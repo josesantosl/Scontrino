@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Scontrino</string>
+    <string name="nav_receipts">Belege</string>
+    <string name="nav_stats">Statistiken</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="add_receipt_title">Neuer Beleg</string>
+    <string name="add_receipt_back">Zurück</string>
+    <string name="add_receipt_store">Geschäft</string>
+    <string name="add_receipt_date">Datum</string>
+    <string name="add_receipt_items">Artikel</string>
+    <string name="add_receipt_item_name">Artikelname</string>
+    <string name="add_receipt_price">Preis</string>
+    <string name="add_receipt_quantity">Menge</string>
+    <string name="add_receipt_note">Notizen</string>
+    <string name="add_receipt_save">Beleg speichern</string>
+    <string name="add_receipt_select_date">Datum auswählen</string>
+    <string name="add_receipt_ok">OK</string>
+    <string name="add_receipt_fab">Beleg hinzufügen</string>
+</resources>

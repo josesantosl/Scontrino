@@ -24,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.pepesantos.scontrino.R
 
 @Composable
 fun ReceiptsScreen() {
@@ -42,7 +44,7 @@ fun ReceiptsScreen() {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = "Aggiungi scontrino"
+                        contentDescription = stringResource(R.string.add_receipt_fab)
                     )
                 }
             }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Scontrino</string>
+    <string name="nav_receipts">Reçus</string>
+    <string name="nav_stats">Statistiques</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="add_receipt_title">Nouveau reçu</string>
+    <string name="add_receipt_back">Retour</string>
+    <string name="add_receipt_store">Magasin</string>
+    <string name="add_receipt_date">Date</string>
+    <string name="add_receipt_items">Articles</string>
+    <string name="add_receipt_item_name">Nom de l\'article</string>
+    <string name="add_receipt_price">Prix</string>
+    <string name="add_receipt_quantity">Qté</string>
+    <string name="add_receipt_note">Notes</string>
+    <string name="add_receipt_save">Enregistrer le reçu</string>
+    <string name="add_receipt_select_date">Sélectionner la date</string>
+    <string name="add_receipt_ok">OK</string>
+    <string name="add_receipt_fab">Ajouter un reçu</string>
+</resources>

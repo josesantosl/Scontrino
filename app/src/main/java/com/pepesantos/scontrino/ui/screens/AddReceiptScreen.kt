@@ -9,10 +9,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.pepesantos.scontrino.R
 
 data class ItemEntry(
     val name: String = "",
@@ -35,15 +36,16 @@ fun AddReceiptScreen(
     val selectedDate = datePickerState.selectedDateMillis?.let {
         java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
     } ?: ""
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nuovo scontrino") },
+                title = { Text(stringResource(R.string.add_receipt_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Indietro"
+                            contentDescription = stringResource(R.string.add_receipt_back)
                         )
                     }
                 }
@@ -59,7 +61,7 @@ fun AddReceiptScreen(
                     onClick = { /* TODO guardar */ },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Salva scontrino")
+                    Text(stringResource(R.string.add_receipt_save))
                 }
             }
         }
@@ -76,7 +78,7 @@ fun AddReceiptScreen(
                 OutlinedTextField(
                     value = storeName,
                     onValueChange = { storeName = it },
-                    label = { Text("Negozio") },
+                    label = { Text(stringResource(R.string.add_receipt_store)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -84,22 +86,24 @@ fun AddReceiptScreen(
                 OutlinedTextField(
                     value = selectedDate,
                     onValueChange = {},
-                    label = { Text("Data") },
+                    label = { Text(stringResource(R.string.add_receipt_date)) },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     trailingIcon = {
                         IconButton(onClick = { showDatePicker = true }) {
-                            Icon(Icons.Filled.DateRange, contentDescription = "Seleziona data")
+                            Icon(
+                                Icons.Filled.DateRange,
+                                contentDescription = stringResource(R.string.add_receipt_select_date)
+                            )
                         }
                     }
                 )
-                // El dialog del calendario
                 if (showDatePicker) {
                     DatePickerDialog(
                         onDismissRequest = { showDatePicker = false },
                         confirmButton = {
                             TextButton(onClick = { showDatePicker = false }) {
-                                Text("OK")
+                                Text(stringResource(R.string.add_receipt_ok))
                             }
                         }
                     ) {
@@ -109,7 +113,7 @@ fun AddReceiptScreen(
             }
             item {
                 Text(
-                    text = "Articoli",
+                    text = stringResource(R.string.add_receipt_items),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -135,7 +139,7 @@ fun AddReceiptScreen(
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("Note") },
+                    label = { Text(stringResource(R.string.add_receipt_note)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -164,7 +168,7 @@ fun ItemRow(
             OutlinedTextField(
                 value = item.name,
                 onValueChange = onNameChange,
-                label = { Text("Nome articolo") },
+                label = { Text(stringResource(R.string.add_receipt_item_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
@@ -173,14 +177,14 @@ fun ItemRow(
                 OutlinedTextField(
                     value = item.price,
                     onValueChange = onPriceChange,
-                    label = { Text("Prezzo") },
+                    label = { Text(stringResource(R.string.add_receipt_price)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = item.quantity.toString(),
                     onValueChange = { onQuantityChange(it.toIntOrNull() ?: 1) },
-                    label = { Text("Qtà") },
+                    label = { Text(stringResource(R.string.add_receipt_quantity)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.width(80.dp)
                 )

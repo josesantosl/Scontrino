@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Scontrino</string>
+
+    <!-- Navigation -->
+    <string name="nav_receipts">Receipts</string>
+    <string name="nav_stats">Statistics</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- AddReceiptScreen -->
+    <string name="add_receipt_title">New receipt</string>
+    <string name="add_receipt_back">Back</string>
+    <string name="add_receipt_store">Store</string>
+    <string name="add_receipt_date">Date</string>
+    <string name="add_receipt_items">Items</string>
+    <string name="add_receipt_item_name">Item name</string>
+    <string name="add_receipt_price">Price</string>
+    <string name="add_receipt_quantity">Qty</string>
+    <string name="add_receipt_note">Notes</string>
+    <string name="add_receipt_save">Save receipt</string>
+    <string name="add_receipt_select_date">Select date</string>
+    <string name="add_receipt_ok">OK</string>
+
+    <!-- ReceiptsScreen -->
+    <string name="add_receipt_fab">Add receipt</string>
 </resources>

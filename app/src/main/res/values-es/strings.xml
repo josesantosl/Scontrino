@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Scontrino</string>
+    <string name="nav_receipts">Facturas</string>
+    <string name="nav_stats">Estadísticas</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="add_receipt_title">Nueva factura</string>
+    <string name="add_receipt_back">Volver</string>
+    <string name="add_receipt_store">Tienda</string>
+    <string name="add_receipt_date">Fecha</string>
+    <string name="add_receipt_items">Artículos</string>
+    <string name="add_receipt_item_name">Nombre del artículo</string>
+    <string name="add_receipt_price">Precio</string>
+    <string name="add_receipt_quantity">Cant.</string>
+    <string name="add_receipt_note">Notas</string>
+    <string name="add_receipt_save">Guardar factura</string>
+    <string name="add_receipt_select_date">Seleccionar fecha</string>
+    <string name="add_receipt_ok">OK</string>
+    <string name="add_receipt_fab">Añadir factura</string>
+</resources>
