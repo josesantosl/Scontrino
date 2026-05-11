@@ -46,7 +46,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ScontrinoApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCONTRINI) }
-
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -64,17 +63,11 @@ fun ScontrinoApp() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+        when (currentDestination) {
+            AppDestinations.SCONTRINI -> ReceiptsScreen()
+            AppDestinations.STATS -> StatsScreen()
+            AppDestinations.SETTINGS -> SettingsScreen()
         }
-    }
-    when (currentDestination) {
-        AppDestinations.SCONTRINI -> ReceiptsScreen()
-        AppDestinations.STATS -> StatsScreen()
-        AppDestinations.SETTINGS -> SettingsScreen()
     }
 }
 
