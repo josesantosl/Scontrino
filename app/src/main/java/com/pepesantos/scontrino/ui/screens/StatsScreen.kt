@@ -1,4 +1,7 @@
 package com.pepesantos.scontrino.ui.screens
 
-class StatsScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun StatsScreen() {
 }

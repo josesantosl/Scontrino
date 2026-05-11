@@ -1,4 +1,4 @@
 package com.pepesantos.scontrino.ui.screens
 
-class SettingsScreen {
+fun SettingsScreen() {
 }
