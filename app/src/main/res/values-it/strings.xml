@@ -17,4 +17,8 @@
     <string name="add_receipt_select_date">Seleziona data</string>
     <string name="add_receipt_ok">OK</string>
     <string name="add_receipt_fab">Aggiungi scontrino</string>
+    <string name="nav_wallet">Portafoglio</string>
+    <string name="wallet_your_cards" >Le tue carte</string>
+    <string name="wallet_edit" >Modifica</string>
+    <string name="wallet_add_card">Aggiungi una carta</string>
 </resources>

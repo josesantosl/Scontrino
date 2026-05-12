@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -20,7 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.pepesantos.scontrino.ui.screens.ReceiptsScreen
-import com.pepesantos.scontrino.ui.screens.SettingsScreen
+import com.pepesantos.scontrino.ui.screens.WalletScreen
 import com.pepesantos.scontrino.ui.screens.StatsScreen
 import com.pepesantos.scontrino.ui.theme.ScontrinoTheme
 
@@ -59,7 +60,7 @@ fun ScontrinoApp() {
         when (currentDestination) {
             AppDestinations.SCONTRINI -> ReceiptsScreen()
             AppDestinations.STATS -> StatsScreen()
-            AppDestinations.SETTINGS -> SettingsScreen()
+            AppDestinations.WALLET -> WalletScreen()
         }
     }
 }
@@ -70,5 +71,5 @@ enum class AppDestinations(
 ) {
     SCONTRINI(R.string.nav_receipts, Icons.Filled.ListAlt),
     STATS(R.string.nav_stats, Icons.Filled.BarChart),
-    SETTINGS(R.string.nav_settings, Icons.Filled.Settings),
+    WALLET(R.string.nav_settings, Icons.Filled.CreditCard),
 }

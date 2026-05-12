@@ -22,4 +22,8 @@
 
     <!-- ReceiptsScreen -->
     <string name="add_receipt_fab">Add receipt</string>
+    <string name="nav_wallet">Wallet</string>
+    <string name="wallet_your_cards" >Your cards</string>
+    <string name="wallet_edit" >Edit</string>
+    <string name="wallet_add_card">" Add a card"</string>
 </resources>
