@@ -14,13 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
-
-data class ItemEntry(
-    val name: String = "",
-    val price: String = "",
-    val quantity: Int = 1,
-    val categoryId: Int = 0
-)
+import com.pepesantos.scontrino.data.model.ItemEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
