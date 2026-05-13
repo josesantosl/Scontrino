@@ -30,6 +30,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.data.model.LoyaltyCard
 
 val sampleCards = listOf(
     LoyaltyCard(1, "Bennet", "0420003982200", 0xFFB05050),
