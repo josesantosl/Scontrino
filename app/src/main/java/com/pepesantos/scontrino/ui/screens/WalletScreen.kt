@@ -31,13 +31,6 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
 
-data class LoyaltyCard(
-    val id: Int = 0,
-    val name: String,
-    val cardNumber: String,
-    val color: Long,
-)
-
 val sampleCards = listOf(
     LoyaltyCard(1, "Bennet", "0420003982200", 0xFFB05050),
     LoyaltyCard(2, "Crai", "1234567890123", 0xFF2E7D32),
