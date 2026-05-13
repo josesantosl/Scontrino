@@ -10,6 +10,7 @@ import com.pepesantos.scontrino.data.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.pepesantos.scontrino.R
 
 @Database(
     entities = [
@@ -50,39 +51,29 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
-
     private class PrepopulateCallback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             INSTANCE?.let { database ->
                 CoroutineScope(Dispatchers.IO).launch {
-                    database.categoryDao().insert(
-                        Category(id = 1, label = "other", iconName = "MoreHoriz", color = 0xFF94A3B8, isCustom = false)
+                    val categories = listOf(
+                        Category(id = 1, label = "other", iconName = "MoreHoriz", color = 0xFF94A3B8, isCustom = false),
+                        Category(id = 2, label = "vegetables_fruit", iconName = "Grass", color = 0xFF4CAF50, isCustom = false),
+                        Category(id = 3, label = "plant_protein", iconName = "Spa", color = 0xFF8BC34A, isCustom = false),
+                        Category(id = 4, label = "animal_protein", iconName = "SetMeal", color = 0xFFFF5722, isCustom = false),
+                        Category(id = 5, label = "dairy_alternatives", iconName = "LocalDrink", color = 0xFF03A9F4, isCustom = false),
+                        Category(id = 6, label = "grains_pasta_bread", iconName = "RiceBowl", color = 0xFFFFB300, isCustom = false),
+                        Category(id = 7, label = "snacks_sweets", iconName = "Cookie", color = 0xFFE91E63, isCustom = false),
+                        Category(id = 8, label = "beverages", iconName = "LocalCafe", color = 0xFF795548, isCustom = false),
+                        Category(id = 9, label = "canned_sauces", iconName = "Inventory2", color = 0xFFFF9800, isCustom = false),
+                        Category(id = 10, label = "oils_condiments", iconName = "Opacity", color = 0xFFCDDC39, isCustom = false),
+                        Category(id = 11, label = "cleaning", iconName = "CleaningServices", color = 0xFF00BCD4, isCustom = false),
+                        Category(id = 12, label = "personal_hygiene", iconName = "Soap", color = 0xFF9C27B0, isCustom = false),
+                        Category(id = 13, label = "pets", iconName = "Pets", color = 0xFF607D8B, isCustom = false),
+                        Category(id = 14, label = "pharmacy", iconName = "LocalPharmacy", color = 0xFFF44336, isCustom = false),
+                        Category(id = 15, label = "transport", iconName = "Train", color = 0xFF2196F3, isCustom = false),
                     )
-                    database.categoryDao().insert(
-                        Category(id = 2, label = "groceries", iconName = "ShoppingCart", color = 0xFF4CAF50, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 3, label = "transport", iconName = "Train", color = 0xFF2196F3, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 4, label = "health", iconName = "LocalPharmacy", color = 0xFFE91E63, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 5, label = "home", iconName = "Home", color = 0xFF9C27B0, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 6, label = "technology", iconName = "Devices", color = 0xFF00BCD4, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 7, label = "clothing", iconName = "Checkroom", color = 0xFFFF9800, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 8, label = "leisure", iconName = "SportsEsports", color = 0xFFFFEB3B, isCustom = false)
-                    )
-                    database.categoryDao().insert(
-                        Category(id = 9, label = "services", iconName = "Bolt", color = 0xFFFF5722, isCustom = false)
-                    )
+                    categories.forEach { database.categoryDao().insert(it) }
                 }
             }
         }
