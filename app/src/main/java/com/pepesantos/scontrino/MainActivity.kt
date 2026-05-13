@@ -20,25 +20,39 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import com.pepesantos.scontrino.data.AppDatabase
+import com.pepesantos.scontrino.data.repository.LoyaltyCardRepository
+import com.pepesantos.scontrino.data.repository.ProductRepository
+import com.pepesantos.scontrino.data.repository.ReceiptRepository
+import com.pepesantos.scontrino.data.repository.StoreRepository
 import com.pepesantos.scontrino.ui.screens.ReceiptsScreen
 import com.pepesantos.scontrino.ui.screens.WalletScreen
 import com.pepesantos.scontrino.ui.screens.StatsScreen
 import com.pepesantos.scontrino.ui.theme.ScontrinoTheme
+import com.pepesantos.scontrino.ui.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val database = AppDatabase.getDatabase(applicationContext)
+        val factory = ViewModelFactory(
+            receiptRepository = ReceiptRepository(database.receiptDao(), database.itemDao()),
+            storeRepository = StoreRepository(database.storeDao()),
+            productRepository = ProductRepository(database.productDao()),
+            loyaltyCardRepository = LoyaltyCardRepository(database.loyaltyCardDao()),
+        )
+
         setContent {
             ScontrinoTheme {
-                ScontrinoApp()
+                ScontrinoApp(factory = factory)
             }
         }
     }
 }
-
 @Composable
-fun ScontrinoApp() {
+fun ScontrinoApp(factory: ViewModelFactory) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCONTRINI) }
     NavigationSuiteScaffold(
         navigationSuiteItems = {
