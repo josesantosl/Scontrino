@@ -26,4 +26,12 @@
     <string name="delete_receipt_message">¿Seguro que quieres eliminar esta factura?</string>
     <string name="delete_confirm">Eliminar</string>
     <string name="delete_cancel">Cancelar</string>
+    <string name="delete_card_title">Eliminar tarjeta</string>
+    <string name="delete_card_message">¿Estás seguro de que quieres eliminar esta tarjeta?</string>
+    <string name="wallet_add_card_title">Nueva tarjeta</string>
+    <string name="wallet_card_name">Nombre</string>
+    <string name="wallet_card_number">Número de tarjeta</string>
+    <string name="wallet_select_color">Seleccionar color</string>
+    <string name="wallet_save">Guardar</string>
+    <string name="wallet_cancel">Cancelar</string>
 </resources>

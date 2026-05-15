@@ -26,4 +26,12 @@
     <string name="delete_receipt_message">Möchten Sie diesen Beleg wirklich löschen?</string>
     <string name="delete_confirm">Löschen</string>
     <string name="delete_cancel">Abbrechen</string>
+    <string name="delete_card_title">Karte löschen</string>
+    <string name="delete_card_message">Möchten Sie diese Karte wirklich löschen?</string>
+    <string name="wallet_add_card_title">Neue Karte</string>
+    <string name="wallet_card_name">Name</string>
+    <string name="wallet_card_number">Kartennummer</string>
+    <string name="wallet_select_color">Farbe wählen</string>
+    <string name="wallet_save">Speichern</string>
+    <string name="wallet_cancel">Abbrechen</string>
 </resources>

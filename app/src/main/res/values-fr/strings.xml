@@ -26,4 +26,12 @@
     <string name="delete_receipt_message">Voulez-vous vraiment supprimer ce reçu?</string>
     <string name="delete_confirm">Supprimer</string>
     <string name="delete_cancel">Annuler</string>
+    <string name="delete_card_title">Supprimer la carte</string>
+    <string name="delete_card_message">Voulez-vous vraiment supprimer cette carte?</string>
+    <string name="wallet_add_card_title">Nouvelle carte</string>
+    <string name="wallet_card_name">Nom</string>
+    <string name="wallet_card_number">Numéro de carte</string>
+    <string name="wallet_select_color">Sélectionner la couleur</string>
+    <string name="wallet_save">Enregistrer</string>
+    <string name="wallet_cancel">Annuler</string>
 </resources>

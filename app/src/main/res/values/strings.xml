@@ -31,4 +31,14 @@
     <string name="delete_receipt_message">Are you sure you want to delete this receipt?</string>
     <string name="delete_confirm">Delete</string>
     <string name="delete_cancel">Cancel</string>
+
+    <!-- Wallet -->
+    <string name="delete_card_title">Delete card</string>
+    <string name="delete_card_message">Are you sure you want to delete this card?</string>
+    <string name="wallet_add_card_title">New card</string>
+    <string name="wallet_card_name">Name</string>
+    <string name="wallet_card_number">Card number</string>
+    <string name="wallet_select_color">Select color</string>
+    <string name="wallet_save">Save</string>
+    <string name="wallet_cancel">Cancel</string>
 </resources>

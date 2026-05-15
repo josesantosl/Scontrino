@@ -31,12 +31,23 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.LoyaltyCard
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.Check
+import com.pepesantos.scontrino.ui.viewmodel.WalletViewModel
+import androidx.compose.runtime.collectAsState
 
-val sampleCards = listOf(
-    LoyaltyCard(1, "Bennet", "0420003982200", 0xFFB05050),
-    LoyaltyCard(2, "Crai", "1234567890123", 0xFF2E7D32),
-    LoyaltyCard(3, "Lidl", "9876543210987", 0xFF1565C0),
-    LoyaltyCard(4, "Carrefour", "5647382910111", 0xFF5B9BD5),
+val cardColors = listOf(
+    0xFFB05050, // Red
+    0xFF2E7D32, // Green
+    0xFF1565C0, // Blue
+    0xFF5B9BD5, // Light Blue
+    0xFF7B1FA2, // Purple
+    0xFFFBC02D, // Yellow
+    0xFFE64A19, // Deep Orange
+    0xFF455A64, // Blue Grey
 )
 
 fun generateBarcode(content: String, width: Int = 600, height: Int = 300): Bitmap? {
@@ -62,14 +73,49 @@ fun generateBarcode(content: String, width: Int = 600, height: Int = 300): Bitma
 }
 
 @Composable
-fun WalletScreen() {
+fun WalletScreen(viewModel: WalletViewModel) {
     var selectedCard by remember { mutableStateOf<LoyaltyCard?>(null) }
-    val cards = remember { sampleCards.toMutableStateList() }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var cardToDelete by remember { mutableStateOf<LoyaltyCard?>(null) }
+    
+    val cards by viewModel.cards.collectAsState()
 
     selectedCard?.let { card ->
         BarcodeDialog(
             card = card,
             onDismiss = { selectedCard = null }
+        )
+    }
+    
+    if (showAddDialog) {
+        AddCardDialog(
+            onDismiss = { showAddDialog = false },
+            onSave = { name, number, color ->
+                viewModel.saveCard(name, number, color)
+                showAddDialog = false
+            }
+        )
+    }
+
+    // Dialog de confirmación de borrado
+    cardToDelete?.let { card ->
+        AlertDialog(
+            onDismissRequest = { cardToDelete = null },
+            title = { Text(stringResource(R.string.delete_card_title)) },
+            text = { Text(stringResource(R.string.delete_card_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteCard(card)
+                    cardToDelete = null
+                }) {
+                    Text(stringResource(R.string.delete_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { cardToDelete = null }) {
+                    Text(stringResource(R.string.delete_cancel))
+                }
+            }
         )
     }
 
@@ -90,9 +136,6 @@ fun WalletScreen() {
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(onClick = { /* TODO edit mode */ }) {
-                Text(stringResource(R.string.wallet_edit))
-            }
         }
 
         LazyColumn(
@@ -102,20 +145,23 @@ fun WalletScreen() {
             items(cards) { card ->
                 LoyaltyCardItem(
                     card = card,
-                    onClick = { selectedCard = card }
+                    onClick = { selectedCard = card },
+                    onLongClick = { cardToDelete = card }
                 )
             }
             item {
-                AddCardButton(onClick = { /* TODO */ })
+                AddCardButton(onClick = { showAddDialog = true })
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LoyaltyCardItem(
     card: LoyaltyCard,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val cardColor = Color(card.color)
     val darkColor = Color(
@@ -130,7 +176,10 @@ fun LoyaltyCardItem(
             .height(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(cardColor)
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         // diagonal darker stripe
@@ -146,6 +195,117 @@ fun LoyaltyCardItem(
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+fun AddCardDialog(
+    onDismiss: () -> Unit,
+    onSave: (String, String, Long) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf("") }
+    var selectedColor by remember { mutableStateOf(cardColors[0]) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.wallet_add_card_title)) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.wallet_card_name)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = number,
+                    onValueChange = { number = it },
+                    label = { Text(stringResource(R.string.wallet_card_number)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Text(
+                    text = stringResource(R.string.wallet_select_color),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    cardColors.take(4).forEach { colorLong ->
+                        ColorOption(
+                            color = Color(colorLong),
+                            isSelected = selectedColor == colorLong,
+                            onClick = { selectedColor = colorLong }
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    cardColors.drop(4).forEach { colorLong ->
+                        ColorOption(
+                            color = Color(colorLong),
+                            isSelected = selectedColor == colorLong,
+                            onClick = { selectedColor = colorLong }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(name, number, selectedColor) },
+                enabled = name.isNotBlank() && number.isNotBlank()
+            ) {
+                Text(stringResource(R.string.wallet_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.wallet_cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun ColorOption(
+    color: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = CircleShape
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 

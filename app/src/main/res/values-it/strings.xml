@@ -26,4 +26,12 @@
     <string name="delete_receipt_message">Sei sicuro di voler eliminare questo scontrino?</string>
     <string name="delete_confirm">Elimina</string>
     <string name="delete_cancel">Annulla</string>
+    <string name="delete_card_title">Elimina carta</string>
+    <string name="delete_card_message">Sei sicuro di voler eliminare questa carta?</string>
+    <string name="wallet_add_card_title">Nuova carta</string>
+    <string name="wallet_card_name">Nome</string>
+    <string name="wallet_card_number">Numero carta</string>
+    <string name="wallet_select_color">Seleziona colore</string>
+    <string name="wallet_save">Salva</string>
+    <string name="wallet_cancel">Annulla</string>
 </resources>
