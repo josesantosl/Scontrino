@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("com.google.zxing:core:3.5.3")
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
