@@ -15,6 +15,8 @@ class ItemRepository(private val itemDao: ItemDao) {
 
     suspend fun getByReceipt(receiptId: Int) = itemDao.getByReceipt(receiptId)
 
+    suspend fun getItemEntriesByReceipt(receiptId: Int) = itemDao.getItemEntriesByReceipt(receiptId)
+
     suspend fun getByProduct(productId: Int) = itemDao.getByProduct(productId)
 
     suspend fun deleteByReceipt(receiptId: Int) = itemDao.deleteByReceipt(receiptId)

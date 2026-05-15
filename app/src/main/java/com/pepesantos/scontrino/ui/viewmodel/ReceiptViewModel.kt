@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.Receipt
+import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.ProductRepository
 import com.pepesantos.scontrino.data.repository.ReceiptRepository
@@ -12,15 +13,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.pepesantos.scontrino.data.model.ItemEntry
+import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 
 class ReceiptViewModel(
     private val receiptRepository: ReceiptRepository,
     private val storeRepository: StoreRepository,
     private val productRepository: ProductRepository,
+    private val itemRepository: ItemRepository,
 ) : ViewModel() {
 
-    private val _receipts = MutableStateFlow<List<Receipt>>(emptyList())
-    val receipts: StateFlow<List<Receipt>> = _receipts
+    private val _receipts = MutableStateFlow<List<ReceiptWithStoreName>>(emptyList())
+    val receipts: StateFlow<List<ReceiptWithStoreName>> = _receipts
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -28,11 +31,19 @@ class ReceiptViewModel(
     init {
         loadReceipts()
     }
+    private val _storeNames = MutableStateFlow<Map<Int, String>>(emptyMap())
+    val storeNames: StateFlow<Map<Int, String>> = _storeNames
 
     fun loadReceipts() {
         viewModelScope.launch {
             _isLoading.value = true
-            _receipts.value = receiptRepository.getAll()
+            val receipts = receiptRepository.getAll()
+            _receipts.value = receipts
+
+            // Cargar nombres de tiendas
+            val stores = storeRepository.getAll()
+            _storeNames.value = stores.associate { it.id to it.name }
+
             _isLoading.value = false
         }
     }
@@ -56,7 +67,7 @@ class ReceiptViewModel(
 
             // 2. Calcular total
             val total = items.sumOf {
-                (it.price.toDoubleOrNull() ?: 0.0) * it.quantity
+                it.price * it.quantity
             }
 
             // 3. Crear receipt
@@ -69,28 +80,90 @@ class ReceiptViewModel(
 
             // 4. Obtener o crear productos y construir items
             val roomItems = items
-                .filter { it.name.isNotBlank() && it.price.isNotBlank() }
+                .filter { it.name.isNotBlank() && it.price != 0.0 }
                 .map { entry ->
                     val product = productRepository.getOrCreate(entry.name)
                     Item(
                         productId = product.id,
-                        price = entry.price.toDoubleOrNull() ?: 0.0,
+                        price = entry.price,
                         quantity = entry.quantity,
                         receiptId = 0 // se asigna en el repository
                     )
                 }
 
-            // 5. Insertar todo
+            // 5. insert all
             receiptRepository.insert(receipt, roomItems)
 
-            // 6. Recargar lista
+            // 6. reload list
             loadReceipts()
         }
     }
+    private val _selectedReceipt = MutableStateFlow<ReceiptWithStoreName?>(null)
+    val selectedReceipt: StateFlow<ReceiptWithStoreName?> = _selectedReceipt
 
+    private val _selectedItems = MutableStateFlow<List<ItemEntry>>(emptyList())
+    val selectedItems: StateFlow<List<ItemEntry>> = _selectedItems
+
+    fun loadReceiptById(id: Int) {
+        viewModelScope.launch {
+            _selectedReceipt.value = receiptRepository.getById(id)
+            _selectedItems.value = itemRepository.getItemEntriesByReceipt(id)
+        }
+    }
     fun deleteReceipt(receipt: Receipt) {
         viewModelScope.launch {
             receiptRepository.delete(receipt)
+            loadReceipts()
+        }
+    }
+    fun updateReceipt(
+        receipt: Receipt,
+        storeName: String,
+        date: Long,
+        note: String?,
+        items: List<ItemEntry>
+    ) {
+        viewModelScope.launch {
+            // 1. Obtener o crear la tienda
+            val storeResults = storeRepository.search(storeName)
+            val store = storeResults.firstOrNull { it.name.equals(storeName, ignoreCase = true) }
+                ?: run {
+                    val id = storeRepository.insert(
+                        Store(name = storeName)
+                    )
+                    Store(id = id.toInt(), name = storeName)
+                }
+
+            // 2. Calcular nuevo total
+            val total = items.sumOf {
+                it.price * it.quantity
+            }
+
+            // 3. Actualizar receipt
+            val updatedReceipt = receipt.copy(
+                date = date,
+                total = total,
+                storeId = store.id,
+                note = note?.ifBlank { null }
+            )
+            receiptRepository.update(updatedReceipt)
+
+            // 4. Borrar items anteriores y reinsertar
+            itemRepository.deleteByReceipt(receipt.id)
+            val roomItems = items
+                .filter { it.name.isNotBlank() && it.price != 0.0 }
+                .map { entry ->
+                    val product = productRepository.getOrCreate(entry.name)
+                    Item(
+                        productId = product.id,
+                        price = entry.price,
+                        quantity = entry.quantity,
+                        receiptId = receipt.id
+                    )
+                }
+            itemRepository.insertAll(roomItems)
+
+            // 5. Recargar lista
             loadReceipts()
         }
     }

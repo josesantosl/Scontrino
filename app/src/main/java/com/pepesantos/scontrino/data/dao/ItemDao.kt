@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.data.dao
 
 import androidx.room.*
 import com.pepesantos.scontrino.data.model.Item
+import com.pepesantos.scontrino.data.model.ItemEntry
 
 @Dao
 interface ItemDao {
@@ -21,6 +22,13 @@ interface ItemDao {
     @Query("SELECT * FROM Item WHERE receiptId = :receiptId")
     suspend fun getByReceipt(receiptId: Int): List<Item>
 
+    @Query("""
+    SELECT Product.name, Item.price, Item.quantity, Product.categoryId
+    FROM Item
+    INNER JOIN Product ON Item.productId = Product.id
+    WHERE Item.receiptId = :receiptId
+""")
+    suspend fun getItemEntriesByReceipt(receiptId: Int): List<ItemEntry>
     @Query("SELECT * FROM Item WHERE productId = :productId")
     suspend fun getByProduct(productId: Int): List<Item>
 

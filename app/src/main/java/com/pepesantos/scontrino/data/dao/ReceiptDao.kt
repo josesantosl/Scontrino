@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.data.dao
 
 import androidx.room.*
 import com.pepesantos.scontrino.data.model.Receipt
+import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 
 @Dao
 interface ReceiptDao {
@@ -18,6 +19,20 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt ORDER BY date DESC")
     suspend fun getAll(): List<Receipt>
 
+    @Query("""
+    SELECT Receipt.*, Store.name AS storeName 
+    FROM Receipt 
+    INNER JOIN Store ON Receipt.storeId = Store.id 
+    ORDER BY Receipt.date DESC
+""")
+    suspend fun getAllWithStoreName(): List<ReceiptWithStoreName>
+    @Query("""
+    SELECT Receipt.*, Store.name AS storeName 
+    FROM Receipt 
+    INNER JOIN Store ON Receipt.storeId = Store.id 
+    WHERE Receipt.id = :id
+""")
+    suspend fun getByIdWithStoreName(id: Int): ReceiptWithStoreName?
     @Query("SELECT * FROM Receipt WHERE id = :id")
     suspend fun getById(id: Int): Receipt?
 

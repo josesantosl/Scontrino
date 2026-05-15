@@ -19,10 +19,10 @@ class ReceiptRepository(
 
     suspend fun delete(receipt: Receipt) = receiptDao.delete(receipt)
 
-    suspend fun getAll() = receiptDao.getAll()
+    suspend fun getAll() = receiptDao.getAllWithStoreName()
 
-    suspend fun getById(id: Int) = receiptDao.getById(id)
-
+    //suspend fun getById(id: Int) = receiptDao.getById(id)
+    suspend fun getById(id: Int) = receiptDao.getByIdWithStoreName(id)
     suspend fun getByStore(storeId: Int) = receiptDao.getByStore(storeId)
 
     suspend fun getByDateRange(from: Long, to: Long) = receiptDao.getByDateRange(from, to)

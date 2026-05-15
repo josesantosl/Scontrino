@@ -21,4 +21,9 @@
     <string name="wallet_your_cards" >Ihre Karten</string>
     <string name="wallet_edit" >Bearbeiten</string>
     <string name="wallet_add_card">Karte hinzufügen</string>
+    <string name="edit_receipt_title">Beleg bearbeiten</string>
+    <string name="delete_receipt_title">Beleg löschen</string>
+    <string name="delete_receipt_message">Möchten Sie diesen Beleg wirklich löschen?</string>
+    <string name="delete_confirm">Löschen</string>
+    <string name="delete_cancel">Abbrechen</string>
 </resources>

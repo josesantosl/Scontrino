@@ -21,4 +21,9 @@
     <string name="wallet_your_cards" >Vos cartes</string>
     <string name="wallet_edit" >Modifier</string>
     <string name="wallet_add_card">Ajouter une carte</string>
+    <string name="edit_receipt_title">Modifier le reçu</string>
+    <string name="delete_receipt_title">Supprimer le reçu</string>
+    <string name="delete_receipt_message">Voulez-vous vraiment supprimer ce reçu?</string>
+    <string name="delete_confirm">Supprimer</string>
+    <string name="delete_cancel">Annuler</string>
 </resources>

@@ -21,4 +21,9 @@
     <string name="wallet_your_cards" >Le tue carte</string>
     <string name="wallet_edit" >Modifica</string>
     <string name="wallet_add_card">Aggiungi una carta</string>
+    <string name="edit_receipt_title">Modifica scontrino</string>
+    <string name="delete_receipt_title">Elimina scontrino</string>
+    <string name="delete_receipt_message">Sei sicuro di voler eliminare questo scontrino?</string>
+    <string name="delete_confirm">Elimina</string>
+    <string name="delete_cancel">Annulla</string>
 </resources>

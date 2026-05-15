@@ -21,4 +21,9 @@
     <string name="wallet_your_cards" >Tus tarjetas</string>
     <string name="wallet_edit" >Editar</string>
     <string name="wallet_add_card">Añadir una tarjeta</string>
+    <string name="edit_receipt_title">"Editar factura "</string>
+    <string name="delete_receipt_title">Eliminar factura</string>
+    <string name="delete_receipt_message">¿Seguro que quieres eliminar esta factura?</string>
+    <string name="delete_confirm">Eliminar</string>
+    <string name="delete_cancel">Cancelar</string>
 </resources>

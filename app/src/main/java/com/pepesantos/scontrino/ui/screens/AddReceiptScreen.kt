@@ -5,28 +5,46 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.ItemEntry
+import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReceiptScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSave: (storeName: String, date: Long, note: String?, items: List<ItemEntry>) -> Unit,
+    existingReceipt: ReceiptWithStoreName? = null,
+    existingItems: List<ItemEntry> = emptyList(),
 ) {
-    var storeName by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
-    val items = remember { mutableStateListOf(ItemEntry()) }
+    val isEditMode = existingReceipt != null
+
+    var storeName by remember { mutableStateOf(existingReceipt?.storeName ?: "") }
+    var note by remember { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
+    val items = remember {
+        if (existingItems.isNotEmpty()) {
+            existingItems.toMutableStateList()
+        } else {
+            mutableStateListOf(ItemEntry())
+        }
+    }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
+    )
     val selectedDate = datePickerState.selectedDateMillis?.let {
         java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
     } ?: ""
@@ -34,7 +52,12 @@ fun AddReceiptScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.add_receipt_title)) },
+                title = {
+                    Text(
+                        if (isEditMode) stringResource(R.string.edit_receipt_title)
+                        else stringResource(R.string.add_receipt_title)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -52,7 +75,14 @@ fun AddReceiptScreen(
                     .padding(16.dp)
             ) {
                 Button(
-                    onClick = { /* TODO guardar */ },
+                    onClick = {
+                        onSave(
+                            storeName,
+                            datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
+                            note.ifBlank { null },
+                            items.filter { it.name.isNotBlank() && it.price != 0.0 }
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.add_receipt_save))
@@ -120,7 +150,7 @@ fun AddReceiptScreen(
                     },
                     onPriceChange = { price ->
                         items[index] = items[index].copy(price = price)
-                        if (index == items.lastIndex && price.isNotBlank()) {
+                        if (index == items.lastIndex && price != 0.0) {
                             items.add(ItemEntry())
                         }
                     },
@@ -146,7 +176,7 @@ fun AddReceiptScreen(
 fun ItemRow(
     item: ItemEntry,
     onNameChange: (String) -> Unit,
-    onPriceChange: (String) -> Unit,
+    onPriceChange: (Double) -> Unit,
     onQuantityChange: (Int) -> Unit
 ) {
     Card(
@@ -166,22 +196,40 @@ fun ItemRow(
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = item.price,
-                    onValueChange = onPriceChange,
+                    value = if (item.price == 0.0) "" else item.price.toString(),
+                    onValueChange = { onPriceChange(it.toDoubleOrNull() ?: 0.0) },
                     label = { Text(stringResource(R.string.add_receipt_price)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f)
                 )
-                OutlinedTextField(
-                    value = item.quantity.toString(),
-                    onValueChange = { onQuantityChange(it.toIntOrNull() ?: 1) },
-                    label = { Text(stringResource(R.string.add_receipt_quantity)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(80.dp)
-                )
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    IconButton(
+                        onClick = { if (item.quantity > 1) onQuantityChange(item.quantity - 1) },
+                        enabled = item.quantity > 1
+                    ) {
+                        Icon(Icons.Default.Remove, contentDescription = "Decrease")
+                    }
+                    
+                    Text(
+                        text = item.quantity.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    
+                    IconButton(
+                        onClick = { onQuantityChange(item.quantity + 1) }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Increase")
+                    }
+                }
             }
         }
     }
