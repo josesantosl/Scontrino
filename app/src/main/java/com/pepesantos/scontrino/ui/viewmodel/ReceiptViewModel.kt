@@ -106,6 +106,7 @@ class ReceiptViewModel(
 
     fun loadReceiptById(id: Int) {
         viewModelScope.launch {
+            _selectedItems.value = emptyList()
             _selectedReceipt.value = receiptRepository.getById(id)
             _selectedItems.value = itemRepository.getItemEntriesByReceipt(id)
         }

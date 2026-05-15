@@ -29,22 +29,33 @@ fun AddReceiptScreen(
     existingReceipt: ReceiptWithStoreName? = null,
     existingItems: List<ItemEntry> = emptyList(),
 ) {
+    // Usamos el ID del recibo como clave principal para resetear todo el estado
+    val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
-
-    var storeName by remember { mutableStateOf(existingReceipt?.storeName ?: "") }
-    var note by remember { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
-    val items = remember {
+    
+    var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: "") }
+    var note by remember(receiptId) { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
+    
+    // Para los items, queremos que se inicialicen con existingItems cuando estos lleguen del ViewModel
+    val items = remember(receiptId) { mutableStateListOf<ItemEntry>() }
+    
+    // Efecto para sincronizar existingItems cuando se cargan
+    LaunchedEffect(receiptId, existingItems) {
         if (existingItems.isNotEmpty()) {
-            existingItems.toMutableStateList()
-        } else {
-            mutableStateListOf(ItemEntry())
+            items.clear()
+            items.addAll(existingItems)
+            items.add(ItemEntry()) // Fila vacía para añadir más
+        } else if (receiptId == -1 && items.isEmpty()) {
+            items.add(ItemEntry())
         }
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
-    )
+    val datePickerState = key(existingReceipt?.receipt?.id) {
+        rememberDatePickerState(
+            initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
+        )
+    }
     val selectedDate = datePickerState.selectedDateMillis?.let {
         java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
     } ?: ""
@@ -146,16 +157,25 @@ fun AddReceiptScreen(
                 ItemRow(
                     item = item,
                     onNameChange = { name ->
-                        items[index] = items[index].copy(name = name)
+                        val updated = items[index].copy(name = name)
+                        items[index] = updated
+                        if (index == items.lastIndex && updated.name.isNotBlank()) {
+                            items.add(ItemEntry())
+                        }
                     },
                     onPriceChange = { price ->
-                        items[index] = items[index].copy(price = price)
-                        if (index == items.lastIndex && price != 0.0) {
+                        val updated = items[index].copy(price = price)
+                        items[index] = updated
+                        if (index == items.lastIndex && updated.price != 0.0) {
                             items.add(ItemEntry())
                         }
                     },
                     onQuantityChange = { quantity ->
-                        items[index] = items[index].copy(quantity = quantity)
+                        val updated = items[index].copy(quantity = quantity)
+                        items[index] = updated
+                        if (index == items.lastIndex && updated.quantity > 1) {
+                            items.add(ItemEntry())
+                        }
                     }
                 )
             }
