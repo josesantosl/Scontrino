@@ -11,7 +11,7 @@ class LoyaltyCardRepository(private val loyaltyCardDao: LoyaltyCardDao) {
 
     suspend fun delete(card: LoyaltyCard) = loyaltyCardDao.delete(card)
 
-    suspend fun getAll() = loyaltyCardDao.getAll()
+    suspend fun getAll() = loyaltyCardDao.getAllWithStore()
 
     suspend fun getById(id: Int) = loyaltyCardDao.getById(id)
 }

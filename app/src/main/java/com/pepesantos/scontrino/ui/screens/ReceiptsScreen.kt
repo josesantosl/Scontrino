@@ -1,6 +1,7 @@
 package com.pepesantos.scontrino.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +11,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
@@ -98,6 +101,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                             storeName = receiptWithStore.storeName,
                             date = receiptWithStore.receipt.date,
                             total = receiptWithStore.receipt.total,
+                            storeColor = receiptWithStore.storeColor,
                             onClick = {
                                 viewModel.loadReceiptById(receiptWithStore.receipt.id)
                                 editingReceipt = receiptWithStore
@@ -119,12 +123,18 @@ fun ReceiptCard(
     storeName: String,
     date: Long,
     total: Double,
+    storeColor: Long? = null,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
     val formattedDate = remember(date) {
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(date))
     }
+    
+    val cardColor = if (storeColor != null) Color(storeColor) else MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = if (storeColor != null) Color.White else MaterialTheme.colorScheme.onSurface
+    val secondaryColor = if (storeColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,32 +143,50 @@ fun ReceiptCard(
                 onLongClick = onLongClick
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = cardColor
         )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = storeName,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+        Box {
+            if (storeColor != null) {
+                val stripeColor = Color(
+                    red = (cardColor.red * 0.7f),
+                    green = (cardColor.green * 0.7f),
+                    blue = (cardColor.blue * 0.7f)
+                ).copy(alpha = 0.3f)
+                
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(stripeColor)
+                )
+            }
+            
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = formattedDate,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = storeName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = "€%.2f".format(total),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = formattedDate,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = secondaryColor
+                    )
+                    Text(
+                        text = "€%.2f".format(total),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = contentColor,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

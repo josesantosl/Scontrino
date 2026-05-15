@@ -20,19 +20,21 @@ interface ReceiptDao {
     suspend fun getAll(): List<Receipt>
 
     @Query("""
-    SELECT Receipt.*, Store.name AS storeName 
+    SELECT Receipt.*, Store.name AS storeName, Store.color AS storeColor
     FROM Receipt 
     INNER JOIN Store ON Receipt.storeId = Store.id 
     ORDER BY Receipt.date DESC
 """)
     suspend fun getAllWithStoreName(): List<ReceiptWithStoreName>
+
     @Query("""
-    SELECT Receipt.*, Store.name AS storeName 
+    SELECT Receipt.*, Store.name AS storeName, Store.color AS storeColor
     FROM Receipt 
     INNER JOIN Store ON Receipt.storeId = Store.id 
     WHERE Receipt.id = :id
 """)
     suspend fun getByIdWithStoreName(id: Int): ReceiptWithStoreName?
+
     @Query("SELECT * FROM Receipt WHERE id = :id")
     suspend fun getById(id: Int): Receipt?
 

@@ -1,12 +1,28 @@
 package com.pepesantos.scontrino.data.model
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import androidx.room.Embedded
 
-@Entity
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = Store::class,
+            parentColumns = ["id"],
+            childColumns = ["storeId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class LoyaltyCard(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val name: String,
+    val storeId: Int,
     val cardNumber: String,
-    val color: Long,
+)
+
+data class LoyaltyCardWithStore(
+    @Embedded val card: LoyaltyCard,
+    val storeName: String,
+    val storeColor: Long?
 )

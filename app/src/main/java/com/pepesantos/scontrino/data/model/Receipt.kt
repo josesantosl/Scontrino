@@ -18,5 +18,6 @@ data class Receipt(
 )
 data class ReceiptWithStoreName(
     @Embedded val receipt: Receipt,
-    val storeName: String
+    val storeName: String,
+    val storeColor: Long? = null
 )

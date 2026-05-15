@@ -7,10 +7,6 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pepesantos.scontrino.data.dao.*
 import com.pepesantos.scontrino.data.model.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import com.pepesantos.scontrino.R
 
 @Database(
     entities = [
@@ -21,7 +17,7 @@ import com.pepesantos.scontrino.R
         Store::class,
         LoyaltyCard::class,
     ],
-    version = 1,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -45,36 +41,67 @@ abstract class AppDatabase : RoomDatabase() {
                     "scontrino_database"
                 )
                     .addCallback(PrepopulateCallback())
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
+
     private class PrepopulateCallback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            INSTANCE?.let { database ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    val categories = listOf(
-                        Category(id = 1, label = "other", iconName = "MoreHoriz", color = 0xFF94A3B8, isCustom = false),
-                        Category(id = 2, label = "vegetables_fruit", iconName = "Grass", color = 0xFF4CAF50, isCustom = false),
-                        Category(id = 3, label = "plant_protein", iconName = "Spa", color = 0xFF8BC34A, isCustom = false),
-                        Category(id = 4, label = "animal_protein", iconName = "SetMeal", color = 0xFFFF5722, isCustom = false),
-                        Category(id = 5, label = "dairy_alternatives", iconName = "LocalDrink", color = 0xFF03A9F4, isCustom = false),
-                        Category(id = 6, label = "grains_pasta_bread", iconName = "RiceBowl", color = 0xFFFFB300, isCustom = false),
-                        Category(id = 7, label = "snacks_sweets", iconName = "Cookie", color = 0xFFE91E63, isCustom = false),
-                        Category(id = 8, label = "beverages", iconName = "LocalCafe", color = 0xFF795548, isCustom = false),
-                        Category(id = 9, label = "canned_sauces", iconName = "Inventory2", color = 0xFFFF9800, isCustom = false),
-                        Category(id = 10, label = "oils_condiments", iconName = "Opacity", color = 0xFFCDDC39, isCustom = false),
-                        Category(id = 11, label = "cleaning", iconName = "CleaningServices", color = 0xFF00BCD4, isCustom = false),
-                        Category(id = 12, label = "personal_hygiene", iconName = "Soap", color = 0xFF9C27B0, isCustom = false),
-                        Category(id = 13, label = "pets", iconName = "Pets", color = 0xFF607D8B, isCustom = false),
-                        Category(id = 14, label = "pharmacy", iconName = "LocalPharmacy", color = 0xFFF44336, isCustom = false),
-                        Category(id = 15, label = "transport", iconName = "Train", color = 0xFF2196F3, isCustom = false),
-                    )
-                    categories.forEach { database.categoryDao().insert(it) }
+            prepopulate(db)
+        }
+
+        override fun onOpen(db: SupportSQLiteDatabase) {
+            super.onOpen(db)
+            // Verificamos si la tabla existe y si está vacía antes de prepoblar
+            val cursorTable = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='Category'")
+            val tableExists = cursorTable.moveToFirst()
+            cursorTable.close()
+
+            if (tableExists) {
+                val cursorCount = db.query("SELECT COUNT(*) FROM Category")
+                if (cursorCount.moveToFirst() && cursorCount.getInt(0) == 0) {
+                    prepopulate(db)
                 }
+                cursorCount.close()
+            }
+        }
+
+        private fun prepopulate(db: SupportSQLiteDatabase) {
+            val categories = listOf(
+                "other" to Pair("MoreHoriz", 0xFF94A3B8),
+                "vegetables_fruit" to Pair("Grass", 0xFF4CAF50),
+                "plant_protein" to Pair("Spa", 0xFF8BC34A),
+                "animal_protein" to Pair("SetMeal", 0xFFFF5722),
+                "dairy_alternatives" to Pair("LocalDrink", 0xFF03A9F4),
+                "grains_pasta_bread" to Pair("RiceBowl", 0xFFFFB300),
+                "snacks_sweets" to Pair("Cookie", 0xFFE91E63),
+                "beverages" to Pair("LocalCafe", 0xFF795548),
+                "canned_sauces" to Pair("Inventory2", 0xFFFF9800),
+                "oils_condiments" to Pair("Opacity", 0xFFCDDC39),
+                "cleaning" to Pair("CleaningServices", 0xFF00BCD4),
+                "personal_hygiene" to Pair("Soap", 0xFF9C27B0),
+                "pets" to Pair("Pets", 0xFF607D8B),
+                "pharmacy" to Pair("LocalPharmacy", 0xFFF44336),
+                "transport" to Pair("Train", 0xFF2196F3)
+            )
+
+            db.beginTransaction()
+            try {
+                categories.forEachIndexed { index, (label, details) ->
+                    val id = index + 1
+                    val (icon, color) = details
+                    db.execSQL(
+                        "INSERT OR REPLACE INTO Category (id, label, iconName, color, isCustom) VALUES ($id, '$label', '$icon', $color, 0)"
+                    )
+                }
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
             }
         }
     }

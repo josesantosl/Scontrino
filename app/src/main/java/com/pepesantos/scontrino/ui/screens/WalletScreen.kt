@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +30,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.LoyaltyCard
+import com.pepesantos.scontrino.data.model.LoyaltyCardWithStore
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.CircleShape
@@ -74,15 +74,15 @@ fun generateBarcode(content: String, width: Int = 600, height: Int = 300): Bitma
 
 @Composable
 fun WalletScreen(viewModel: WalletViewModel) {
-    var selectedCard by remember { mutableStateOf<LoyaltyCard?>(null) }
+    var selectedCard by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var cardToDelete by remember { mutableStateOf<LoyaltyCard?>(null) }
+    var cardToDelete by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
     
     val cards by viewModel.cards.collectAsState()
 
-    selectedCard?.let { card ->
+    selectedCard?.let { cardWithStore ->
         BarcodeDialog(
-            card = card,
+            cardWithStore = cardWithStore,
             onDismiss = { selectedCard = null }
         )
     }
@@ -98,14 +98,14 @@ fun WalletScreen(viewModel: WalletViewModel) {
     }
 
     // Dialog de confirmación de borrado
-    cardToDelete?.let { card ->
+    cardToDelete?.let { cardWithStore ->
         AlertDialog(
             onDismissRequest = { cardToDelete = null },
             title = { Text(stringResource(R.string.delete_card_title)) },
             text = { Text(stringResource(R.string.delete_card_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteCard(card)
+                    viewModel.deleteCard(cardWithStore.card)
                     cardToDelete = null
                 }) {
                     Text(stringResource(R.string.delete_confirm))
@@ -142,11 +142,11 @@ fun WalletScreen(viewModel: WalletViewModel) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            items(cards) { card ->
+            items(cards) { cardWithStore ->
                 LoyaltyCardItem(
-                    card = card,
-                    onClick = { selectedCard = card },
-                    onLongClick = { cardToDelete = card }
+                    cardWithStore = cardWithStore,
+                    onClick = { selectedCard = cardWithStore },
+                    onLongClick = { cardToDelete = cardWithStore }
                 )
             }
             item {
@@ -159,11 +159,11 @@ fun WalletScreen(viewModel: WalletViewModel) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LoyaltyCardItem(
-    card: LoyaltyCard,
+    cardWithStore: LoyaltyCardWithStore,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    val cardColor = Color(card.color)
+    val cardColor = Color(cardWithStore.storeColor ?: 0xFF94A3B8)
     val darkColor = Color(
         red = (cardColor.red * 0.7f),
         green = (cardColor.green * 0.7f),
@@ -189,7 +189,7 @@ fun LoyaltyCardItem(
                 .background(darkColor.copy(alpha = 0.3f))
         )
         Text(
-            text = card.name,
+            text = cardWithStore.storeName,
             color = Color.White,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
@@ -311,11 +311,11 @@ fun ColorOption(
 
 @Composable
 fun BarcodeDialog(
-    card: LoyaltyCard,
+    cardWithStore: LoyaltyCardWithStore,
     onDismiss: () -> Unit
 ) {
-    val barcodeBitmap = remember(card.cardNumber) {
-        generateBarcode(card.cardNumber)
+    val barcodeBitmap = remember(cardWithStore.card.cardNumber) {
+        generateBarcode(cardWithStore.card.cardNumber)
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -329,7 +329,7 @@ fun BarcodeDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp)
-                        .background(Color(card.color)),
+                        .background(Color(cardWithStore.storeColor ?: 0xFF94A3B8)),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
@@ -343,7 +343,7 @@ fun BarcodeDialog(
                         )
                     }
                     Text(
-                        text = card.name,
+                        text = cardWithStore.storeName,
                         color = Color.White,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -369,7 +369,7 @@ fun BarcodeDialog(
                         )
                     }
                     Text(
-                        text = card.cardNumber,
+                        text = cardWithStore.card.cardNumber,
                         color = Color.Black,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,

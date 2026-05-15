@@ -6,7 +6,7 @@ import com.pepesantos.scontrino.data.model.Category
 @Dao
 interface CategoryDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(category: Category): Long
 
     @Update
