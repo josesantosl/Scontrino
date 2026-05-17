@@ -41,4 +41,5 @@
     <string name="wallet_select_color">Select color</string>
     <string name="wallet_save">Save</string>
     <string name="wallet_cancel">Cancel</string>
+    <string name="wallet_scan">Scan barcode</string>
 </resources>

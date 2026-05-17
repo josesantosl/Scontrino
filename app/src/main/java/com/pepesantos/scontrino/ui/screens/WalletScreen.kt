@@ -1,16 +1,24 @@
 package com.pepesantos.scontrino.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,25 +27,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
-import com.pepesantos.scontrino.data.model.LoyaltyCard
 import com.pepesantos.scontrino.data.model.LoyaltyCardWithStore
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.border
-import androidx.compose.material.icons.filled.Check
+import com.pepesantos.scontrino.ui.components.BarcodeScanner
 import com.pepesantos.scontrino.ui.viewmodel.WalletViewModel
-import androidx.compose.runtime.collectAsState
 
 val cardColors = listOf(
     0xFFB05050, // Red
@@ -51,11 +57,21 @@ val cardColors = listOf(
 )
 
 fun generateBarcode(content: String, width: Int = 600, height: Int = 300): Bitmap? {
+    if (content.isBlank()) return null
     return try {
         val hints = mapOf(EncodeHintType.MARGIN to 1)
+        
+        // Determinar el formato más probable basado en la longitud
+        val format = when {
+            content.length == 13 && content.all { it.isDigit() } -> BarcodeFormat.EAN_13
+            content.length == 12 && content.all { it.isDigit() } -> BarcodeFormat.UPC_A
+            content.length == 8 && content.all { it.isDigit() } -> BarcodeFormat.EAN_8
+            else -> BarcodeFormat.CODE_128
+        }
+
         val bitMatrix = MultiFormatWriter().encode(
             content,
-            BarcodeFormat.CODE_128,
+            format,
             width,
             height,
             hints
@@ -206,6 +222,33 @@ fun AddCardDialog(
     var name by remember { mutableStateOf("") }
     var number by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(cardColors[0]) }
+    var showScanner by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            showScanner = true
+        }
+    }
+
+    if (showScanner) {
+        Dialog(
+            onDismissRequest = { showScanner = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(modifier = Modifier.fillMaxSize(), color = Color.Black) {
+                BarcodeScanner(
+                    onBarcodeScanned = {
+                        number = it
+                        showScanner = false
+                    },
+                    onDismiss = { showScanner = false }
+                )
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -229,7 +272,23 @@ fun AddCardDialog(
                     onValueChange = { number = it },
                     label = { Text(stringResource(R.string.wallet_card_number)) },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            val permission = Manifest.permission.CAMERA
+                            if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                                showScanner = true
+                            } else {
+                                permissionLauncher.launch(permission)
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.QrCodeScanner,
+                                contentDescription = stringResource(R.string.wallet_scan)
+                            )
+                        }
+                    }
                 )
                 
                 Text(
