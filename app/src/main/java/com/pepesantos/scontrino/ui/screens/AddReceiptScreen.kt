@@ -1,31 +1,39 @@
 package com.pepesantos.scontrino.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.data.model.Category
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.ui.theme.CategoryIcons
+import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReceiptScreen(
     onNavigateBack: () -> Unit,
     onSave: (storeName: String, date: Long, note: String?, items: List<ItemEntry>) -> Unit,
+    categories: List<Category> = emptyList(),
     existingReceipt: ReceiptWithStoreName? = null,
     existingItems: List<ItemEntry> = emptyList(),
 ) {
@@ -46,12 +54,12 @@ fun AddReceiptScreen(
             items.addAll(existingItems)
             items.add(ItemEntry()) // Fila vacía para añadir más
         } else if (receiptId == -1 && items.isEmpty()) {
-            items.add(ItemEntry())
+            items.add(ItemEntry(categoryId = 1))
         }
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = key(existingReceipt?.receipt?.id) {
+    val datePickerState = key(receiptId) {
         rememberDatePickerState(
             initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
         )
@@ -72,7 +80,7 @@ fun AddReceiptScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.add_receipt_back)
                         )
                     }
@@ -156,26 +164,39 @@ fun AddReceiptScreen(
             itemsIndexed(items) { index, item ->
                 ItemRow(
                     item = item,
+                    categories = categories,
                     onNameChange = { name ->
-                        val updated = items[index].copy(name = name)
+                        var categoryId = items[index].categoryId
+                        val detectedLabel = CategoryMatcher.detectCategoryLabel(name)
+                        if (detectedLabel != null) {
+                            val category = categories.find { it.label == detectedLabel }
+                            if (category != null) {
+                                categoryId = category.id
+                            }
+                        }
+                        
+                        val updated = items[index].copy(name = name, categoryId = categoryId)
                         items[index] = updated
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
-                            items.add(ItemEntry())
+                            items.add(ItemEntry(categoryId = 1))
                         }
                     },
                     onPriceChange = { price ->
                         val updated = items[index].copy(price = price)
                         items[index] = updated
                         if (index == items.lastIndex && updated.price != 0.0) {
-                            items.add(ItemEntry())
+                            items.add(ItemEntry(categoryId = 1))
                         }
                     },
                     onQuantityChange = { quantity ->
                         val updated = items[index].copy(quantity = quantity)
                         items[index] = updated
                         if (index == items.lastIndex && updated.quantity > 1) {
-                            items.add(ItemEntry())
+                            items.add(ItemEntry(categoryId = 1))
                         }
+                    },
+                    onCategoryChange = { catId ->
+                        items[index] = items[index].copy(categoryId = catId)
                     }
                 )
             }
@@ -195,10 +216,56 @@ fun AddReceiptScreen(
 @Composable
 fun ItemRow(
     item: ItemEntry,
+    categories: List<Category>,
     onNameChange: (String) -> Unit,
     onPriceChange: (Double) -> Unit,
-    onQuantityChange: (Int) -> Unit
+    onQuantityChange: (Int) -> Unit,
+    onCategoryChange: (Int) -> Unit
 ) {
+    var showCategoryDialog by remember { mutableStateOf(false) }
+    val currentCategory = categories.find { it.id == item.categoryId } ?: categories.firstOrNull()
+
+    // Estado local para el texto del precio para permitir una edición fluida (puntos, comas, etc.)
+    var priceInput by remember(item.price) { 
+        mutableStateOf(if (item.price == 0.0) "" else item.price.toString()) 
+    }
+
+    if (showCategoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showCategoryDialog = false },
+            title = { Text("Select Category") },
+            text = {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(categories) { category ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onCategoryChange(category.id)
+                                    showCategoryDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = CategoryIcons.getIcon(category.iconName),
+                                contentDescription = category.label,
+                                tint = Color(category.color)
+                            )
+                            Text(category.label)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showCategoryDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -209,19 +276,40 @@ fun ItemRow(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
-                value = item.name,
-                onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.add_receipt_item_name)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(onClick = { showCategoryDialog = true }) {
+                    Icon(
+                        imageVector = CategoryIcons.getIcon(currentCategory?.iconName ?: "Help"),
+                        contentDescription = "Category",
+                        tint = currentCategory?.let { Color(it.color) } ?: MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                OutlinedTextField(
+                    value = item.name,
+                    onValueChange = onNameChange,
+                    label = { Text(stringResource(R.string.add_receipt_item_name)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = if (item.price == 0.0) "" else item.price.toString(),
-                    onValueChange = { onPriceChange(it.toDoubleOrNull() ?: 0.0) },
+                    value = priceInput,
+                    onValueChange = { newValue ->
+                        // Permitir solo números con un separador decimal opcional
+                        if (newValue.isEmpty() || newValue.matches(Regex("""^\d*[.,]?\d*$"""))) {
+                            priceInput = newValue
+                            val parsedPrice = newValue.replace(',', '.').toDoubleOrNull() ?: 0.0
+                            onPriceChange(parsedPrice)
+                        }
+                    },
                     label = { Text(stringResource(R.string.add_receipt_price)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f)

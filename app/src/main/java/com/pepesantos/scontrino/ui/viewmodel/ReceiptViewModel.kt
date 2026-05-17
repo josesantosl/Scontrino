@@ -12,15 +12,21 @@ import com.pepesantos.scontrino.data.repository.StoreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.pepesantos.scontrino.data.model.Category
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.data.repository.CategoryRepository
 
 class ReceiptViewModel(
     private val receiptRepository: ReceiptRepository,
     private val storeRepository: StoreRepository,
     private val productRepository: ProductRepository,
     private val itemRepository: ItemRepository,
+    private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
+
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories
 
     private val _receipts = MutableStateFlow<List<ReceiptWithStoreName>>(emptyList())
     val receipts: StateFlow<List<ReceiptWithStoreName>> = _receipts
@@ -30,6 +36,13 @@ class ReceiptViewModel(
 
     init {
         loadReceipts()
+        loadCategories()
+    }
+    
+    private fun loadCategories() {
+        viewModelScope.launch {
+            _categories.value = categoryRepository.getAll()
+        }
     }
     private val _storeNames = MutableStateFlow<Map<Int, String>>(emptyMap())
     val storeNames: StateFlow<Map<Int, String>> = _storeNames
@@ -38,7 +51,11 @@ class ReceiptViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             val receipts = receiptRepository.getAll()
-            _receipts.value = receipts
+            // Ordenamos por fecha descendente y luego por ID descendente para que el último añadido esté arriba
+            _receipts.value = receipts.sortedWith(
+                compareByDescending<ReceiptWithStoreName> { it.receipt.date }
+                    .thenByDescending { it.receipt.id }
+            )
 
             // Cargar nombres de tiendas
             val stores = storeRepository.getAll()
@@ -54,15 +71,19 @@ class ReceiptViewModel(
         note: String?,
         items: List<ItemEntry>
     ) {
+        val trimmedStoreName = storeName.trim()
         viewModelScope.launch {
-            // 1. Obtener o crear la tienda
-            val storeResults = storeRepository.search(storeName)
-            val store = storeResults.firstOrNull { it.name.equals(storeName, ignoreCase = true) }
+            // 1. Obtener o crear la tienda - Preferimos una que ya tenga color si hay duplicados
+            val storeResults = storeRepository.search(trimmedStoreName)
+            val store = storeResults
+                .filter { it.name.equals(trimmedStoreName, ignoreCase = true) }
+                .sortedByDescending { it.color != null }
+                .firstOrNull()
                 ?: run {
                     val id = storeRepository.insert(
-                        com.pepesantos.scontrino.data.model.Store(name = storeName)
+                        com.pepesantos.scontrino.data.model.Store(name = trimmedStoreName)
                     )
-                    com.pepesantos.scontrino.data.model.Store(id = id.toInt(), name = storeName)
+                    com.pepesantos.scontrino.data.model.Store(id = id.toInt(), name = trimmedStoreName)
                 }
 
             // 2. Calcular total
@@ -82,7 +103,7 @@ class ReceiptViewModel(
             val roomItems = items
                 .filter { it.name.isNotBlank() && it.price != 0.0 }
                 .map { entry ->
-                    val product = productRepository.getOrCreate(entry.name)
+                    val product = productRepository.getOrCreate(entry.name, entry.categoryId)
                     Item(
                         productId = product.id,
                         price = entry.price,
@@ -124,15 +145,19 @@ class ReceiptViewModel(
         note: String?,
         items: List<ItemEntry>
     ) {
+        val trimmedStoreName = storeName.trim()
         viewModelScope.launch {
-            // 1. Obtener o crear la tienda
-            val storeResults = storeRepository.search(storeName)
-            val store = storeResults.firstOrNull { it.name.equals(storeName, ignoreCase = true) }
+            // 1. Obtener o crear la tienda - Preferimos una que ya tenga color
+            val storeResults = storeRepository.search(trimmedStoreName)
+            val store = storeResults
+                .filter { it.name.equals(trimmedStoreName, ignoreCase = true) }
+                .sortedByDescending { it.color != null }
+                .firstOrNull()
                 ?: run {
                     val id = storeRepository.insert(
-                        Store(name = storeName)
+                        Store(name = trimmedStoreName)
                     )
-                    Store(id = id.toInt(), name = storeName)
+                    Store(id = id.toInt(), name = trimmedStoreName)
                 }
 
             // 2. Calcular nuevo total
@@ -154,7 +179,7 @@ class ReceiptViewModel(
             val roomItems = items
                 .filter { it.name.isNotBlank() && it.price != 0.0 }
                 .map { entry ->
-                    val product = productRepository.getOrCreate(entry.name)
+                    val product = productRepository.getOrCreate(entry.name, entry.categoryId)
                     Item(
                         productId = product.id,
                         price = entry.price,

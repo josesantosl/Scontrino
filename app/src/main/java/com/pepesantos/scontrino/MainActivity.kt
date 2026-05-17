@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepesantos.scontrino.data.AppDatabase
+import com.pepesantos.scontrino.data.repository.CategoryRepository
 import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.LoyaltyCardRepository
 import com.pepesantos.scontrino.data.repository.ProductRepository
@@ -45,6 +46,7 @@ class MainActivity : ComponentActivity() {
             productRepository = ProductRepository(database.productDao()),
             loyaltyCardRepository = LoyaltyCardRepository(database.loyaltyCardDao()),
             itemRepository = ItemRepository(database.itemDao()),
+            categoryRepository = CategoryRepository(database.categoryDao()),
         )
         setContent {
             ScontrinoTheme {

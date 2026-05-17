@@ -155,6 +155,7 @@ fun WalletScreen(viewModel: WalletViewModel) {
         }
 
         LazyColumn(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
@@ -169,6 +170,16 @@ fun WalletScreen(viewModel: WalletViewModel) {
                 AddCardButton(onClick = { showAddDialog = true })
             }
         }
+
+        Text(
+            text = "Made in Turin ♥️",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
