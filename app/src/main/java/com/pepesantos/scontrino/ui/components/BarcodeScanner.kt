@@ -26,6 +26,10 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
+/**
+ * Camera component that uses CameraX and ML Kit to scan barcodes.
+ * Specifically handles the UPC-A to EAN-13 conversion to preserve leading zeros.
+ */
 @OptIn(ExperimentalGetImage::class)
 @Composable
 fun BarcodeScanner(
@@ -36,6 +40,7 @@ fun BarcodeScanner(
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     
+    // Explicitly configure scanner for common loyalty card formats
     val options = remember {
         BarcodeScannerOptions.Builder()
             .setBarcodeFormats(
@@ -89,7 +94,9 @@ fun BarcodeScanner(
                                     for (barcode in barcodes) {
                                         barcode.rawValue?.let { value ->
                                             if (!isScanned) {
-                                                // Si es UPC_A (12 dígitos), lo convertimos a EAN_13 (13 dígitos con 0 inicial)
+                                                // EUROPEAN FIX: If it's a 12-digit UPC-A, it's often an EAN-13 
+                                                // with a leading zero that ML Kit "simplifies" away.
+                                                // We restore it to ensure compatibility with store scanners.
                                                 val finalValue = if (barcode.format == Barcode.FORMAT_UPC_A && value.length == 12) {
                                                     "0$value"
                                                 } else {

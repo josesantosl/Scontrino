@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
@@ -28,6 +27,10 @@ import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
+/**
+ * Screen for creating or editing a receipt.
+ * Features automatic category detection, a dynamic item list, and date selection.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReceiptScreen(
@@ -37,22 +40,21 @@ fun AddReceiptScreen(
     existingReceipt: ReceiptWithStoreName? = null,
     existingItems: List<ItemEntry> = emptyList(),
 ) {
-    // Usamos el ID del recibo como clave principal para resetear todo el estado
     val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
     
+    // State reset logic: when receiptId changes, reset storeName, note, and items
     var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: "") }
     var note by remember(receiptId) { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
     
-    // Para los items, queremos que se inicialicen con existingItems cuando estos lleguen del ViewModel
     val items = remember(receiptId) { mutableStateListOf<ItemEntry>() }
     
-    // Efecto para sincronizar existingItems cuando se cargan
+    // Effect to populate items when loading from database (handles async loading)
     LaunchedEffect(receiptId, existingItems) {
         if (existingItems.isNotEmpty()) {
             items.clear()
             items.addAll(existingItems)
-            items.add(ItemEntry()) // Fila vacía para añadir más
+            items.add(ItemEntry(categoryId = 1)) // Add empty row for new additions
         } else if (receiptId == -1 && items.isEmpty()) {
             items.add(ItemEntry(categoryId = 1))
         }
@@ -167,6 +169,7 @@ fun AddReceiptScreen(
                     categories = categories,
                     onNameChange = { name ->
                         var categoryId = items[index].categoryId
+                        // Automatically detect category based on product name
                         val detectedLabel = CategoryMatcher.detectCategoryLabel(name)
                         if (detectedLabel != null) {
                             val category = categories.find { it.label == detectedLabel }
@@ -177,6 +180,7 @@ fun AddReceiptScreen(
                         
                         val updated = items[index].copy(name = name, categoryId = categoryId)
                         items[index] = updated
+                        // Add new empty row if user started typing in the last one
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
                             items.add(ItemEntry(categoryId = 1))
                         }
@@ -213,6 +217,10 @@ fun AddReceiptScreen(
     }
 }
 
+/**
+ * Individual row for a product entry.
+ * Includes category selector, product name, price input, and quantity counter.
+ */
 @Composable
 fun ItemRow(
     item: ItemEntry,
@@ -225,7 +233,7 @@ fun ItemRow(
     var showCategoryDialog by remember { mutableStateOf(false) }
     val currentCategory = categories.find { it.id == item.categoryId } ?: categories.firstOrNull()
 
-    // Estado local para el texto del precio para permitir una edición fluida (puntos, comas, etc.)
+    // Local state for price text to handle intermediate states like dots or commas
     var priceInput by remember(item.price) { 
         mutableStateOf(if (item.price == 0.0) "" else item.price.toString()) 
     }
@@ -280,6 +288,7 @@ fun ItemRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Category button: triggers manual override dialog
                 IconButton(onClick = { showCategoryDialog = true }) {
                     Icon(
                         imageVector = CategoryIcons.getIcon(currentCategory?.iconName ?: "Help"),
@@ -303,7 +312,7 @@ fun ItemRow(
                 OutlinedTextField(
                     value = priceInput,
                     onValueChange = { newValue ->
-                        // Permitir solo números con un separador decimal opcional
+                        // Allow digits and a single optional decimal separator
                         if (newValue.isEmpty() || newValue.matches(Regex("""^\d*[.,]?\d*$"""))) {
                             priceInput = newValue
                             val parsedPrice = newValue.replace(',', '.').toDoubleOrNull() ?: 0.0
@@ -315,6 +324,7 @@ fun ItemRow(
                     modifier = Modifier.weight(1f)
                 )
                 
+                // Quantity Counter (+ / - buttons)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(top = 8.dp)

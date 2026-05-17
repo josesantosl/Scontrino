@@ -8,6 +8,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pepesantos.scontrino.data.dao.*
 import com.pepesantos.scontrino.data.model.*
 
+/**
+ * Main database class for the application.
+ * Manages the persistence of categories, items, products, receipts, stores, and loyalty cards.
+ */
 @Database(
     entities = [
         Category::class,
@@ -33,6 +37,10 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        /**
+         * Returns the singleton instance of [AppDatabase].
+         * Uses fallbackToDestructiveMigration for simplified schema updates during development.
+         */
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -49,6 +57,9 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 
+    /**
+     * Internal callback to handle initial data prepopulation and schema recovery.
+     */
     private class PrepopulateCallback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
@@ -57,7 +68,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         override fun onOpen(db: SupportSQLiteDatabase) {
             super.onOpen(db)
-            // Verificamos si la tabla existe y si está vacía antes de prepoblar
+            // Safety check: ensure Category table exists and is not empty on every database open
             val cursorTable = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='Category'")
             val tableExists = cursorTable.moveToFirst()
             cursorTable.close()
@@ -71,6 +82,9 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Inserts default product categories into the database using raw SQL for synchronous execution.
+         */
         private fun prepopulate(db: SupportSQLiteDatabase) {
             val categories = listOf(
                 "other" to Pair("MoreHoriz", 0xFF94A3B8),

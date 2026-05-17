@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing loyalty cards and ensuring they are correctly linked to stores.
+ */
 class WalletViewModel(
     private val loyaltyCardRepository: LoyaltyCardRepository,
     private val storeRepository: StoreRepository
@@ -23,28 +26,36 @@ class WalletViewModel(
         loadCards()
     }
 
+    /**
+     * Fetches all loyalty cards with their associated store information.
+     */
     fun loadCards() {
         viewModelScope.launch {
             _cards.value = loyaltyCardRepository.getAll()
         }
     }
 
+    /**
+     * Saves a new loyalty card. 
+     * Automatically links it to an existing store or creates a new one with the chosen color.
+     */
     fun saveCard(storeName: String, cardNumber: String, color: Long) {
         viewModelScope.launch {
-            // 1. Obtener o crear la tienda
+            // 1. Search for store by name (case-insensitive)
             val storeResults = storeRepository.search(storeName)
             val store = storeResults.firstOrNull { it.name.equals(storeName, ignoreCase = true) }
                 ?: run {
+                    // Create new store if not found
                     val id = storeRepository.insert(Store(name = storeName, color = color))
                     Store(id = id.toInt(), name = storeName, color = color)
                 }
             
-            // 2. Actualizar color de la tienda si es necesario (ya que ahora la tarjeta manda el color)
+            // 2. Synchronize store color with the chosen card color
             if (store.color != color) {
                 storeRepository.update(store.copy(color = color))
             }
 
-            // 3. Crear la tarjeta de fidelidad
+            // 3. Persist the loyalty card
             loyaltyCardRepository.insert(
                 LoyaltyCard(storeId = store.id, cardNumber = cardNumber)
             )
@@ -52,6 +63,9 @@ class WalletViewModel(
         }
     }
 
+    /**
+     * Deletes a loyalty card and refreshes the wallet view.
+     */
     fun deleteCard(card: LoyaltyCard) {
         viewModelScope.launch {
             loyaltyCardRepository.delete(card)
@@ -59,10 +73,11 @@ class WalletViewModel(
         }
     }
 
+    /**
+     * Updates an existing loyalty card's details and its associated store's name/color.
+     */
     fun updateCard(card: LoyaltyCard, storeName: String, color: Long) {
         viewModelScope.launch {
-            // En una app real, actualizaríamos la relación con la tienda o su nombre/color
-            // Por ahora simplificamos: actualizamos el color de la tienda vinculada
             val cardWithStore = cards.value.firstOrNull { it.card.id == card.id }
             cardWithStore?.let {
                 val store = storeRepository.getById(it.card.storeId)

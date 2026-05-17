@@ -1,6 +1,14 @@
 package com.pepesantos.scontrino.ui.viewmodel
 
+/**
+ * Utility object for automatic product categorization.
+ * Matches keywords found in product names to category labels.
+ */
 object CategoryMatcher {
+    /**
+     * Map of keyword lists to category labels.
+     * Supports multiple languages and brand names (e.g., 'felix' for pets).
+     */
     private val keywordToLabel = mapOf(
         listOf("tofu", "seitan", "tempeh", "soja", "soya", "legumbres", "lentejas", "garbanzos") to "plant_protein",
         listOf("pollo", "chicken", "carne", "meat", "pork", "cerdo", "beef", "ternera", "vaca", "ham", "jamon", "pescado", "fish", "salmon", "atun", "tuna") to "animal_protein",
@@ -16,6 +24,11 @@ object CategoryMatcher {
         listOf("bus", "train", "tren", "metro", "ticket", "billete", "transport", "transporte") to "transport"
     )
 
+    /**
+     * Attempts to find a matching category label for a given product name.
+     * @param name The name entered by the user.
+     * @return The label of the matched category, or null if no keywords match.
+     */
     fun detectCategoryLabel(name: String): String? {
         val lowerName = name.lowercase()
         for ((keywords, label) in keywordToLabel) {
