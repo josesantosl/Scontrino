@@ -1,8 +1,6 @@
 # Scontrino
 
-
-A personal receipt and loyalty card manager for Android. Built because every existing app either costs too much, requires an internet connection, or treats a supermarket trip like a corporate expense report.
-
+A personal receipt and loyalty card manager for Android. Built because every app that scans receipts requires a subscription, and every free alternative expects you to enter everything by hand.
 
 ## Why
 
