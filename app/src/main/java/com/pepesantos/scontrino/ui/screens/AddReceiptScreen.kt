@@ -102,7 +102,7 @@ fun AddReceiptScreen(
                             storeName,
                             datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
                             note.ifBlank { null },
-                            items.filter { it.name.isNotBlank() && it.price != 0.0 }
+                            items.filter { it.name.isNotBlank() }
                         )
                     },
                     modifier = Modifier.fillMaxWidth()

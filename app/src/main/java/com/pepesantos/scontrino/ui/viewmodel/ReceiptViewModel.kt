@@ -122,7 +122,7 @@ class ReceiptViewModel(
 
             // 4. Resolve products and build item entities
             val roomItems = items
-                .filter { it.name.isNotBlank() && it.price != 0.0 }
+                .filter { it.name.isNotBlank() }
                 .map { entry ->
                     val product = productRepository.getOrCreate(entry.name, entry.categoryId)
                     Item(
@@ -198,7 +198,7 @@ class ReceiptViewModel(
             // Delete old items and insert new ones to handle removals/additions simply
             itemRepository.deleteByReceipt(receipt.id)
             val roomItems = items
-                .filter { it.name.isNotBlank() && it.price != 0.0 }
+                .filter { it.name.isNotBlank() }
                 .map { entry ->
                     val product = productRepository.getOrCreate(entry.name, entry.categoryId)
                     Item(

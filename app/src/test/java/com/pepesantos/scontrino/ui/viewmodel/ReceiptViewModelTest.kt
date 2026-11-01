@@ -78,4 +78,36 @@ class ReceiptViewModelTest {
             this.storeId == 1 && this.total == 20.0 && this.date == date && this.note == note
         }, any())
     }
+
+    @Test
+    fun `saveReceipt saves items with price 0 as shopping list items`() = runTest {
+        val storeName = "Supermarket"
+        val date = 3000L
+        val note = "Shopping list"
+        val items = listOf(
+            ItemEntry("Apples", 0.0, 1, 1),
+            ItemEntry("Milk", 0.0, 2, 1),
+            ItemEntry("", 0.0, 1, 1) // Empty item should be filtered out
+        )
+
+        whenever(storeRepository.search(storeName)).thenReturn(emptyList())
+        whenever(storeRepository.insert(any())).thenReturn(1L)
+        
+        val productApples = Product(id = 1, name = "Apples", categoryId = 1)
+        val productMilk = Product(id = 2, name = "Milk", categoryId = 1)
+        whenever(productRepository.getOrCreate("Apples", 1)).thenReturn(productApples)
+        whenever(productRepository.getOrCreate("Milk", 1)).thenReturn(productMilk)
+        
+        whenever(receiptRepository.getAll()).thenReturn(emptyList())
+        whenever(storeRepository.getAll()).thenReturn(emptyList())
+
+        viewModel.saveReceipt(storeName, date, note, items)
+        advanceUntilIdle()
+
+        // Verify receipt insertion with total 0.0 and 2 items with price 0.0
+        verify(receiptRepository).insert(
+            argThat { this.total == 0.0 && this.storeId == 1 },
+            argThat { size == 2 && all { it.price == 0.0 } }
+        )
+    }
 }
