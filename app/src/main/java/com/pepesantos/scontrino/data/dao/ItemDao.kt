@@ -23,7 +23,7 @@ interface ItemDao {
     suspend fun getByReceipt(receiptId: Int): List<Item>
 
     @Query("""
-    SELECT Product.name, Item.price, Item.quantity, Product.categoryId
+    SELECT Product.name, Item.price, Item.quantity, Product.categoryId, Item.weight
     FROM Item
     INNER JOIN Product ON Item.productId = Product.id
     WHERE Item.receiptId = :receiptId

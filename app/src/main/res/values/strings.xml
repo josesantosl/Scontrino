@@ -14,6 +14,8 @@
     <string name="add_receipt_items">Items</string>
     <string name="add_receipt_item_name">Item name</string>
     <string name="add_receipt_price">Price</string>
+    <string name="add_receipt_weight">Weight (g)</string>
+    <string name="add_receipt_volume">Volume (L)</string>
     <string name="add_receipt_quantity">Qty</string>
     <string name="add_receipt_note">Notes</string>
     <string name="add_receipt_save">Save receipt</string>

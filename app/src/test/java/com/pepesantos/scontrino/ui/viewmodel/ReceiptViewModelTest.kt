@@ -110,4 +110,37 @@ class ReceiptViewModelTest {
             argThat { size == 2 && all { it.price == 0.0 } }
         )
     }
+
+    @Test
+    fun `saveReceipt saves items with optional weight correctly`() = runTest {
+        val storeName = "Greengrocer"
+        val date = 4000L
+        val items = listOf(
+            ItemEntry("Bananas", 1.80, 1, 1, weight = 250.0),
+            ItemEntry("Soap", 0.90, 1, 1, weight = null)
+        )
+
+        whenever(storeRepository.search(storeName)).thenReturn(emptyList())
+        whenever(storeRepository.insert(any())).thenReturn(1L)
+        
+        val productBananas = Product(id = 1, name = "Bananas", categoryId = 1)
+        val productSoap = Product(id = 2, name = "Soap", categoryId = 1)
+        whenever(productRepository.getOrCreate("Bananas", 1)).thenReturn(productBananas)
+        whenever(productRepository.getOrCreate("Soap", 1)).thenReturn(productSoap)
+        
+        whenever(receiptRepository.getAll()).thenReturn(emptyList())
+        whenever(storeRepository.getAll()).thenReturn(emptyList())
+
+        viewModel.saveReceipt(storeName, date, null, items)
+        advanceUntilIdle()
+
+        verify(receiptRepository).insert(
+            any(),
+            argThat {
+                size == 2 &&
+                first().weight == 250.0 &&
+                last().weight == null
+            }
+        )
+    }
 }

@@ -15,4 +15,5 @@ data class Item(
     val price: Double,
     val quantity: Int = 1,
     val receiptId: Int,
+    val weight: Double? = null,
 )

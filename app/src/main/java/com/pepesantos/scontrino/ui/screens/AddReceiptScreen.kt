@@ -193,6 +193,13 @@ fun AddReceiptScreen(
                             items.add(ItemEntry(categoryId = 1))
                         }
                     },
+                    onWeightChange = { weight ->
+                        val updated = items[index].copy(weight = weight)
+                        items[index] = updated
+                        if (index == items.lastIndex && updated.weight != null) {
+                            items.add(ItemEntry(categoryId = 1))
+                        }
+                    },
                     onQuantityChange = { quantity ->
                         val updated = items[index].copy(quantity = quantity)
                         items[index] = updated
@@ -228,6 +235,7 @@ fun ItemRow(
     categories: List<Category>,
     onNameChange: (String) -> Unit,
     onPriceChange: (Double) -> Unit,
+    onWeightChange: (Double?) -> Unit,
     onQuantityChange: (Int) -> Unit,
     onCategoryChange: (Int) -> Unit
 ) {
@@ -237,6 +245,20 @@ fun ItemRow(
     // Local state for price text to handle intermediate states like dots or commas
     var priceInput by remember(item.price) { 
         mutableStateOf(if (item.price == 0.0) "" else item.price.toString()) 
+    }
+    var weightInput by remember(item.weight) {
+        mutableStateOf(
+            item.weight?.let {
+                if (it % 1.0 == 0.0) it.toLong().toString() else it.toString()
+            } ?: ""
+        )
+    }
+
+    val isBeverage = currentCategory?.label == "beverages"
+    val weightOrVolumeLabel = if (isBeverage) {
+        stringResource(R.string.add_receipt_volume)
+    } else {
+        stringResource(R.string.add_receipt_weight)
     }
 
     if (showCategoryDialog) {
@@ -324,6 +346,20 @@ fun ItemRow(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f)
                 )
+
+                OutlinedTextField(
+                    value = weightInput,
+                    onValueChange = { newValue ->
+                        if (newValue.isEmpty() || newValue.matches(Regex("""^\d*[.,]?\d*$"""))) {
+                            weightInput = newValue
+                            val parsedWeight = newValue.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
+                            onWeightChange(parsedWeight)
+                        }
+                    },
+                    label = { Text(weightOrVolumeLabel) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.weight(1f)
+                )
                 
                 // Quantity Counter (+ / - buttons)
                 Row(
@@ -332,7 +368,8 @@ fun ItemRow(
                 ) {
                     IconButton(
                         onClick = { if (item.quantity > 1) onQuantityChange(item.quantity - 1) },
-                        enabled = item.quantity > 1
+                        enabled = item.quantity > 1,
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(Icons.Default.Remove, contentDescription = "Decrease")
                     }
@@ -340,11 +377,12 @@ fun ItemRow(
                     Text(
                         text = item.quantity.toString(),
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
                     
                     IconButton(
-                        onClick = { onQuantityChange(item.quantity + 1) }
+                        onClick = { onQuantityChange(item.quantity + 1) },
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Increase")
                     }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pepesantos.scontrino.data.dao.*
 import com.pepesantos.scontrino.data.model.*
@@ -21,7 +22,7 @@ import com.pepesantos.scontrino.data.model.*
         Store::class,
         LoyaltyCard::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -37,6 +38,12 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE Item ADD COLUMN weight REAL DEFAULT NULL")
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -49,6 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "scontrino_database"
                 )
                     .addCallback(PrepopulateCallback())
+                    .addMigrations(MIGRATION_5_6)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

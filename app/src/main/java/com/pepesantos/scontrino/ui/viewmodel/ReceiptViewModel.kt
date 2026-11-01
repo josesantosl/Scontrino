@@ -129,7 +129,8 @@ class ReceiptViewModel(
                         productId = product.id,
                         price = entry.price,
                         quantity = entry.quantity,
-                        receiptId = 0 // Assigned in the repository level
+                        receiptId = 0, // Assigned in the repository level
+                        weight = entry.weight
                     )
                 }
 
@@ -205,7 +206,8 @@ class ReceiptViewModel(
                         productId = product.id,
                         price = entry.price,
                         quantity = entry.quantity,
-                        receiptId = receipt.id
+                        receiptId = receipt.id,
+                        weight = entry.weight
                     )
                 }
             itemRepository.insertAll(roomItems)

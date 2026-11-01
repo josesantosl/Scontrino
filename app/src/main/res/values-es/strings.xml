@@ -11,6 +11,8 @@
     <string name="add_receipt_items">Artículos</string>
     <string name="add_receipt_item_name">Nombre del artículo</string>
     <string name="add_receipt_price">Precio</string>
+    <string name="add_receipt_weight">Peso (g)</string>
+    <string name="add_receipt_volume">Volumen (l)</string>
     <string name="add_receipt_quantity">Cant.</string>
     <string name="add_receipt_note">Notas</string>
     <string name="add_receipt_save">Guardar factura</string>
