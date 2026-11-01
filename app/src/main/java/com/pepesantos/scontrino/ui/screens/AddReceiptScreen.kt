@@ -25,6 +25,7 @@ import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
+import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
 /**
@@ -241,7 +242,7 @@ fun ItemRow(
     if (showCategoryDialog) {
         AlertDialog(
             onDismissRequest = { showCategoryDialog = false },
-            title = { Text("Select Category") },
+            title = { Text(stringResource(R.string.category_select_title)) },
             text = {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(categories) { category ->
@@ -258,17 +259,17 @@ fun ItemRow(
                         ) {
                             Icon(
                                 imageVector = CategoryIcons.getIcon(category.iconName),
-                                contentDescription = category.label,
+                                contentDescription = category.displayName(),
                                 tint = Color(category.color)
                             )
-                            Text(category.label)
+                            Text(category.displayName())
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showCategoryDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.delete_cancel))
                 }
             }
         )
@@ -292,7 +293,7 @@ fun ItemRow(
                 IconButton(onClick = { showCategoryDialog = true }) {
                     Icon(
                         imageVector = CategoryIcons.getIcon(currentCategory?.iconName ?: "Help"),
-                        contentDescription = "Category",
+                        contentDescription = currentCategory?.displayName() ?: stringResource(R.string.category_label),
                         tint = currentCategory?.let { Color(it.color) } ?: MaterialTheme.colorScheme.primary
                     )
                 }

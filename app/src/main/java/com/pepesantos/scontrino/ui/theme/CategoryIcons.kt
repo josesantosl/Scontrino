@@ -2,7 +2,11 @@ package com.pepesantos.scontrino.ui.theme
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import com.pepesantos.scontrino.data.model.Category
+import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
 object CategoryIcons {
     fun getIcon(name: String): ImageVector {
@@ -26,3 +30,23 @@ object CategoryIcons {
         }
     }
 }
+
+/**
+ * Returns the localized display name for a category label,
+ * or the label itself if no string resource is found (e.g., custom categories).
+ */
+@Composable
+fun getCategoryDisplayName(label: String): String {
+    val resId = CategoryMatcher.getCategoryStringRes(label)
+    return resId?.let { stringResource(it) } ?: label
+}
+
+/**
+ * Extension on Category to get its localized display name.
+ */
+@Composable
+fun Category.displayName(): String {
+    val resId = getStringRes()
+    return resId?.let { stringResource(it) } ?: label
+}
+

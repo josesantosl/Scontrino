@@ -18,6 +18,7 @@ class ReceiptViewModelTest {
     private val storeRepository: StoreRepository = mock()
     private val productRepository: ProductRepository = mock()
     private val itemRepository: ItemRepository = mock()
+    private val categoryRepository: CategoryRepository = mock()
     private lateinit var viewModel: ReceiptViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -28,8 +29,9 @@ class ReceiptViewModelTest {
         
         whenever(receiptRepository.getAll()).thenReturn(emptyList())
         whenever(storeRepository.getAll()).thenReturn(emptyList())
+        whenever(categoryRepository.getAll()).thenReturn(emptyList())
         
-        viewModel = ReceiptViewModel(receiptRepository, storeRepository, productRepository, itemRepository)
+        viewModel = ReceiptViewModel(receiptRepository, storeRepository, productRepository, itemRepository, categoryRepository)
     }
 
     @After

@@ -35,4 +35,23 @@
     <string name="wallet_save">Salva</string>
     <string name="wallet_cancel">Annulla</string>
     <string name="wallet_scan">Scansiona codice a barre</string>
+
+    <!-- Categories -->
+    <string name="category_select_title">Seleziona categoria</string>
+    <string name="category_label">Categoria</string>
+    <string name="category_other">Altro</string>
+    <string name="category_vegetables_fruit">Frutta e verdura</string>
+    <string name="category_plant_protein">Proteine vegetali</string>
+    <string name="category_animal_protein">Proteine animali</string>
+    <string name="category_dairy_alternatives">Latticini e alternative</string>
+    <string name="category_grains_pasta_bread">Cereali, pasta e pane</string>
+    <string name="category_snacks_sweets">Snack e dolci</string>
+    <string name="category_beverages">Bevande</string>
+    <string name="category_canned_sauces">Conserve e salse</string>
+    <string name="category_oils_condiments">Oli e condimenti</string>
+    <string name="category_cleaning">Pulizia</string>
+    <string name="category_personal_hygiene">Igiene personale</string>
+    <string name="category_pets">Animali domestici</string>
+    <string name="category_pharmacy">Farmacia</string>
+    <string name="category_transport">Trasporti</string>
 </resources>
