@@ -31,6 +31,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     val receipts by viewModel.receipts.collectAsState()
     val selectedItems by viewModel.selectedItems.collectAsState()
     val categories by viewModel.categories.collectAsState()
+    val stores by viewModel.stores.collectAsState()
+    val products by viewModel.products.collectAsState()
 
     when {
         showAddReceipt -> {
@@ -40,7 +42,9 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                     viewModel.saveReceipt(storeName, date, note, items)
                     showAddReceipt = false
                 },
-                categories = categories
+                categories = categories,
+                availableStores = stores,
+                availableProducts = products
             )
         }
         editingReceipt != null -> {
@@ -52,7 +56,9 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 },
                 categories = categories,
                 existingReceipt = editingReceipt,
-                existingItems = selectedItems
+                existingItems = selectedItems,
+                availableStores = stores,
+                availableProducts = products
             )
         }
         else -> {

@@ -21,16 +21,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.Category
-import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.ItemEntry
+import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
 /**
  * Screen for creating or editing a receipt.
- * Features automatic category detection, a dynamic item list, and date selection.
+ * Features automatic category detection, store/product autocompletion, a dynamic item list, and date selection.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,8 @@ fun AddReceiptScreen(
     categories: List<Category> = emptyList(),
     existingReceipt: ReceiptWithStoreName? = null,
     existingItems: List<ItemEntry> = emptyList(),
+    availableStores: List<Store> = emptyList(),
+    availableProducts: List<Product> = emptyList(),
 ) {
     val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
@@ -121,12 +124,54 @@ fun AddReceiptScreen(
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             item {
-                OutlinedTextField(
-                    value = storeName,
-                    onValueChange = { storeName = it },
-                    label = { Text(stringResource(R.string.add_receipt_store)) },
+                var storeExpanded by remember { mutableStateOf(false) }
+                val storeSuggestions = remember(availableStores) {
+                    availableStores.map { it.name }.distinct()
+                }
+                val filteredStoreSuggestions = remember(storeName, storeSuggestions) {
+                    if (storeName.isBlank()) {
+                        emptyList()
+                    } else {
+                        storeSuggestions.filter {
+                            it.contains(storeName, ignoreCase = true) && !it.equals(storeName, ignoreCase = true)
+                        }.take(5)
+                    }
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = storeExpanded && filteredStoreSuggestions.isNotEmpty(),
+                    onExpandedChange = { storeExpanded = it },
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    OutlinedTextField(
+                        value = storeName,
+                        onValueChange = {
+                            storeName = it
+                            storeExpanded = true
+                        },
+                        label = { Text(stringResource(R.string.add_receipt_store)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
+                        singleLine = true
+                    )
+                    if (filteredStoreSuggestions.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = storeExpanded,
+                            onDismissRequest = { storeExpanded = false }
+                        ) {
+                            filteredStoreSuggestions.forEach { suggestion ->
+                                DropdownMenuItem(
+                                    text = { Text(suggestion) },
+                                    onClick = {
+                                        storeName = suggestion
+                                        storeExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
             item {
                 OutlinedTextField(
@@ -168,6 +213,7 @@ fun AddReceiptScreen(
                 ItemRow(
                     item = item,
                     categories = categories,
+                    availableProducts = availableProducts,
                     onNameChange = { name ->
                         var categoryId = items[index].categoryId
                         // Automatically detect category based on product name
@@ -182,6 +228,16 @@ fun AddReceiptScreen(
                         val updated = items[index].copy(name = name, categoryId = categoryId)
                         items[index] = updated
                         // Add new empty row if user started typing in the last one
+                        if (index == items.lastIndex && updated.name.isNotBlank()) {
+                            items.add(ItemEntry(categoryId = 1))
+                        }
+                    },
+                    onProductSelect = { selectedProduct ->
+                        val updated = items[index].copy(
+                            name = selectedProduct.name,
+                            categoryId = selectedProduct.categoryId
+                        )
+                        items[index] = updated
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
                             items.add(ItemEntry(categoryId = 1))
                         }
@@ -227,13 +283,16 @@ fun AddReceiptScreen(
 
 /**
  * Individual row for a product entry.
- * Includes category selector, product name, price input, and quantity counter.
+ * Includes category selector, product name with autocomplete, price input, and quantity counter.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemRow(
     item: ItemEntry,
     categories: List<Category>,
+    availableProducts: List<Product> = emptyList(),
     onNameChange: (String) -> Unit,
+    onProductSelect: ((Product) -> Unit)? = null,
     onPriceChange: (Double) -> Unit,
     onWeightChange: (Double?) -> Unit,
     onQuantityChange: (Int) -> Unit,
@@ -320,12 +379,55 @@ fun ItemRow(
                     )
                 }
                 
-                OutlinedTextField(
-                    value = item.name,
-                    onValueChange = onNameChange,
-                    label = { Text(stringResource(R.string.add_receipt_item_name)) },
+                var productExpanded by remember { mutableStateOf(false) }
+                val filteredProducts = remember(item.name, availableProducts) {
+                    if (item.name.isBlank()) {
+                        emptyList()
+                    } else {
+                        availableProducts
+                            .distinctBy { it.name.lowercase() }
+                            .filter {
+                                it.name.contains(item.name, ignoreCase = true) &&
+                                        !it.name.equals(item.name, ignoreCase = true)
+                            }
+                            .take(5)
+                    }
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = productExpanded && filteredProducts.isNotEmpty(),
+                    onExpandedChange = { productExpanded = it },
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    OutlinedTextField(
+                        value = item.name,
+                        onValueChange = {
+                            onNameChange(it)
+                            productExpanded = true
+                        },
+                        label = { Text(stringResource(R.string.add_receipt_item_name)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
+                        singleLine = true
+                    )
+                    if (filteredProducts.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = productExpanded,
+                            onDismissRequest = { productExpanded = false }
+                        ) {
+                            filteredProducts.forEach { product ->
+                                DropdownMenuItem(
+                                    text = { Text(product.name) },
+                                    onClick = {
+                                        onProductSelect?.invoke(product) ?: onNameChange(product.name)
+                                        productExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Row(

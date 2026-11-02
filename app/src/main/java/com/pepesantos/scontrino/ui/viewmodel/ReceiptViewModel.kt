@@ -3,6 +3,7 @@ package com.pepesantos.scontrino.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pepesantos.scontrino.data.model.Item
+import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Receipt
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.data.repository.ItemRepository
@@ -31,6 +32,12 @@ class ReceiptViewModel(
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories: StateFlow<List<Category>> = _categories
 
+    private val _stores = MutableStateFlow<List<Store>>(emptyList())
+    val stores: StateFlow<List<Store>> = _stores
+
+    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    val products: StateFlow<List<Product>> = _products
+
     private val _receipts = MutableStateFlow<List<ReceiptWithStoreName>>(emptyList())
     val receipts: StateFlow<List<ReceiptWithStoreName>> = _receipts
 
@@ -49,6 +56,7 @@ class ReceiptViewModel(
     init {
         loadReceipts()
         loadCategories()
+        loadStoresAndProducts()
     }
     
     /**
@@ -57,6 +65,16 @@ class ReceiptViewModel(
     private fun loadCategories() {
         viewModelScope.launch {
             _categories.value = categoryRepository.getAll()
+        }
+    }
+
+    /**
+     * Loads all available stores and products from the database for autocomplete suggestions.
+     */
+    fun loadStoresAndProducts() {
+        viewModelScope.launch {
+            _stores.value = storeRepository.getAll()
+            _products.value = productRepository.getAll()
         }
     }
 
@@ -139,6 +157,7 @@ class ReceiptViewModel(
 
             // 6. Refresh UI
             loadReceipts()
+            loadStoresAndProducts()
         }
     }
 
@@ -213,6 +232,7 @@ class ReceiptViewModel(
             itemRepository.insertAll(roomItems)
 
             loadReceipts()
+            loadStoresAndProducts()
         }
     }
 }

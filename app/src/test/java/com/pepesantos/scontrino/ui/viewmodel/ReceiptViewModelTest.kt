@@ -143,4 +143,19 @@ class ReceiptViewModelTest {
             }
         )
     }
+
+    @Test
+    fun `loadStoresAndProducts updates stores and products state flows`() = runTest {
+        val testStores = listOf(Store(1, "Mercadona"), Store(2, "Carrefour"))
+        val testProducts = listOf(Product(1, "Pan", 1), Product(2, "Leche", 1))
+
+        whenever(storeRepository.getAll()).thenReturn(testStores)
+        whenever(productRepository.getAll()).thenReturn(testProducts)
+
+        viewModel.loadStoresAndProducts()
+        advanceUntilIdle()
+
+        assertEquals(testStores, viewModel.stores.value)
+        assertEquals(testProducts, viewModel.products.value)
+    }
 }
