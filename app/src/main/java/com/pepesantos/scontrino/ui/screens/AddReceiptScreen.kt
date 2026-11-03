@@ -1,5 +1,6 @@
 package com.pepesantos.scontrino.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,6 +66,8 @@ fun AddReceiptScreen(
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
     val datePickerState = key(receiptId) {
         rememberDatePickerState(
             initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
@@ -73,6 +76,62 @@ fun AddReceiptScreen(
     val selectedDate = datePickerState.selectedDateMillis?.let {
         java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
     } ?: ""
+
+    val initialStoreName = existingReceipt?.storeName ?: ""
+    val initialNote = existingReceipt?.receipt?.note ?: ""
+    val initialDate = existingReceipt?.receipt?.date
+
+    val hasChanges = remember(
+        storeName,
+        note,
+        datePickerState.selectedDateMillis,
+        items.toList(),
+        existingReceipt,
+        existingItems
+    ) {
+        val currentValidItems = items.filter { it.name.isNotBlank() || it.price > 0.0 || it.weight != null }
+        if (isEditMode) {
+            storeName != initialStoreName ||
+                    note != initialNote ||
+                    (initialDate != null && datePickerState.selectedDateMillis != initialDate) ||
+                    currentValidItems != existingItems
+        } else {
+            storeName.isNotBlank() || note.isNotBlank() || currentValidItems.isNotEmpty()
+        }
+    }
+
+    val handleBack = remember(hasChanges, onNavigateBack) {
+        {
+            if (hasChanges) {
+                showDiscardDialog = true
+            } else {
+                onNavigateBack()
+            }
+        }
+    }
+
+    BackHandler(enabled = true, onBack = handleBack)
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text(stringResource(R.string.unsaved_changes_title)) },
+            text = { Text(stringResource(R.string.unsaved_changes_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onNavigateBack()
+                }) {
+                    Text(stringResource(R.string.unsaved_changes_leave))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text(stringResource(R.string.delete_cancel))
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -84,7 +143,7 @@ fun AddReceiptScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = handleBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.add_receipt_back)

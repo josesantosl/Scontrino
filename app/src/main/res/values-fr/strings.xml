@@ -6,6 +6,9 @@
     <string name="nav_settings">Paramètres</string>
     <string name="add_receipt_title">Nouveau reçu</string>
     <string name="add_receipt_back">Retour</string>
+    <string name="unsaved_changes_title">Modifications non enregistrées</string>
+    <string name="unsaved_changes_message">Voulez-vous vraiment quitter sans enregistrer?</string>
+    <string name="unsaved_changes_leave">Quitter</string>
     <string name="add_receipt_store">Magasin</string>
     <string name="add_receipt_date">Date</string>
     <string name="add_receipt_items">Articles</string>

@@ -9,6 +9,9 @@
     <!-- AddReceiptScreen -->
     <string name="add_receipt_title">New receipt</string>
     <string name="add_receipt_back">Back</string>
+    <string name="unsaved_changes_title">Unsaved changes</string>
+    <string name="unsaved_changes_message">Are you sure you want to leave without saving?</string>
+    <string name="unsaved_changes_leave">Leave</string>
     <string name="add_receipt_store">Store</string>
     <string name="add_receipt_date">Date</string>
     <string name="add_receipt_items">Items</string>
