@@ -34,6 +34,16 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     val stores by viewModel.stores.collectAsState()
     val products by viewModel.products.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadStoresAndProducts()
+    }
+
+    LaunchedEffect(showAddReceipt, editingReceipt) {
+        if (showAddReceipt || editingReceipt != null) {
+            viewModel.loadStoresAndProducts()
+        }
+    }
+
     when {
         showAddReceipt -> {
             AddReceiptScreen(

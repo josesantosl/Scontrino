@@ -67,4 +67,15 @@ class WalletViewModelTest {
         verify(storeRepository).insert(argThat { name == storeName && this.color == color })
         verify(loyaltyCardRepository).insert(argThat { storeId == 1 && this.cardNumber == cardNumber })
     }
+
+    @Test
+    fun `loadStores updates stores state flow`() = runTest {
+        val stores = listOf(Store(1, "Bennet"), Store(2, "Lidl"))
+        whenever(storeRepository.getAll()).thenReturn(stores)
+
+        viewModel.loadStores()
+        advanceUntilIdle()
+
+        assertEquals(stores, viewModel.stores.value)
+    }
 }

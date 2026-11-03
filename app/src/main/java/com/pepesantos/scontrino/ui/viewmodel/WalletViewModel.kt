@@ -22,8 +22,12 @@ class WalletViewModel(
     private val _cards = MutableStateFlow<List<LoyaltyCardWithStore>>(emptyList())
     val cards: StateFlow<List<LoyaltyCardWithStore>> = _cards
 
+    private val _stores = MutableStateFlow<List<Store>>(emptyList())
+    val stores: StateFlow<List<Store>> = _stores
+
     init {
         loadCards()
+        loadStores()
     }
 
     /**
@@ -32,6 +36,15 @@ class WalletViewModel(
     fun loadCards() {
         viewModelScope.launch {
             _cards.value = loyaltyCardRepository.getAll()
+        }
+    }
+
+    /**
+     * Fetches all available stores for autocomplete.
+     */
+    fun loadStores() {
+        viewModelScope.launch {
+            _stores.value = storeRepository.getAll()
         }
     }
 
@@ -60,6 +73,7 @@ class WalletViewModel(
                 LoyaltyCard(storeId = store.id, cardNumber = cardNumber)
             )
             loadCards()
+            loadStores()
         }
     }
 
@@ -70,6 +84,7 @@ class WalletViewModel(
         viewModelScope.launch {
             loyaltyCardRepository.delete(card)
             loadCards()
+            loadStores()
         }
     }
 
@@ -87,6 +102,7 @@ class WalletViewModel(
             }
             loyaltyCardRepository.update(card)
             loadCards()
+            loadStores()
         }
     }
 }

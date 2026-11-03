@@ -42,6 +42,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.LoyaltyCardWithStore
+import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ui.components.BarcodeScanner
 import com.pepesantos.scontrino.ui.viewmodel.WalletViewModel
 
@@ -95,6 +96,17 @@ fun WalletScreen(viewModel: WalletViewModel) {
     var cardToDelete by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
     
     val cards by viewModel.cards.collectAsState()
+    val stores by viewModel.stores.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadStores()
+    }
+
+    LaunchedEffect(showAddDialog) {
+        if (showAddDialog) {
+            viewModel.loadStores()
+        }
+    }
 
     selectedCard?.let { cardWithStore ->
         BarcodeDialog(
@@ -109,7 +121,8 @@ fun WalletScreen(viewModel: WalletViewModel) {
             onSave = { name, number, color ->
                 viewModel.saveCard(name, number, color)
                 showAddDialog = false
-            }
+            },
+            availableStores = stores
         )
     }
 
@@ -225,15 +238,31 @@ fun LoyaltyCardItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCardDialog(
     onDismiss: () -> Unit,
-    onSave: (String, String, Long) -> Unit
+    onSave: (String, String, Long) -> Unit,
+    availableStores: List<Store> = emptyList()
 ) {
     var name by remember { mutableStateOf("") }
     var number by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(cardColors[0]) }
     var showScanner by remember { mutableStateOf(false) }
+
+    var nameExpanded by remember { mutableStateOf(false) }
+    val storeSuggestions = remember(availableStores) {
+        availableStores.map { it.name }.distinct()
+    }
+    val filteredStoreSuggestions = remember(name, storeSuggestions) {
+        if (name.isBlank()) {
+            emptyList()
+        } else {
+            storeSuggestions.filter {
+                it.contains(name, ignoreCase = true) && !it.equals(name, ignoreCase = true)
+            }.take(5)
+        }
+    }
 
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -271,13 +300,44 @@ fun AddCardDialog(
                     .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.wallet_card_name)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                ExposedDropdownMenuBox(
+                    expanded = nameExpanded && filteredStoreSuggestions.isNotEmpty(),
+                    onExpandedChange = { nameExpanded = it },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = {
+                            name = it
+                            nameExpanded = true
+                        },
+                        label = { Text(stringResource(R.string.wallet_card_name)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
+                        singleLine = true
+                    )
+                    if (filteredStoreSuggestions.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = nameExpanded,
+                            onDismissRequest = { nameExpanded = false }
+                        ) {
+                            filteredStoreSuggestions.forEach { suggestion ->
+                                DropdownMenuItem(
+                                    text = { Text(suggestion) },
+                                    onClick = {
+                                        name = suggestion
+                                        nameExpanded = false
+                                        val matchedStore = availableStores.firstOrNull { it.name.equals(suggestion, ignoreCase = true) }
+                                        if (matchedStore?.color != null) {
+                                            selectedColor = matchedStore.color
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
                 OutlinedTextField(
                     value = number,
                     onValueChange = { number = it },
