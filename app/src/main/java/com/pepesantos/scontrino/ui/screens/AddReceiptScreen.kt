@@ -28,6 +28,8 @@ import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
+import com.pepesantos.scontrino.ui.theme.displayColor
+import com.pepesantos.scontrino.ui.theme.icon
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 
 /**
@@ -398,9 +400,9 @@ fun ItemRow(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Icon(
-                                imageVector = CategoryIcons.getIcon(category.iconName),
+                                imageVector = category.icon(),
                                 contentDescription = category.displayName(),
-                                tint = Color(category.color)
+                                tint = category.displayColor()
                             )
                             Text(category.displayName())
                         }
@@ -432,9 +434,9 @@ fun ItemRow(
                 // Category button: triggers manual override dialog
                 IconButton(onClick = { showCategoryDialog = true }) {
                     Icon(
-                        imageVector = CategoryIcons.getIcon(currentCategory?.iconName ?: "Help"),
+                        imageVector = currentCategory?.icon() ?: CategoryIcons.getIcon("Help"),
                         contentDescription = currentCategory?.displayName() ?: stringResource(R.string.category_label),
-                        tint = currentCategory?.let { Color(it.color) } ?: MaterialTheme.colorScheme.primary
+                        tint = currentCategory?.displayColor() ?: MaterialTheme.colorScheme.primary
                     )
                 }
                 

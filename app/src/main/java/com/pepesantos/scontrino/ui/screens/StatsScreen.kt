@@ -543,8 +543,8 @@ fun TopProductsCard(
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                         val rankTextColor = if (index < 3) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
-                        val categoryColor = Color(category.categoryColor)
-                        val categoryIcon = CategoryIcons.getIcon(category.categoryIconName)
+                        val categoryColor = CategoryIcons.colorFor(category.categoryLabel, category.categoryColor)
+                        val categoryIcon = CategoryIcons.forCategory(category.categoryLabel, category.categoryIconName)
                         val categoryName = getCategoryDisplayName(category.categoryLabel)
 
                         Row(

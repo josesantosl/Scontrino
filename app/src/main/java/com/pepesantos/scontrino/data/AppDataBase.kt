@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pepesantos.scontrino.data.dao.*
 import com.pepesantos.scontrino.data.model.*
+import com.pepesantos.scontrino.ui.theme.CategoryIcons
 
 /**
  * Main database class for the application.
@@ -94,29 +95,14 @@ abstract class AppDatabase : RoomDatabase() {
          * Inserts default product categories into the database using raw SQL for synchronous execution.
          */
         private fun prepopulate(db: SupportSQLiteDatabase) {
-            val categories = listOf(
-                "other" to Pair("MoreHoriz", 0xFF94A3B8),
-                "vegetables_fruit" to Pair("Grass", 0xFF4CAF50),
-                "plant_protein" to Pair("Spa", 0xFF8BC34A),
-                "animal_protein" to Pair("SetMeal", 0xFFFF5722),
-                "dairy_alternatives" to Pair("LocalDrink", 0xFF03A9F4),
-                "grains_pasta_bread" to Pair("RiceBowl", 0xFFFFB300),
-                "snacks_sweets" to Pair("Cookie", 0xFFE91E63),
-                "beverages" to Pair("LocalCafe", 0xFF795548),
-                "canned_sauces" to Pair("Inventory2", 0xFFFF9800),
-                "oils_condiments" to Pair("Opacity", 0xFFCDDC39),
-                "cleaning" to Pair("CleaningServices", 0xFF00BCD4),
-                "personal_hygiene" to Pair("Soap", 0xFF9C27B0),
-                "pets" to Pair("Pets", 0xFF607D8B),
-                "pharmacy" to Pair("LocalPharmacy", 0xFFF44336),
-                "transport" to Pair("Train", 0xFF2196F3)
-            )
+            // Single source of truth for default categories; order defines the ids
+            val categories = CategoryIcons.defaults.toList()
 
             db.beginTransaction()
             try {
-                categories.forEachIndexed { index, (label, details) ->
+                categories.forEachIndexed { index, (label, style) ->
                     val id = index + 1
-                    val (icon, color) = details
+                    val (icon, color) = style
                     db.execSQL(
                         "INSERT OR REPLACE INTO Category (id, label, iconName, color, isCustom) VALUES ($id, '$label', '$icon', $color, 0)"
                     )
