@@ -20,4 +20,8 @@ class ItemRepository(private val itemDao: ItemDao) {
     suspend fun getByProduct(productId: Int) = itemDao.getByProduct(productId)
 
     suspend fun deleteByReceipt(receiptId: Int) = itemDao.deleteByReceipt(receiptId)
+
+    suspend fun getTopProductsSpendingInRange(from: Long, to: Long) = itemDao.getTopProductsSpendingInRange(from, to)
+
+    suspend fun getTopCategoriesSpendingInRange(from: Long, to: Long) = itemDao.getTopCategoriesSpendingInRange(from, to)
 }

@@ -3,6 +3,7 @@ package com.pepesantos.scontrino.data.dao
 import androidx.room.*
 import com.pepesantos.scontrino.data.model.Receipt
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.data.model.StoreSpending
 
 @Dao
 interface ReceiptDao {
@@ -44,6 +45,19 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt WHERE date BETWEEN :from AND :to ORDER BY date DESC")
     suspend fun getByDateRange(from: Long, to: Long): List<Receipt>
 
+    @Query("SELECT * FROM Receipt WHERE date BETWEEN :from AND :to ORDER BY date ASC")
+    suspend fun getReceiptsInRangeAsc(from: Long, to: Long): List<Receipt>
+
     @Query("SELECT SUM(total) FROM Receipt WHERE date BETWEEN :from AND :to")
     suspend fun getTotalSpentInRange(from: Long, to: Long): Double?
+
+    @Query("""
+    SELECT Store.name AS storeName, Store.color AS storeColor, SUM(Receipt.total) AS totalSpent
+    FROM Receipt 
+    INNER JOIN Store ON Receipt.storeId = Store.id 
+    WHERE Receipt.date BETWEEN :from AND :to
+    GROUP BY Store.id
+    ORDER BY totalSpent DESC
+""")
+    suspend fun getStoreSpendingInRange(from: Long, to: Long): List<StoreSpending>
 }

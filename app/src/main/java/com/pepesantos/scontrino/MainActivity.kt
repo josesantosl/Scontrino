@@ -35,6 +35,8 @@ import com.pepesantos.scontrino.ui.viewmodel.ReceiptViewModel
 import com.pepesantos.scontrino.ui.viewmodel.ViewModelFactory
 import com.pepesantos.scontrino.ui.viewmodel.WalletViewModel
 
+import com.pepesantos.scontrino.ui.viewmodel.StatsViewModel
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
 fun ScontrinoApp(factory: ViewModelFactory) {
     val receiptViewModel: ReceiptViewModel = viewModel(factory = factory)
     val walletViewModel: WalletViewModel = viewModel(factory = factory)
+    val statsViewModel: StatsViewModel = viewModel(factory = factory)
 
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCONTRINI) }
     NavigationSuiteScaffold(
@@ -74,14 +77,19 @@ fun ScontrinoApp(factory: ViewModelFactory) {
                     },
                     label = { Text(stringResource(it.label)) },
                     selected = it == currentDestination,
-                    onClick = { currentDestination = it }
+                    onClick = {
+                        if (it == AppDestinations.STATS) {
+                            statsViewModel.loadStats()
+                        }
+                        currentDestination = it
+                    }
                 )
             }
         }
     ) {
         when (currentDestination) {
             AppDestinations.SCONTRINI -> ReceiptsScreen(viewModel = receiptViewModel)
-            AppDestinations.STATS -> StatsScreen()
+            AppDestinations.STATS -> StatsScreen(viewModel = statsViewModel)
             AppDestinations.WALLET -> WalletScreen(viewModel = walletViewModel)
         }
     }

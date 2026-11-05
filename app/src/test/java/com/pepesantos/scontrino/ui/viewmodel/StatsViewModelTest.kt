@@ -1,5 +1,6 @@
 package com.pepesantos.scontrino.ui.viewmodel
 
+import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.ReceiptRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,6 +15,7 @@ import org.mockito.kotlin.*
 class StatsViewModelTest {
 
     private val receiptRepository: ReceiptRepository = mock()
+    private val itemRepository: ItemRepository = mock()
     private lateinit var viewModel: StatsViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -21,10 +23,14 @@ class StatsViewModelTest {
     @Before
     fun setup() = runTest {
         Dispatchers.setMain(testDispatcher)
-        
+
         whenever(receiptRepository.getTotalSpentInRange(any(), any())).thenReturn(0.0)
-        
-        viewModel = StatsViewModel(receiptRepository)
+        whenever(receiptRepository.getStoreSpendingInRange(any(), any())).thenReturn(emptyList())
+        whenever(receiptRepository.getReceiptsInRangeAsc(any(), any())).thenReturn(emptyList())
+        whenever(itemRepository.getTopProductsSpendingInRange(any(), any())).thenReturn(emptyList())
+        whenever(itemRepository.getTopCategoriesSpendingInRange(any(), any())).thenReturn(emptyList())
+
+        viewModel = StatsViewModel(receiptRepository, itemRepository)
     }
 
     @After

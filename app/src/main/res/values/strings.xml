@@ -6,6 +6,21 @@
     <string name="nav_stats">Statistics</string>
     <string name="nav_settings">Settings</string>
 
+    <!-- Stats -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_period_this_month">This Month</string>
+    <string name="stats_period_three_months">3 Months</string>
+    <string name="stats_period_this_year">Year</string>
+    <string name="stats_total_spending">Total Spending</string>
+    <string name="stats_vs_prev_period">vs prev period</string>
+    <string name="stats_no_prev_data">No prior data</string>
+    <string name="stats_spending_by_store">Spending by Supermarket</string>
+    <string name="stats_spending_evolution">Spending Evolution</string>
+    <string name="stats_top_products">Top Spending</string>
+    <string name="stats_top_by_product">By Product</string>
+    <string name="stats_top_by_category">By Category</string>
+    <string name="stats_no_data">No receipt data for this period</string>
+
     <!-- AddReceiptScreen -->
     <string name="add_receipt_title">New receipt</string>
     <string name="add_receipt_back">Back</string>

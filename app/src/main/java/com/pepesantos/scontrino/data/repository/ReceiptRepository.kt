@@ -27,5 +27,9 @@ class ReceiptRepository(
 
     suspend fun getByDateRange(from: Long, to: Long) = receiptDao.getByDateRange(from, to)
 
+    suspend fun getReceiptsInRangeAsc(from: Long, to: Long) = receiptDao.getReceiptsInRangeAsc(from, to)
+
     suspend fun getTotalSpentInRange(from: Long, to: Long) = receiptDao.getTotalSpentInRange(from, to)
+
+    suspend fun getStoreSpendingInRange(from: Long, to: Long) = receiptDao.getStoreSpendingInRange(from, to)
 }
