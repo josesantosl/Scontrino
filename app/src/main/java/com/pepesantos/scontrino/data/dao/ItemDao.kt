@@ -4,6 +4,7 @@ import androidx.room.*
 import com.pepesantos.scontrino.data.model.ComparableProduct
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.LatestStorePrice
+import com.pepesantos.scontrino.data.model.StoreWeight
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.TopCategorySpending
 import com.pepesantos.scontrino.data.model.TopProductSpending
@@ -92,14 +93,16 @@ interface ItemDao {
 """)
     suspend fun getLatestPricePerStore(productId: Int): List<LatestStorePrice>
 
-    /** Most recent known weight of a product in any store, used to estimate missing weights. */
+    /**
+     * Most recent known weight of a product in each store, used to fill in missing weights.
+     * Weights are never shared across stores: each store sells its own package size.
+     */
     @Query("""
-    SELECT Item.weight
+    SELECT Receipt.storeId AS storeId, Item.weight AS weight, MAX(Receipt.date) AS date
     FROM Item
     INNER JOIN Receipt ON Item.receiptId = Receipt.id
     WHERE Item.productId = :productId AND Item.weight IS NOT NULL AND Item.weight > 0
-    ORDER BY Receipt.date DESC
-    LIMIT 1
+    GROUP BY Receipt.storeId
 """)
-    suspend fun getLastKnownWeight(productId: Int): Double?
+    suspend fun getLastKnownWeightPerStore(productId: Int): List<StoreWeight>
 }

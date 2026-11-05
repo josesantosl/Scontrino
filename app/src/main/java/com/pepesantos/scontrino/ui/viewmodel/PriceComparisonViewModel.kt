@@ -15,9 +15,12 @@ import kotlinx.coroutines.launch
 enum class WeightSource {
     /** The latest receipt line of this store has its own weight. */
     MEASURED,
-    /** Borrowed from the most recent weight of the same product in any store. */
+    /**
+     * Taken from an earlier receipt of the same product in the same store (however old), or,
+     * only if this store never had a weight for it, from the most recent weight in another store.
+     */
     ESTIMATED,
-    /** No weight was ever recorded: a default reference weight is assumed. */
+    /** No weight was ever recorded for this product in any store: a default reference weight is assumed. */
     DEFAULT
 }
 
@@ -89,10 +92,14 @@ class PriceComparisonViewModel(
         comparisonJob?.cancel()
         comparisonJob = viewModelScope.launch {
             val latest = itemRepository.getLatestPricePerStore(product.productId)
-            val lastKnownWeight = itemRepository.getLastKnownWeight(product.productId)
+            val storeWeights = itemRepository.getLastKnownWeightPerStore(product.productId)
+            val weightByStore = storeWeights.associate { it.storeId to it.weight }
+            // Only used for stores that never recorded a weight for this product.
+            val mostRecentWeightAnyStore = storeWeights.maxByOrNull { it.date }?.weight
 
             val rows = latest.map { entry ->
                 val ownWeight = entry.weight?.takeIf { it > 0.0 }
+                val lastKnownWeight = weightByStore[entry.storeId] ?: mostRecentWeightAnyStore
                 val (weight, source) = when {
                     ownWeight != null -> ownWeight to WeightSource.MEASURED
                     lastKnownWeight != null -> lastKnownWeight to WeightSource.ESTIMATED

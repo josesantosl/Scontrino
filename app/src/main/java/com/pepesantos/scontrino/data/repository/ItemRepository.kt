@@ -29,5 +29,5 @@ class ItemRepository(private val itemDao: ItemDao) {
 
     suspend fun getLatestPricePerStore(productId: Int) = itemDao.getLatestPricePerStore(productId)
 
-    suspend fun getLastKnownWeight(productId: Int) = itemDao.getLastKnownWeight(productId)
+    suspend fun getLastKnownWeightPerStore(productId: Int) = itemDao.getLastKnownWeightPerStore(productId)
 }

@@ -28,6 +28,13 @@ data class ComparableProduct(
     val storeCount: Int
 )
 
+/** Most recent non-empty weight of a product in a given store. */
+data class StoreWeight(
+    val storeId: Int,
+    val weight: Double,
+    val date: Long
+)
+
 /** Latest recorded price (and weight, if any) of a product in a given store. */
 data class LatestStorePrice(
     val storeId: Int,
