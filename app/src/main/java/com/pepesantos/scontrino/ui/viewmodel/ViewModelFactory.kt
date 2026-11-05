@@ -26,6 +26,8 @@ class ViewModelFactory(
                 WalletViewModel(loyaltyCardRepository, storeRepository) as T
             modelClass.isAssignableFrom(StatsViewModel::class.java) ->
                 StatsViewModel(receiptRepository, itemRepository) as T
+            modelClass.isAssignableFrom(PriceComparisonViewModel::class.java) ->
+                PriceComparisonViewModel(itemRepository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }

@@ -72,4 +72,26 @@
     <string name="category_pets">Animali domestici</string>
     <string name="category_pharmacy">Farmacia</string>
     <string name="category_transport">Trasporti</string>
+
+    <!-- Confronto prezzi -->
+    <string name="stats_compare_title">Confronta prezzi</string>
+    <string name="stats_compare_subtitle">Scopri in quale supermercato un prodotto costa meno</string>
+    <string name="compare_title">Confronto prezzi</string>
+    <string name="compare_search_hint">Cerca un prodotto</string>
+    <string name="compare_clear">Cancella</string>
+    <string name="compare_empty_hint">Cerca un prodotto per confrontare il suo ultimo prezzo in ogni supermercato.</string>
+    <string name="compare_no_data">Non ci sono ancora acquisti di questo prodotto.</string>
+    <string name="compare_single_store">Acquistato in un solo supermercato. Compralo altrove per confrontare.</string>
+    <string name="compare_paid">Pagato %1$s</string>
+    <string name="compare_source_weight">peso</string>
+    <string name="compare_source_volume">volume</string>
+    <string name="compare_source_estimated">≈ stimato</string>
+    <string name="compare_source_unit">a unità</string>
+    <string name="compare_savings">Comprando da %1$s risparmi il %2$d%% rispetto a %3$s (%4$s).</string>
+    <string name="compare_same_price">Stesso prezzo in tutti i supermercati.</string>
+    <plurals name="compare_store_count">
+        <item quantity="one">%d negozio</item>
+        <item quantity="many">%d negozi</item>
+        <item quantity="other">%d negozi</item>
+    </plurals>
 </resources>

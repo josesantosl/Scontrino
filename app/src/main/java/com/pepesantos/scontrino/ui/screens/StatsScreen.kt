@@ -2,19 +2,23 @@ package com.pepesantos.scontrino.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,14 +37,41 @@ import com.pepesantos.scontrino.data.model.TopProductSpending
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.getCategoryDisplayName
 import com.pepesantos.scontrino.ui.viewmodel.DailySpendingPoint
+import com.pepesantos.scontrino.ui.viewmodel.PriceComparisonViewModel
 import com.pepesantos.scontrino.ui.viewmodel.StatsViewModel
 import com.pepesantos.scontrino.ui.viewmodel.TimePeriod
 import com.pepesantos.scontrino.ui.viewmodel.TopMode
 import kotlin.math.abs
 
+@Composable
+fun StatsScreen(
+    viewModel: StatsViewModel,
+    priceComparisonViewModel: PriceComparisonViewModel,
+) {
+    var showComparison by rememberSaveable { mutableStateOf(false) }
+
+    if (showComparison) {
+        PriceComparisonScreen(
+            viewModel = priceComparisonViewModel,
+            onNavigateBack = { showComparison = false }
+        )
+    } else {
+        StatsContent(
+            viewModel = viewModel,
+            onOpenComparison = { productId ->
+                priceComparisonViewModel.open(productId)
+                showComparison = true
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen(viewModel: StatsViewModel) {
+private fun StatsContent(
+    viewModel: StatsViewModel,
+    onOpenComparison: (productId: Int?) -> Unit,
+) {
     val state by viewModel.stats.collectAsState()
 
     Scaffold(
@@ -96,16 +127,61 @@ fun StatsScreen(viewModel: StatsViewModel) {
                     dailySpendings = state.dailySpendings
                 )
 
+                // Acceso a la comparativa de precios
+                PriceComparisonEntryCard(onClick = { onOpenComparison(null) })
+
                 // Card Productos con Mayor Gasto
                 TopProductsCard(
                     topMode = state.topMode,
                     onTopModeSelected = { viewModel.selectTopMode(it) },
                     topProducts = state.topProducts,
-                    topCategories = state.topCategories
+                    topCategories = state.topCategories,
+                    onProductClick = { onOpenComparison(it.productId) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun PriceComparisonEntryCard(onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.CompareArrows,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.stats_compare_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = stringResource(R.string.stats_compare_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }
@@ -429,7 +505,8 @@ fun TopProductsCard(
     topMode: TopMode,
     onTopModeSelected: (TopMode) -> Unit,
     topProducts: List<TopProductSpending>,
-    topCategories: List<TopCategorySpending>
+    topCategories: List<TopCategorySpending>,
+    onProductClick: (TopProductSpending) -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -490,7 +567,11 @@ fun TopProductsCard(
                         val rankTextColor = if (index < 3) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onProductClick(product) }
+                                .padding(vertical = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

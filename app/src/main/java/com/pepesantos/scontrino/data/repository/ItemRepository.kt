@@ -24,4 +24,10 @@ class ItemRepository(private val itemDao: ItemDao) {
     suspend fun getTopProductsSpendingInRange(from: Long, to: Long) = itemDao.getTopProductsSpendingInRange(from, to)
 
     suspend fun getTopCategoriesSpendingInRange(from: Long, to: Long) = itemDao.getTopCategoriesSpendingInRange(from, to)
+
+    suspend fun getComparableProducts() = itemDao.getComparableProducts()
+
+    suspend fun getLatestPricePerStore(productId: Int) = itemDao.getLatestPricePerStore(productId)
+
+    suspend fun getLastKnownWeight(productId: Int) = itemDao.getLastKnownWeight(productId)
 }

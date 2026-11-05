@@ -81,4 +81,25 @@
     <string name="category_pets">Pets</string>
     <string name="category_pharmacy">Pharmacy</string>
     <string name="category_transport">Transport</string>
+
+    <!-- Price comparison -->
+    <string name="stats_compare_title">Compare prices</string>
+    <string name="stats_compare_subtitle">Find which supermarket is cheapest for a product</string>
+    <string name="compare_title">Price comparison</string>
+    <string name="compare_search_hint">Search a product</string>
+    <string name="compare_clear">Clear</string>
+    <string name="compare_empty_hint">Search a product to compare its latest price in each supermarket.</string>
+    <string name="compare_no_data">There are no purchases of this product yet.</string>
+    <string name="compare_single_store">Only bought in one supermarket. Buy it somewhere else to compare.</string>
+    <string name="compare_paid">Paid %1$s</string>
+    <string name="compare_source_weight">weight</string>
+    <string name="compare_source_volume">volume</string>
+    <string name="compare_source_estimated">≈ estimated</string>
+    <string name="compare_source_unit">per unit</string>
+    <string name="compare_savings">Buying at %1$s you save %2$d%% compared to %3$s (%4$s).</string>
+    <string name="compare_same_price">Same price in every supermarket.</string>
+    <plurals name="compare_store_count">
+        <item quantity="one">%d store</item>
+        <item quantity="other">%d stores</item>
+    </plurals>
 </resources>
