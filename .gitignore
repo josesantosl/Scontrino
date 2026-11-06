@@ -8,3 +8,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Personal project documents (proposal and diagrams), not part of the app
+/propuesta.*
+/DSSGeneral.png
+/modelodidominio.png

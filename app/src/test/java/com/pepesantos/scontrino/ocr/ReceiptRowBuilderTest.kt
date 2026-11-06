@@ -79,6 +79,32 @@ class ReceiptRowBuilderTest {
     }
 
     @Test
+    fun `a tiny noise fragment does not split a line in two`() {
+        val rows = ReceiptRowBuilder.build(
+            listOf(
+                word("COLA", 10, 100, 80, 137),
+                word("E", 300, 121, 340, 129), // 8 px tall speck between name and price
+                word("22%", 500, 110, 560, 148),
+                word("0,55", 700, 104, 760, 149),
+            )
+        )
+        assertEquals(1, rows.size)
+        assertEquals(listOf("COLA", "E", "22%", "0,55"), rows.single().words.map { it.text })
+    }
+
+    @Test
+    fun `a fragment away from any line is kept as its own row`() {
+        val rows = ReceiptRowBuilder.build(
+            listOf(
+                word("PANE", 10, 100, 80, 140),
+                word("-", 300, 300, 310, 304),
+                word("LATTE", 10, 500, 80, 540),
+            )
+        )
+        assertEquals(listOf("PANE", "-", "LATTE"), rows.map { it.text })
+    }
+
+    @Test
     fun `row box is the union of its words`() {
         val row = ReceiptRowBuilder.build(
             listOf(word("A", 10, 100, 30), word("B", 300, 104, 340, 126))

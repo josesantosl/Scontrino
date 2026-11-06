@@ -33,9 +33,33 @@ object ReceiptRowBuilder {
         val valid = words.filter { it.text.isNotBlank() && it.box.height > 0 && it.box.width > 0 }
         if (valid.isEmpty()) return emptyList()
 
+        // Specks of noise (stray dots, dashes, show-through) can be just a few pixels
+        // tall. If they took part in row grouping they would shrink the tolerance and
+        // split a real line in two, so rows are built from normal-height words first
+        // and small fragments are attached afterwards.
+        val minTextHeight = SMALL_WORD_RATIO * valid.map { it.box.height.toDouble() }.median()
+        val (regular, small) = valid.partition { it.box.height >= minTextHeight }
+
+        val rows = groupIntoRows(regular)
+        val orphans = mutableListOf<OcrWord>()
+        for (word in small) {
+            val row = rows
+                .filter { row -> row.any { word.box.centerY in it.box.top.toDouble()..it.box.bottom.toDouble() } }
+                .minByOrNull { row -> abs(row.map { it.box.centerY }.average() - word.box.centerY) }
+            if (row != null) row += word else orphans += word
+        }
+        // Fragments far from any line are kept as their own rows; the parser decides.
+        rows += groupIntoRows(orphans)
+
+        return rows
+            .sortedBy { row -> row.map { it.box.centerY }.average() }
+            .map { toRow(it, segmentGapFactor) }
+    }
+
+    private fun groupIntoRows(words: List<OcrWord>): MutableList<MutableList<OcrWord>> {
         val rows = mutableListOf<MutableList<OcrWord>>()
         var current = mutableListOf<OcrWord>()
-        for (word in valid.sortedBy { it.box.centerY }) {
+        for (word in words.sortedBy { it.box.centerY }) {
             if (current.isEmpty() || belongsToRow(word, current)) {
                 current += word
             } else {
@@ -43,9 +67,8 @@ object ReceiptRowBuilder {
                 current = mutableListOf(word)
             }
         }
-        rows += current
-
-        return rows.map { toRow(it, segmentGapFactor) }
+        if (current.isNotEmpty()) rows += current
+        return rows
     }
 
     private fun belongsToRow(word: OcrWord, row: List<OcrWord>): Boolean {
@@ -72,6 +95,9 @@ object ReceiptRowBuilder {
             segments = segments.map { segment -> segment.joinToString(" ") { it.text } },
         )
     }
+
+    /** Words shorter than this fraction of the median word height count as fragments. */
+    private const val SMALL_WORD_RATIO = 0.5
 
     private fun List<Double>.median(): Double {
         val sorted = sorted()

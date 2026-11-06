@@ -16,6 +16,7 @@ zxing-cpp = "3.1.1"
 opencv = "4.14.0"
 tesseract4android = "4.9.0"
 exifinterface = "1.4.2"
+json = "20260814"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,8 @@ zxing-cpp = { group = "io.github.zxing-cpp", name = "android", version.ref = "zx
 opencv = { group = "org.opencv", name = "opencv", version.ref = "opencv" }
 tesseract4android = { group = "cz.adaptech.tesseract4android", name = "tesseract4android", version.ref = "tesseract4android" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+# Real org.json for JVM unit tests (android.jar only ships stubs); used to read OCR fixtures.
+json = { group = "org.json", name = "json", version.ref = "json" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
