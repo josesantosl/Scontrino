@@ -1,7 +1,6 @@
 package com.pepesantos.scontrino.ui.components
 
 import android.util.Log
-import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -20,17 +19,15 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.common.InputImage
+import zxingcpp.BarcodeReader
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Camera component that uses CameraX and ML Kit to scan barcodes.
+ * Camera component that uses CameraX and zxing-cpp (fully offline, no Google services)
+ * to scan barcodes.
  * Specifically handles the UPC-A to EAN-13 conversion to preserve leading zeros.
  */
-@OptIn(ExperimentalGetImage::class)
 @Composable
 fun BarcodeScanner(
     onBarcodeScanned: (String) -> Unit,
@@ -39,20 +36,25 @@ fun BarcodeScanner(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-    
+    val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
+
     // Explicitly configure scanner for common loyalty card formats
-    val options = remember {
-        BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_EAN_13,
-                Barcode.FORMAT_EAN_8,
-                Barcode.FORMAT_UPC_A,
-                Barcode.FORMAT_CODE_128
+    val barcodeReader = remember {
+        BarcodeReader(
+            BarcodeReader.Options(
+                formats = setOf(
+                    BarcodeReader.Format.EAN_13,
+                    BarcodeReader.Format.EAN_8,
+                    BarcodeReader.Format.UPC_A,
+                    BarcodeReader.Format.CODE_128
+                ),
+                tryHarder = true,
+                tryRotate = true
             )
-            .build()
+        )
     }
-    val barcodeScanner = remember { BarcodeScanning.getClient(options) }
-    var isScanned by remember { mutableStateOf(false) }
+    // Written from the camera thread, so it must be thread-safe.
+    val isScanned = remember { AtomicBoolean(false) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -81,41 +83,29 @@ fun BarcodeScanner(
                         .build()
 
                     imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                        if (isScanned) {
-                            imageProxy.close()
-                            return@setAnalyzer
-                        }
+                        try {
+                            if (isScanned.get()) return@setAnalyzer
 
-                        val mediaImage = imageProxy.image
-                        if (mediaImage != null) {
-                            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                            barcodeScanner.process(image)
-                                .addOnSuccessListener { barcodes ->
-                                    for (barcode in barcodes) {
-                                        barcode.rawValue?.let { value ->
-                                            if (!isScanned) {
-                                                // EUROPEAN FIX: If it's a 12-digit UPC-A, it's often an EAN-13 
-                                                // with a leading zero that ML Kit "simplifies" away.
-                                                // We restore it to ensure compatibility with store scanners.
-                                                val finalValue = if (barcode.format == Barcode.FORMAT_UPC_A && value.length == 12) {
-                                                    "0$value"
-                                                } else {
-                                                    value
-                                                }
-                                                
-                                                isScanned = true
-                                                onBarcodeScanned(finalValue)
-                                            }
-                                        }
-                                    }
-                                }
-                                .addOnFailureListener {
-                                    Log.e("BarcodeScanner", "Scanning failed", it)
-                                }
-                                .addOnCompleteListener {
-                                    imageProxy.close()
-                                }
-                        } else {
+                            val barcode = barcodeReader.read(imageProxy)
+                                .firstOrNull { !it.text.isNullOrEmpty() }
+                                ?: return@setAnalyzer
+                            val value = barcode.text!!
+
+                            // EUROPEAN FIX: If it's a 12-digit UPC-A, it's often an EAN-13
+                            // with a leading zero that the decoder "simplifies" away.
+                            // We restore it to ensure compatibility with store scanners.
+                            val finalValue = if (barcode.format == BarcodeReader.Format.UPC_A && value.length == 12) {
+                                "0$value"
+                            } else {
+                                value
+                            }
+
+                            if (isScanned.compareAndSet(false, true)) {
+                                mainExecutor.execute { onBarcodeScanned(finalValue) }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("BarcodeScanner", "Scanning failed", e)
+                        } finally {
                             imageProxy.close()
                         }
                     }

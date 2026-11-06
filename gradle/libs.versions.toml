@@ -12,7 +12,7 @@ room = "2.8.4"
 mockito-kotlin = "5.4.0"
 kotlinx-coroutines-test = "1.9.0"
 camerax = "1.4.1"
-barcode-scanning = "17.3.0"
+zxing-cpp = "3.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,7 +39,7 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcode-scanning" }
+zxing-cpp = { group = "io.github.zxing-cpp", name = "android", version.ref = "zxing-cpp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
