@@ -93,4 +93,29 @@
         <item quantity="one">%d Geschäft</item>
         <item quantity="other">%d Geschäfte</item>
     </plurals>
+
+    <!-- Receipt OCR (debug) -->
+    <string name="ocr_debug_open">Kassenbon scannen (Beta)</string>
+    <string name="ocr_debug_title">Kassenbon-OCR (Beta)</string>
+    <string name="ocr_pick_image">Foto auswählen</string>
+    <string name="ocr_run">Text erkennen</string>
+    <string name="ocr_languages">Sprachen des Kassenbons</string>
+    <string name="ocr_detect_document">Kassenbon erkennen und begradigen</string>
+    <string name="ocr_binarize">Schwarzweiß (binarisieren)</string>
+    <string name="ocr_page_mode">Layoutmodus</string>
+    <string name="ocr_psm_auto">Automatisch</string>
+    <string name="ocr_psm_single_block">Einzelner Block</string>
+    <string name="ocr_psm_sparse">Verstreuter Text</string>
+    <string name="ocr_no_image">Wähle ein Foto eines Kassenbons, um zu beginnen.</string>
+    <string name="ocr_summary">%1$d Wörter · %2$d Zeilen · Konfidenz %3$d%% · %4$d ms</string>
+    <string name="ocr_document_detected">Ränder des Kassenbons erkannt und begradigt.</string>
+    <string name="ocr_document_not_detected">Ränder nicht erkannt: Das ganze Foto wird verwendet.</string>
+    <string name="ocr_document_region">Ecken nicht sichtbar: Kassenbon als heller Bereich erkannt, Hintergrund entfernt.</string>
+    <string name="ocr_deskew">Textzeilen begradigen</string>
+    <string name="ocr_skew_corrected">Drehung korrigiert: %1$s°</string>
+    <string name="ocr_rows">Rekonstruierte Zeilen</string>
+    <string name="ocr_copy_json">JSON kopieren</string>
+    <string name="ocr_copy_text">Text kopieren</string>
+    <string name="ocr_copied">In die Zwischenablage kopiert</string>
+    <string name="ocr_error">Fehler: %1$s</string>
 </resources>

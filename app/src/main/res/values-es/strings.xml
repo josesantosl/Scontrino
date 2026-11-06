@@ -94,4 +94,29 @@
         <item quantity="many">%d tiendas</item>
         <item quantity="other">%d tiendas</item>
     </plurals>
+
+    <!-- Receipt OCR (debug) -->
+    <string name="ocr_debug_open">Escanear ticket (beta)</string>
+    <string name="ocr_debug_title">OCR de tickets (beta)</string>
+    <string name="ocr_pick_image">Elegir foto</string>
+    <string name="ocr_run">Reconocer texto</string>
+    <string name="ocr_languages">Idiomas del ticket</string>
+    <string name="ocr_detect_document">Detectar y enderezar el ticket</string>
+    <string name="ocr_binarize">Blanco y negro (binarizar)</string>
+    <string name="ocr_page_mode">Modo de diseño</string>
+    <string name="ocr_psm_auto">Automático</string>
+    <string name="ocr_psm_single_block">Bloque único</string>
+    <string name="ocr_psm_sparse">Texto disperso</string>
+    <string name="ocr_no_image">Elige una foto de un ticket para empezar.</string>
+    <string name="ocr_summary">%1$d palabras · %2$d filas · confianza %3$d%% · %4$d ms</string>
+    <string name="ocr_document_detected">Bordes del ticket detectados y enderezados.</string>
+    <string name="ocr_document_not_detected">No se detectaron los bordes: se usa la foto completa.</string>
+    <string name="ocr_document_region">Esquinas no visibles: ticket localizado como zona clara y fondo eliminado.</string>
+    <string name="ocr_deskew">Enderezar las líneas de texto</string>
+    <string name="ocr_skew_corrected">Rotación corregida: %1$s°</string>
+    <string name="ocr_rows">Filas reconstruidas</string>
+    <string name="ocr_copy_json">Copiar JSON</string>
+    <string name="ocr_copy_text">Copiar texto</string>
+    <string name="ocr_copied">Copiado al portapapeles</string>
+    <string name="ocr_error">Error: %1$s</string>
 </resources>

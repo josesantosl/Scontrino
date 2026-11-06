@@ -1,5 +1,6 @@
 package com.pepesantos.scontrino.ui.screens
 
+import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -8,10 +9,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,6 +30,12 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     var showAddReceipt by remember { mutableStateOf(false) }
     var editingReceipt by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var receiptToDelete by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
+    var showOcrDebug by remember { mutableStateOf(false) }
+    // The OCR lab screen is only reachable in debug builds while it is being developed.
+    val context = LocalContext.current
+    val isDebuggable = remember {
+        context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+    }
 
     val receipts by viewModel.receipts.collectAsState()
     val selectedItems by viewModel.selectedItems.collectAsState()
@@ -45,6 +54,9 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     }
 
     when {
+        showOcrDebug -> {
+            OcrDebugScreen(onNavigateBack = { showOcrDebug = false })
+        }
         showAddReceipt -> {
             AddReceiptScreen(
                 onNavigateBack = { showAddReceipt = false },
@@ -96,14 +108,27 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
 
             Scaffold(
                 floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { showAddReceipt = true },
-                        containerColor = MaterialTheme.colorScheme.primary
+                    Column(
+                        horizontalAlignment = androidx.compose.ui.Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.add_receipt_fab)
-                        )
+                        if (isDebuggable) {
+                            SmallFloatingActionButton(onClick = { showOcrDebug = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.DocumentScanner,
+                                    contentDescription = stringResource(R.string.ocr_debug_open)
+                                )
+                            }
+                        }
+                        FloatingActionButton(
+                            onClick = { showAddReceipt = true },
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(R.string.add_receipt_fab)
+                            )
+                        }
                     }
                 }
             ) { innerPadding ->
