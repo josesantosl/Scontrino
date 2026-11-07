@@ -4,6 +4,7 @@ import androidx.room.*
 import com.pepesantos.scontrino.data.model.ComparableProduct
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.LatestStorePrice
+import com.pepesantos.scontrino.data.model.PastPurchase
 import com.pepesantos.scontrino.data.model.StoreWeight
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.TopCategorySpending
@@ -105,4 +106,20 @@ interface ItemDao {
     GROUP BY Receipt.storeId
 """)
     suspend fun getLastKnownWeightPerStore(productId: Int): List<StoreWeight>
+
+    /**
+     * Everything bought in the stores with this name (case-insensitive, duplicated stores
+     * included), newest first, leaving out one receipt (the one being edited, or -1).
+     */
+    @Query("""
+    SELECT Product.name AS productName, Item.price AS price, Item.weight AS weight,
+           Receipt.date AS date
+    FROM Item
+    INNER JOIN Product ON Item.productId = Product.id
+    INNER JOIN Receipt ON Item.receiptId = Receipt.id
+    INNER JOIN Store ON Receipt.storeId = Store.id
+    WHERE Store.name = :storeName COLLATE NOCASE AND Receipt.id != :excludeReceiptId
+    ORDER BY Receipt.date DESC, Receipt.id DESC, Item.id DESC
+""")
+    suspend fun getPurchasesInStore(storeName: String, excludeReceiptId: Int): List<PastPurchase>
 }

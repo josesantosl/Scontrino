@@ -45,6 +45,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     val categories by viewModel.categories.collectAsState()
     val stores by viewModel.stores.collectAsState()
     val products by viewModel.products.collectAsState()
+    val purchaseHistory by viewModel.purchaseHistory.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadStoresAndProducts()
@@ -79,6 +80,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 availableStores = stores,
                 availableProducts = products,
                 draft = draft,
+                purchaseHistory = purchaseHistory,
+                onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
             )
         }
         showAddReceipt -> {
@@ -90,7 +93,9 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 },
                 categories = categories,
                 availableStores = stores,
-                availableProducts = products
+                availableProducts = products,
+                purchaseHistory = purchaseHistory,
+                onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
             )
         }
         editingReceipt != null -> {
@@ -104,7 +109,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 existingReceipt = editingReceipt,
                 existingItems = selectedItems,
                 availableStores = stores,
-                availableProducts = products
+                availableProducts = products,
+                purchaseHistory = purchaseHistory,
+                onStoreNameChange = {
+                    viewModel.loadPurchaseHistory(it, excludeReceiptId = editingReceipt?.receipt?.id ?: -1)
+                },
             )
         }
         else -> {

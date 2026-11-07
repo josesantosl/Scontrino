@@ -10,6 +10,7 @@ import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.ProductRepository
 import com.pepesantos.scontrino.data.repository.ReceiptRepository
 import com.pepesantos.scontrino.data.repository.StoreRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -56,6 +57,11 @@ class ReceiptViewModel(
     private val _selectedItems = MutableStateFlow<List<ItemEntry>>(emptyList())
     val selectedItems: StateFlow<List<ItemEntry>> = _selectedItems
 
+    private val _purchaseHistory = MutableStateFlow(PurchaseHistory.EMPTY)
+    /** Past purchases in the store of the receipt being edited, see [loadPurchaseHistory]. */
+    val purchaseHistory: StateFlow<PurchaseHistory> = _purchaseHistory
+    private var purchaseHistoryJob: Job? = null
+
     init {
         loadReceipts()
         loadCategories()
@@ -99,6 +105,24 @@ class ReceiptViewModel(
             _storeNames.value = stores.associate { it.id to it.name }
 
             _isLoading.value = false
+        }
+    }
+
+    /**
+     * Loads what was bought before in the store called [storeName], to prefill prices and
+     * weights and show how they changed. [excludeReceiptId] is the receipt being edited
+     * (or -1), so that it is not compared with itself.
+     */
+    fun loadPurchaseHistory(storeName: String, excludeReceiptId: Int) {
+        val trimmedStoreName = storeName.trim()
+        // Only the latest store name matters: drop a lookup still running for an older one.
+        purchaseHistoryJob?.cancel()
+        purchaseHistoryJob = viewModelScope.launch {
+            _purchaseHistory.value = if (trimmedStoreName.isEmpty()) {
+                PurchaseHistory.EMPTY
+            } else {
+                PurchaseHistory(itemRepository.getPurchasesInStore(trimmedStoreName, excludeReceiptId))
+            }
         }
     }
 

@@ -31,7 +31,11 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.theme.displayColor
 import com.pepesantos.scontrino.ui.theme.icon
+import com.pepesantos.scontrino.ui.viewmodel.AutoFilled
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
+import com.pepesantos.scontrino.ui.viewmodel.PurchaseHistory
+import com.pepesantos.scontrino.ui.viewmodel.prefilledWith
+import kotlinx.coroutines.delay
 
 /**
  * Screen for creating or editing a receipt.
@@ -49,9 +53,14 @@ fun AddReceiptScreen(
     availableProducts: List<Product> = emptyList(),
     /** Data read from a receipt photo, to prefill a new receipt for review. */
     draft: ReceiptDraft? = null,
+    /** Past purchases in the store being typed, requested through [onStoreNameChange]. */
+    purchaseHistory: PurchaseHistory = PurchaseHistory.EMPTY,
+    onStoreNameChange: (String) -> Unit = {},
 ) {
     val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
+    // Rows read from the photo keep the receipt's own prices: only rows added by hand are prefilled.
+    val scannedRowCount = if (isEditMode) 0 else draft?.items?.size ?: 0
     
     // State reset logic: when receiptId changes, reset storeName, note, and items
     var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: draft?.storeName ?: "") }
@@ -84,6 +93,41 @@ fun AddReceiptScreen(
     val selectedDate = datePickerState.selectedDateMillis?.let {
         java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
     } ?: ""
+    val selectedDateMillis = datePickerState.selectedDateMillis
+
+    // Ask for the store's purchase history once the user stops typing its name.
+    val currentOnStoreNameChange by rememberUpdatedState(onStoreNameChange)
+    LaunchedEffect(storeName) {
+        delay(300)
+        currentOnStoreNameChange(storeName)
+    }
+    // Drop it when leaving, so the next receipt doesn't briefly show this store's prices.
+    DisposableEffect(Unit) {
+        onDispose { currentOnStoreNameChange("") }
+    }
+
+    // Per row: which values came from the last purchase (and may be replaced or cleared).
+    val autoFilled = remember(receiptId) { mutableStateMapOf<Int, AutoFilled>() }
+    fun prefill(index: Int, entry: ItemEntry): ItemEntry {
+        if (index < scannedRowCount) return entry
+        val last = purchaseHistory.lastPurchase(entry.name, selectedDateMillis)
+        val (filled, auto) = entry.prefilledWith(last, autoFilled[index] ?: AutoFilled())
+        autoFilled[index] = auto
+        return filled
+    }
+
+    // The store or the date may be set after the items: prefill again rows that are still
+    // empty or were prefilled, never values the user typed.
+    LaunchedEffect(purchaseHistory, selectedDateMillis) {
+        for (index in items.indices) {
+            val entry = items[index]
+            val auto = autoFilled[index] ?: AutoFilled()
+            val untouched = entry.price == 0.0 && entry.weight == null
+            if (entry.name.isNotBlank() && (auto.price || auto.weight || untouched)) {
+                items[index] = prefill(index, entry)
+            }
+        }
+    }
 
     val initialStoreName = existingReceipt?.storeName ?: ""
     val initialNote = existingReceipt?.receipt?.note ?: ""
@@ -300,7 +344,7 @@ fun AddReceiptScreen(
                             }
                         }
                         
-                        val updated = items[index].copy(name = name, categoryId = categoryId)
+                        val updated = prefill(index, items[index].copy(name = name, categoryId = categoryId))
                         items[index] = updated
                         // Add new empty row if user started typing in the last one
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
@@ -308,9 +352,12 @@ fun AddReceiptScreen(
                         }
                     },
                     onProductSelect = { selectedProduct ->
-                        val updated = items[index].copy(
-                            name = selectedProduct.name,
-                            categoryId = selectedProduct.categoryId
+                        val updated = prefill(
+                            index,
+                            items[index].copy(
+                                name = selectedProduct.name,
+                                categoryId = selectedProduct.categoryId
+                            )
                         )
                         items[index] = updated
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
@@ -318,6 +365,7 @@ fun AddReceiptScreen(
                         }
                     },
                     onPriceChange = { price ->
+                        autoFilled[index] = (autoFilled[index] ?: AutoFilled()).copy(price = false)
                         val updated = items[index].copy(price = price)
                         items[index] = updated
                         if (index == items.lastIndex && updated.price != 0.0) {
@@ -325,6 +373,7 @@ fun AddReceiptScreen(
                         }
                     },
                     onWeightChange = { weight ->
+                        autoFilled[index] = (autoFilled[index] ?: AutoFilled()).copy(weight = false)
                         val updated = items[index].copy(weight = weight)
                         items[index] = updated
                         if (index == items.lastIndex && updated.weight != null) {
