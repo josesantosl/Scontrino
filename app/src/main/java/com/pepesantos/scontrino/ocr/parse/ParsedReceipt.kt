@@ -15,8 +15,13 @@ data class ParsedReceipt(
     val headerLines: List<String>,
     /** Rows inside the item list that could not be interpreted. */
     val unparsedRows: List<String>,
+    /** Rows from the first total line on (totals, payment, date, footer). */
+    val footerLines: List<String> = emptyList(),
 ) {
     val itemsTotalCents: Long get() = items.sumOf { it.netCents }
+
+    /** All the text that is not an item: where the store name usually appears. */
+    val nonItemLines: List<String> get() = headerLines + unparsedRows + footerLines
 
     /** True when the items, after discounts, add up exactly to the total. */
     val isConsistent: Boolean get() = totalCents != null && totalCents == itemsTotalCents

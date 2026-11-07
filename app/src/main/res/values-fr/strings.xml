@@ -121,6 +121,10 @@
     <string name="ocr_copied">Copié dans le presse-papiers</string>
     <string name="ocr_error">Erreur : %1$s</string>
     <string name="ocr_parsed_title">Ticket interprété</string>
+    <string name="ocr_use_receipt">Utiliser ce ticket</string>
+    <string name="scan_review_notice">Lu sur une photo : vérifiez le magasin, la date et chaque article avant d\'enregistrer.</string>
+    <string name="scan_totals">Total du ticket %1$s · somme des articles %2$s</string>
+    <string name="scan_totals_mismatch">La somme des articles ne correspond pas au total du ticket : vérifiez les prix.</string>
     <string name="ocr_parsed_date">Date : %1$s</string>
     <string name="ocr_parsed_total">Total %1$s · articles %2$s</string>
     <string name="ocr_parsed_consistent">La somme des articles correspond au total.</string>

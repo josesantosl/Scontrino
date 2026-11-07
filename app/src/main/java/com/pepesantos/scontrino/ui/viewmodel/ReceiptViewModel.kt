@@ -17,6 +17,9 @@ import com.pepesantos.scontrino.data.model.Category
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.repository.CategoryRepository
+import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
+import com.pepesantos.scontrino.ocr.draft.ReceiptDraftBuilder
+import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 
 /**
  * ViewModel responsible for managing receipts, their items, and related store/category data.
@@ -100,6 +103,13 @@ class ReceiptViewModel(
     }
 
     /**
+     * Builds the prefilled data for the new receipt screen from a receipt read by
+     * OCR, using the stores, products and categories already loaded.
+     */
+    fun createDraft(parsed: ParsedReceipt): ReceiptDraft =
+        ReceiptDraftBuilder.build(parsed, _stores.value, _products.value, _categories.value)
+
+    /**
      * Saves a new receipt with its associated items.
      * Automatically matches or creates the store and products.
      *
@@ -107,12 +117,15 @@ class ReceiptViewModel(
      * @param date Timestamp of the receipt.
      * @param note Optional text note.
      * @param items List of items to be saved.
+     * @param storeVatNumber VAT number read from a scanned receipt; remembered on the
+     * store (if it has none yet) to recognise it on future scans.
      */
     fun saveReceipt(
         storeName: String,
         date: Long,
         note: String?,
-        items: List<ItemEntry>
+        items: List<ItemEntry>,
+        storeVatNumber: String? = null,
     ) {
         val trimmedStoreName = storeName.trim()
         viewModelScope.launch {
@@ -126,6 +139,9 @@ class ReceiptViewModel(
                     val id = storeRepository.insert(Store(name = trimmedStoreName))
                     Store(id = id.toInt(), name = trimmedStoreName)
                 }
+            if (storeVatNumber != null && store.vatNumber == null) {
+                storeRepository.update(store.copy(vatNumber = storeVatNumber))
+            }
 
             // 2. Calculate total based on unit prices and quantities
             val total = items.sumOf { it.price * it.quantity }

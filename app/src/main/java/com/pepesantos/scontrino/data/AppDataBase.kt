@@ -23,7 +23,7 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
         Store::class,
         LoyaltyCard::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -45,6 +45,12 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE Store ADD COLUMN vatNumber TEXT DEFAULT NULL")
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -57,7 +63,9 @@ abstract class AppDatabase : RoomDatabase() {
                     "scontrino_database"
                 )
                     .addCallback(PrepopulateCallback())
-                    .addMigrations(MIGRATION_5_6)
+                    // Every version bump needs a migration here: the destructive
+                    // fallback below would otherwise wipe the user's receipts.
+                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

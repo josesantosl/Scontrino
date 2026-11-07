@@ -121,6 +121,10 @@
     <string name="ocr_copied">Copiado al portapapeles</string>
     <string name="ocr_error">Error: %1$s</string>
     <string name="ocr_parsed_title">Ticket interpretado</string>
+    <string name="ocr_use_receipt">Usar este ticket</string>
+    <string name="scan_review_notice">Leído de una foto: revisa la tienda, la fecha y cada producto antes de guardar.</string>
+    <string name="scan_totals">Total del ticket %1$s · suma de productos %2$s</string>
+    <string name="scan_totals_mismatch">Los productos no suman el total del ticket: revisa los precios.</string>
     <string name="ocr_parsed_date">Fecha: %1$s</string>
     <string name="ocr_parsed_total">Total %1$s · productos %2$s</string>
     <string name="ocr_parsed_consistent">Los productos suman el total.</string>

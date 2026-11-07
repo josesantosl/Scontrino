@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
 import com.pepesantos.scontrino.ui.viewmodel.ReceiptViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,6 +32,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     var editingReceipt by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var receiptToDelete by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var showOcrDebug by remember { mutableStateOf(false) }
+    // A receipt read from a photo, being reviewed in the new receipt screen.
+    var scanDraft by remember { mutableStateOf<ReceiptDraft?>(null) }
     // The OCR lab screen is only reachable in debug builds while it is being developed.
     val context = LocalContext.current
     val isDebuggable = remember {
@@ -47,15 +50,36 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
         viewModel.loadStoresAndProducts()
     }
 
-    LaunchedEffect(showAddReceipt, editingReceipt) {
-        if (showAddReceipt || editingReceipt != null) {
+    // Fresh stores and products for autocomplete and for recognising scanned receipts.
+    LaunchedEffect(showAddReceipt, editingReceipt, showOcrDebug) {
+        if (showAddReceipt || editingReceipt != null || showOcrDebug) {
             viewModel.loadStoresAndProducts()
         }
     }
 
     when {
         showOcrDebug -> {
-            OcrDebugScreen(onNavigateBack = { showOcrDebug = false })
+            OcrDebugScreen(
+                onNavigateBack = { showOcrDebug = false },
+                onUseReceipt = { parsed ->
+                    scanDraft = viewModel.createDraft(parsed)
+                    showOcrDebug = false
+                },
+            )
+        }
+        scanDraft != null -> {
+            val draft = scanDraft!!
+            AddReceiptScreen(
+                onNavigateBack = { scanDraft = null },
+                onSave = { storeName, date, note, items ->
+                    viewModel.saveReceipt(storeName, date, note, items, storeVatNumber = draft.storeVatNumber)
+                    scanDraft = null
+                },
+                categories = categories,
+                availableStores = stores,
+                availableProducts = products,
+                draft = draft,
+            )
         }
         showAddReceipt -> {
             AddReceiptScreen(

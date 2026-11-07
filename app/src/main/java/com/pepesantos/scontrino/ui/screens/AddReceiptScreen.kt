@@ -26,6 +26,7 @@ import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
+import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.theme.displayColor
@@ -46,12 +47,14 @@ fun AddReceiptScreen(
     existingItems: List<ItemEntry> = emptyList(),
     availableStores: List<Store> = emptyList(),
     availableProducts: List<Product> = emptyList(),
+    /** Data read from a receipt photo, to prefill a new receipt for review. */
+    draft: ReceiptDraft? = null,
 ) {
     val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
     
     // State reset logic: when receiptId changes, reset storeName, note, and items
-    var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: "") }
+    var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: draft?.storeName ?: "") }
     var note by remember(receiptId) { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
     
     val items = remember(receiptId) { mutableStateListOf<ItemEntry>() }
@@ -63,6 +66,7 @@ fun AddReceiptScreen(
             items.addAll(existingItems)
             items.add(ItemEntry(categoryId = 1)) // Add empty row for new additions
         } else if (receiptId == -1 && items.isEmpty()) {
+            draft?.let { items.addAll(it.items) }
             items.add(ItemEntry(categoryId = 1))
         }
     }
@@ -72,7 +76,9 @@ fun AddReceiptScreen(
 
     val datePickerState = key(receiptId) {
         rememberDatePickerState(
-            initialSelectedDateMillis = existingReceipt?.receipt?.date ?: System.currentTimeMillis()
+            initialSelectedDateMillis = existingReceipt?.receipt?.date
+                ?: draft?.dateMillis
+                ?: System.currentTimeMillis()
         )
     }
     val selectedDate = datePickerState.selectedDateMillis?.let {
@@ -184,6 +190,14 @@ fun AddReceiptScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+            if (draft != null) {
+                item {
+                    ScanReviewBanner(
+                        draft = draft,
+                        currentItemsTotal = items.sumOf { it.price * it.quantity },
+                    )
+                }
+            }
             item {
                 var storeExpanded by remember { mutableStateOf(false) }
                 val storeSuggestions = remember(availableStores) {
@@ -337,6 +351,45 @@ fun AddReceiptScreen(
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Shown when the receipt comes from a photo: asks the user to review it and compares,
+ * live, the total printed on the receipt with the sum of the items being edited.
+ */
+@Composable
+private fun ScanReviewBanner(draft: ReceiptDraft, currentItemsTotal: Double) {
+    val locale = java.util.Locale.getDefault()
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                stringResource(R.string.scan_review_notice),
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            draft.receiptTotal?.let { receiptTotal ->
+                Text(
+                    stringResource(
+                        R.string.scan_totals,
+                        String.format(locale, "%.2f", receiptTotal),
+                        String.format(locale, "%.2f", currentItemsTotal),
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                // Compare in cents to avoid floating point noise.
+                if (Math.round(receiptTotal * 100) != Math.round(currentItemsTotal * 100)) {
+                    Text(
+                        stringResource(R.string.scan_totals_mismatch),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
     }

@@ -120,6 +120,10 @@
     <string name="ocr_copied">In die Zwischenablage kopiert</string>
     <string name="ocr_error">Fehler: %1$s</string>
     <string name="ocr_parsed_title">Erkannter Kassenbon</string>
+    <string name="ocr_use_receipt">Diesen Kassenbon verwenden</string>
+    <string name="scan_review_notice">Aus einem Foto gelesen: Prüfe Geschäft, Datum und jeden Artikel vor dem Speichern.</string>
+    <string name="scan_totals">Summe Kassenbon %1$s · Summe Artikel %2$s</string>
+    <string name="scan_totals_mismatch">Die Artikel ergeben nicht die Summe des Kassenbons: Prüfe die Preise.</string>
     <string name="ocr_parsed_date">Datum: %1$s</string>
     <string name="ocr_parsed_total">Summe %1$s · Artikel %2$s</string>
     <string name="ocr_parsed_consistent">Die Artikel ergeben die Summe.</string>

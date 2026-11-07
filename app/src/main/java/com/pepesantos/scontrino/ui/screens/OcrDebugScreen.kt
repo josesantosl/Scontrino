@@ -73,6 +73,8 @@ private const val LOW_CONFIDENCE = 60f
 @Composable
 fun OcrDebugScreen(
     onNavigateBack: () -> Unit,
+    /** Opens the new receipt screen prefilled with what was read. */
+    onUseReceipt: (ParsedReceipt) -> Unit,
     viewModel: OcrDebugViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -206,7 +208,7 @@ fun OcrDebugScreen(
                     }
                 }
                 state.parsed?.let { parsed ->
-                    item { ParsedReceiptSection(parsed) }
+                    item { ParsedReceiptSection(parsed, onUse = { onUseReceipt(parsed) }) }
                 }
                 item {
                     Text(stringResource(R.string.ocr_rows), style = MaterialTheme.typography.titleMedium)
@@ -226,9 +228,12 @@ fun OcrDebugScreen(
 
 /** What the parser understood: the proposal the future review screen will start from. */
 @Composable
-private fun ParsedReceiptSection(parsed: ParsedReceipt) {
+private fun ParsedReceiptSection(parsed: ParsedReceipt, onUse: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(stringResource(R.string.ocr_parsed_title), style = MaterialTheme.typography.titleMedium)
+        Button(onClick = onUse, enabled = parsed.items.isNotEmpty()) {
+            Text(stringResource(R.string.ocr_use_receipt))
+        }
         parsed.date?.let { Text(stringResource(R.string.ocr_parsed_date, it.toString())) }
 
         val total = parsed.totalCents
