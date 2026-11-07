@@ -24,6 +24,11 @@ data class OcrWord(
     val box: BoundingBox,
     /** 0..100, as reported by the engine. */
     val confidence: Float,
+    /**
+     * Index of the text line the engine put this word in (0 = first line), or null
+     * if unknown (e.g. older fixtures).
+     */
+    val line: Int? = null,
 )
 
 data class OcrResult(
@@ -60,9 +65,22 @@ enum class OcrLanguage(val tesseractCode: String, val isoCode: String) {
     }
 }
 
-/** Tesseract page segmentation modes worth comparing on receipts. */
-enum class OcrPageSegMode(val tesseractValue: Int) {
-    AUTO(3),
-    SINGLE_BLOCK(6),
-    SPARSE(11),
+/**
+ * Tesseract page segmentation modes worth comparing on receipts.
+ *
+ * @property fullWidthLines whether the engine's text lines span the whole receipt
+ * width (name ... price). Then they are a better row grouping than geometry alone,
+ * as the engine tolerates residual skew and curved paper. In [AUTO] and [SPARSE]
+ * lines are split by column, so rows must be rebuilt from geometry.
+ */
+enum class OcrPageSegMode(val tesseractValue: Int, val fullWidthLines: Boolean) {
+    AUTO(3, fullWidthLines = false),
+    /**
+     * One column of lines with variable font sizes: matches a receipt and skips the
+     * column analysis of [AUTO], which sometimes reads the stacked price column as
+     * vertical text.
+     */
+    SINGLE_COLUMN(4, fullWidthLines = true),
+    SINGLE_BLOCK(6, fullWidthLines = true),
+    SPARSE(11, fullWidthLines = false),
 }

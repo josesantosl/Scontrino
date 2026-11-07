@@ -105,13 +105,14 @@
     <string name="ocr_binarize">Noir et blanc (binariser)</string>
     <string name="ocr_page_mode">Mode de mise en page</string>
     <string name="ocr_psm_auto">Automatique</string>
+    <string name="ocr_psm_single_column">Colonne unique</string>
     <string name="ocr_psm_single_block">Bloc unique</string>
     <string name="ocr_psm_sparse">Texte épars</string>
     <string name="ocr_no_image">Choisissez la photo d\'un ticket pour commencer.</string>
     <string name="ocr_summary">%1$d mots · %2$d lignes · confiance %3$d%% · %4$d ms</string>
     <string name="ocr_document_detected">Bords du ticket détectés et redressés.</string>
     <string name="ocr_document_not_detected">Bords non détectés : la photo entière est utilisée.</string>
-    <string name="ocr_document_region">Coins non visibles : ticket repéré comme zone claire, arrière-plan supprimé.</string>
+    <string name="ocr_document_region">Coins non visibles : ticket repéré comme zone claire et recadré.</string>
     <string name="ocr_deskew">Redresser les lignes de texte</string>
     <string name="ocr_skew_corrected">Rotation corrigée : %1$s°</string>
     <string name="ocr_rows">Lignes reconstruites</string>

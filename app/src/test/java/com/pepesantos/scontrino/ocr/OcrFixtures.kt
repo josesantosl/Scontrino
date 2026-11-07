@@ -21,6 +21,7 @@ object OcrFixtures {
                 text = word.getString("text"),
                 box = BoundingBox(box.getInt(0), box.getInt(1), box.getInt(2), box.getInt(3)),
                 confidence = word.getDouble("confidence").toFloat(),
+                line = if (word.has("line")) word.getInt("line") else null,
             )
         }
     }

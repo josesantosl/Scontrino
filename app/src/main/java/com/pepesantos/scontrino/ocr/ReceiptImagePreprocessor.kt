@@ -22,8 +22,8 @@ import kotlin.math.roundToInt
  *
  * 1. grayscale
  * 2. locate the receipt: a clean quadrilateral (perspective is corrected) or, when
- *    fingers/framing hide the corners, the largest bright region (background is
- *    whitened and cropped)
+ *    fingers/framing hide the corners, the bounding box of the largest bright
+ *    region (cropped only)
  * 3. deskew so text lines are horizontal (row reconstruction depends on it)
  * 4. upscale small images
  * 5. flatten uneven lighting
@@ -189,8 +189,13 @@ class ReceiptImagePreprocessor {
 
     /**
      * Fallback when the corners are hidden (fingers, paper running off the frame):
-     * the receipt is usually the largest bright area on a darker background.
-     * Everything outside it is painted white and the image is cropped to it.
+     * the receipt is usually the largest bright area on a darker background, and
+     * the image is cropped to its bounding box.
+     *
+     * Deliberately crop-only: painting everything outside the region white erased
+     * real text whenever part of the paper was in shadow and looked like background
+     * (even using the convex hull). Some background left at the edges is harmless
+     * by comparison.
      * Returns null if no plausible region is found, or it already fills the photo.
      */
     private fun isolateBrightRegion(gray: Mat): Mat? {
@@ -211,28 +216,20 @@ class ReceiptImagePreprocessor {
         val contours = ArrayList<MatOfPoint>()
         val hierarchy = Mat()
         Imgproc.findContours(bright, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE)
+        // The bounding box of a contour equals that of its convex hull, so a shadow
+        // biting into the contour does not shrink the crop.
         val largest = contours.maxByOrNull { Imgproc.contourArea(it) }
-        val areaRatio = largest?.let { Imgproc.contourArea(it) / small.total() } ?: 0.0
+        val box = largest?.let { Imgproc.boundingRect(it) }
+        val areaRatio = box?.let { it.area() / small.total() } ?: 0.0
 
-        var result: Mat? = null
-        if (largest != null && areaRatio in MIN_REGION_AREA_RATIO..MAX_REGION_AREA_RATIO) {
-            val smallMask = Mat.zeros(small.size(), CvType.CV_8UC1)
-            Imgproc.drawContours(smallMask, listOf(largest), 0, Scalar(255.0), -1)
-            val mask = Mat()
-            Imgproc.resize(smallMask, mask, gray.size(), 0.0, 0.0, Imgproc.INTER_NEAREST)
-            val outside = Mat()
-            Core.bitwise_not(mask, outside)
-
-            val box = Imgproc.boundingRect(largest)
+        val result = if (box != null && areaRatio in MIN_REGION_AREA_RATIO..MAX_REGION_AREA_RATIO) {
             val crop = Rect(
                 (box.x / scale).toInt(), (box.y / scale).toInt(),
                 (box.width / scale).toInt(), (box.height / scale).toInt(),
             ).clampTo(gray)
-
-            val cleaned = gray.clone()
-            cleaned.setTo(Scalar(255.0), outside)
-            result = cleaned.submat(crop).clone()
-            listOf(smallMask, mask, outside, cleaned).forEach { it.release() }
+            gray.submat(crop).clone()
+        } else {
+            null
         }
 
         contours.forEach { it.release() }

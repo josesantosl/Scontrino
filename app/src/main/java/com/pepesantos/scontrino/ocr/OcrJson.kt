@@ -28,6 +28,7 @@ object OcrJson {
                 put("text", word.text)
                 put("confidence", word.confidence.toDouble())
                 put("box", word.box.toJson())
+                word.line?.let { put("line", it) }
             }
         }))
         put("rawText", result.rawText)

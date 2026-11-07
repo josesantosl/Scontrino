@@ -18,31 +18,53 @@ data class ReceiptRow(
 }
 
 /**
- * Rebuilds receipt lines from loose OCR words using their geometry, independently
- * of how the engine grouped them into blocks.
+ * Rebuilds receipt lines from OCR words.
  *
- * Assumes the image is roughly straight (the preprocessor corrects perspective).
+ * Two strategies:
+ * - engine lines: when the engine's text lines span the whole width (single column
+ *   or single block layout), they are used as rows. The engine follows each line
+ *   even when the paper is slightly skewed or curved, which pure geometry does not:
+ *   a residual 1-1.5 deg tilt was enough to pair the prices with the wrong names.
+ * - geometry: otherwise (automatic layout splits lines by column, older fixtures
+ *   have no line info), rows are rebuilt from the word boxes. This assumes the
+ *   image is roughly straight (the preprocessor deskews it).
  */
 object ReceiptRowBuilder {
 
     /**
+     * @param useEngineLines group by [OcrWord.line] when every word has one.
      * @param segmentGapFactor a horizontal gap wider than this many times the row
      * height starts a new segment.
      */
-    fun build(words: List<OcrWord>, segmentGapFactor: Double = 1.5): List<ReceiptRow> {
+    fun build(
+        words: List<OcrWord>,
+        useEngineLines: Boolean = false,
+        segmentGapFactor: Double = 1.5,
+    ): List<ReceiptRow> {
         val valid = words.filter { it.text.isNotBlank() && it.box.height > 0 && it.box.width > 0 }
         if (valid.isEmpty()) return emptyList()
 
-        // Specks of noise (stray dots, dashes, show-through) can be just a few pixels
-        // tall. If they took part in row grouping they would shrink the tolerance and
-        // split a real line in two, so rows are built from normal-height words first
-        // and small fragments are attached afterwards.
-        val minTextHeight = SMALL_WORD_RATIO * valid.map { it.box.height.toDouble() }.median()
-        val (regular, small) = valid.partition { it.box.height >= minTextHeight }
+        if (useEngineLines && valid.all { it.line != null }) {
+            return valid
+                .groupBy { it.line!! }
+                .toSortedMap()
+                .values
+                .map { toRow(it, segmentGapFactor) }
+        }
+
+        // Words of abnormal height must not drive row grouping:
+        // - specks of noise (stray dots, dashes) a few pixels tall shrink the
+        //   tolerance and split a real line in two;
+        // - "words" spanning several lines (a column of single letters read top to
+        //   bottom, e.g. the VAT codes) would glue neighbouring lines together.
+        // Rows are built from normal-height words first; the rest is attached after.
+        val medianHeight = valid.map { it.box.height.toDouble() }.median()
+        val normalHeights = SMALL_WORD_RATIO * medianHeight..TALL_WORD_RATIO * medianHeight
+        val (regular, irregular) = valid.partition { it.box.height.toDouble() in normalHeights }
 
         val rows = groupIntoRows(regular)
         val orphans = mutableListOf<OcrWord>()
-        for (word in small) {
+        for (word in irregular) {
             val row = rows
                 .filter { row -> row.any { word.box.centerY in it.box.top.toDouble()..it.box.bottom.toDouble() } }
                 .minByOrNull { row -> abs(row.map { it.box.centerY }.average() - word.box.centerY) }
@@ -98,6 +120,12 @@ object ReceiptRowBuilder {
 
     /** Words shorter than this fraction of the median word height count as fragments. */
     private const val SMALL_WORD_RATIO = 0.5
+
+    /**
+     * Words taller than this multiple of the median word height (multi-line junk, or
+     * large headings such as the logo or the total) are attached instead of grouped.
+     */
+    private const val TALL_WORD_RATIO = 2.0
 
     private fun List<Double>.median(): Double {
         val sorted = sorted()

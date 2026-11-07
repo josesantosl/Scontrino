@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.ocr
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.googlecode.tesseract.android.TessBaseAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -15,7 +16,7 @@ interface ReceiptTextRecognizer {
     suspend fun recognize(
         bitmap: Bitmap,
         languages: List<OcrLanguage>,
-        pageSegMode: OcrPageSegMode = OcrPageSegMode.SINGLE_BLOCK,
+        pageSegMode: OcrPageSegMode = OcrPageSegMode.SINGLE_COLUMN,
     ): OcrResult
 }
 
@@ -50,6 +51,12 @@ class TesseractTextRecognizer(context: Context) : ReceiptTextRecognizer {
                 }
                 api.pageSegMode = pageSegMode.tesseractValue
                 api.setVariable("preserve_interword_spaces", "1")
+                // Receipts never contain vertical text, but in automatic layout mode a
+                // narrow column of stacked prices looks like it, and gets read top to
+                // bottom as one tall "word" per digit position.
+                if (!api.setVariable("textord_tabfind_vertical_text", "0")) {
+                    Log.w(TAG, "Could not disable vertical text detection")
+                }
                 api.setImage(bitmap)
 
                 val rawText = api.getUTF8Text().orEmpty() // runs the recognition
@@ -71,9 +78,12 @@ class TesseractTextRecognizer(context: Context) : ReceiptTextRecognizer {
         val iterator = api.resultIterator ?: return emptyList()
         val level = TessBaseAPI.PageIteratorLevel.RIL_WORD
         val words = mutableListOf<OcrWord>()
+        var line = -1
         try {
             iterator.begin()
             do {
+                // Checked before skipping empty words so line numbering stays right.
+                if (iterator.isAtBeginningOf(TessBaseAPI.PageIteratorLevel.RIL_TEXTLINE)) line++
                 val text = iterator.getUTF8Text(level)?.trim()
                 if (text.isNullOrEmpty()) continue
                 val rect = iterator.getBoundingRect(level)
@@ -81,6 +91,7 @@ class TesseractTextRecognizer(context: Context) : ReceiptTextRecognizer {
                     text = text,
                     box = BoundingBox(rect.left, rect.top, rect.right, rect.bottom),
                     confidence = iterator.confidence(level),
+                    line = line.coerceAtLeast(0),
                 )
             } while (iterator.next(level))
         } finally {
@@ -102,5 +113,9 @@ class TesseractTextRecognizer(context: Context) : ReceiptTextRecognizer {
             }
             if (!temp.renameTo(target)) throw IOException("Cannot install $fileName")
         }
+    }
+
+    private companion object {
+        const val TAG = "TesseractRecognizer"
     }
 }

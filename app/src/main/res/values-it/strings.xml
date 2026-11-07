@@ -105,13 +105,14 @@
     <string name="ocr_binarize">Bianco e nero (binarizza)</string>
     <string name="ocr_page_mode">Modalità di layout</string>
     <string name="ocr_psm_auto">Automatica</string>
+    <string name="ocr_psm_single_column">Colonna unica</string>
     <string name="ocr_psm_single_block">Blocco unico</string>
     <string name="ocr_psm_sparse">Testo sparso</string>
     <string name="ocr_no_image">Scegli la foto di uno scontrino per iniziare.</string>
     <string name="ocr_summary">%1$d parole · %2$d righe · affidabilità %3$d%% · %4$d ms</string>
     <string name="ocr_document_detected">Bordi dello scontrino rilevati e raddrizzati.</string>
     <string name="ocr_document_not_detected">Bordi non rilevati: viene usata la foto intera.</string>
-    <string name="ocr_document_region">Angoli non visibili: scontrino individuato come zona chiara, sfondo rimosso.</string>
+    <string name="ocr_document_region">Angoli non visibili: scontrino individuato come zona chiara e ritagliato.</string>
     <string name="ocr_deskew">Raddrizza le righe di testo</string>
     <string name="ocr_skew_corrected">Rotazione corretta: %1$s°</string>
     <string name="ocr_rows">Righe ricostruite</string>

@@ -34,8 +34,9 @@ data class OcrDebugUiState(
     val detectDocument: Boolean = true,
     val deskew: Boolean = true,
     val binarize: Boolean = true,
-    // AUTO handled the separate name/price columns best on the first real receipt.
-    val pageSegMode: OcrPageSegMode = OcrPageSegMode.AUTO,
+    // AUTO's column analysis read Bennet's price column as vertical text, even with
+    // vertical detection disabled; a single column is what a receipt is.
+    val pageSegMode: OcrPageSegMode = OcrPageSegMode.SINGLE_COLUMN,
     val isProcessing: Boolean = false,
     val processedImage: Bitmap? = null,
     val detection: ReceiptImagePreprocessor.Detection? = null,
@@ -111,7 +112,9 @@ class OcrDebugViewModel @JvmOverloads constructor(
                 }
 
                 val result = recognizer.recognize(processed.bitmap, state.languages, state.pageSegMode)
-                val rows = withContext(Dispatchers.Default) { ReceiptRowBuilder.build(result.words) }
+                val rows = withContext(Dispatchers.Default) {
+                    ReceiptRowBuilder.build(result.words, useEngineLines = state.pageSegMode.fullWidthLines)
+                }
                 _uiState.update { it.copy(result = result, rows = rows, isProcessing = false) }
             } catch (e: CancellationException) {
                 throw e

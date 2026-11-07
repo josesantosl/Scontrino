@@ -93,6 +93,46 @@ class ReceiptRowBuilderTest {
     }
 
     @Test
+    fun `a tall word spanning two lines does not glue them together`() {
+        val rows = ReceiptRowBuilder.build(
+            listOf(
+                word("PANE", 10, 100, 80, 140),
+                word("1,20", 400, 100, 460, 140),
+                // A column of VAT letters read top to bottom: about 2.5 lines tall.
+                word("DO", 500, 120, 520, 230),
+                word("LATTE", 10, 160, 80, 200),
+                word("0,99", 400, 160, 460, 200),
+            )
+        )
+        assertEquals(2, rows.size)
+        assertEquals(listOf("PANE", "1,20"), rows[0].words.map { it.text })
+        assertEquals(listOf("LATTE", "0,99", "DO"), rows[1].words.map { it.text })
+    }
+
+    @Test
+    fun `engine lines keep a skewed price with its own name`() {
+        // The right column sits half a line higher (residual skew): geometry alone
+        // pairs SUCCO with COLA's price, the engine's lines do not.
+        val words = listOf(
+            word("SUCCO", 10, 100, 120, 140).copy(line = 0),
+            word("3,49", 800, 80, 860, 120).copy(line = 0),
+            word("COLA", 10, 150, 100, 190).copy(line = 1),
+            word("0,55", 800, 128, 860, 168).copy(line = 1),
+        )
+        val rows = ReceiptRowBuilder.build(words, useEngineLines = true)
+        assertEquals(listOf("SUCCO  3,49", "COLA  0,55"), rows.map { it.text })
+    }
+
+    @Test
+    fun `without line info geometry is used even if engine lines are requested`() {
+        val rows = ReceiptRowBuilder.build(
+            listOf(word("PANE", 10, 100, 80), word("1,20", 400, 102, 460)),
+            useEngineLines = true,
+        )
+        assertEquals(listOf("PANE  1,20"), rows.map { it.text })
+    }
+
+    @Test
     fun `a fragment away from any line is kept as its own row`() {
         val rows = ReceiptRowBuilder.build(
             listOf(

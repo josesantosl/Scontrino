@@ -113,13 +113,14 @@
     <string name="ocr_binarize">Black and white (binarize)</string>
     <string name="ocr_page_mode">Layout mode</string>
     <string name="ocr_psm_auto">Automatic</string>
+    <string name="ocr_psm_single_column">Single column</string>
     <string name="ocr_psm_single_block">Single block</string>
     <string name="ocr_psm_sparse">Sparse text</string>
     <string name="ocr_no_image">Choose a photo of a receipt to start.</string>
     <string name="ocr_summary">%1$d words · %2$d rows · confidence %3$d%% · %4$d ms</string>
     <string name="ocr_document_detected">Receipt edges detected and straightened.</string>
     <string name="ocr_document_not_detected">Receipt edges not detected: using the whole photo.</string>
-    <string name="ocr_document_region">Corners not visible: receipt located as a bright area, background removed.</string>
+    <string name="ocr_document_region">Corners not visible: receipt located as a bright area and cropped.</string>
     <string name="ocr_deskew">Straighten text lines</string>
     <string name="ocr_skew_corrected">Rotation corrected: %1$s°</string>
     <string name="ocr_rows">Reconstructed rows</string>

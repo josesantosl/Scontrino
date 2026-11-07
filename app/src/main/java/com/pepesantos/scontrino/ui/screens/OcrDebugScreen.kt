@@ -273,6 +273,7 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
 private val OcrPageSegMode.label: Int
     get() = when (this) {
         OcrPageSegMode.AUTO -> R.string.ocr_psm_auto
+        OcrPageSegMode.SINGLE_COLUMN -> R.string.ocr_psm_single_column
         OcrPageSegMode.SINGLE_BLOCK -> R.string.ocr_psm_single_block
         OcrPageSegMode.SPARSE -> R.string.ocr_psm_sparse
     }
