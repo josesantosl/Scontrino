@@ -60,6 +60,8 @@ import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.OcrPageSegMode
 import com.pepesantos.scontrino.ocr.OcrResult
 import com.pepesantos.scontrino.ocr.ReceiptImagePreprocessor
+import com.pepesantos.scontrino.ocr.parse.Amounts
+import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ui.viewmodel.OcrDebugUiState
 import com.pepesantos.scontrino.ui.viewmodel.OcrDebugViewModel
 import java.util.Locale
@@ -203,6 +205,9 @@ fun OcrDebugScreen(
                         }) { Text(stringResource(R.string.ocr_copy_text)) }
                     }
                 }
+                state.parsed?.let { parsed ->
+                    item { ParsedReceiptSection(parsed) }
+                }
                 item {
                     Text(stringResource(R.string.ocr_rows), style = MaterialTheme.typography.titleMedium)
                 }
@@ -215,6 +220,62 @@ fun OcrDebugScreen(
                     HorizontalDivider()
                 }
             }
+        }
+    }
+}
+
+/** What the parser understood: the proposal the future review screen will start from. */
+@Composable
+private fun ParsedReceiptSection(parsed: ParsedReceipt) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.ocr_parsed_title), style = MaterialTheme.typography.titleMedium)
+        parsed.date?.let { Text(stringResource(R.string.ocr_parsed_date, it.toString())) }
+
+        val total = parsed.totalCents
+        if (total == null) {
+            Text(stringResource(R.string.ocr_parsed_no_total), color = MaterialTheme.colorScheme.error)
+        } else {
+            Text(
+                stringResource(
+                    R.string.ocr_parsed_total,
+                    Amounts.format(total),
+                    Amounts.format(parsed.itemsTotalCents),
+                )
+            )
+            Text(
+                stringResource(
+                    if (parsed.isConsistent) R.string.ocr_parsed_consistent else R.string.ocr_parsed_inconsistent
+                ),
+                color = if (parsed.isConsistent) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
+            )
+        }
+
+        parsed.items.forEach { item ->
+            val details = buildList {
+                if (item.discountCents > 0) {
+                    add(stringResource(R.string.ocr_parsed_discount, Amounts.format(item.discountCents)))
+                }
+                item.vatCode?.let { code ->
+                    add(item.vatRate?.takeIf { !code.endsWith("%") }?.let { "$code ${"%.0f".format(it)}%" } ?: code)
+                }
+                item.correctedFromCents?.let {
+                    add(stringResource(R.string.ocr_parsed_corrected, Amounts.format(it)))
+                }
+            }
+            Text(
+                "${item.name}  ${Amounts.format(item.priceCents)}" +
+                    if (details.isEmpty()) "" else "  (${details.joinToString(" · ")})",
+                fontFamily = FontFamily.Monospace,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (item.correctedFromCents != null) MaterialTheme.colorScheme.tertiary else Color.Unspecified,
+            )
+        }
+
+        if (parsed.unparsedRows.isNotEmpty()) {
+            Text(
+                stringResource(R.string.ocr_parsed_unparsed, parsed.unparsedRows.size),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }

@@ -120,4 +120,13 @@
     <string name="ocr_copy_text">Copier le texte</string>
     <string name="ocr_copied">Copié dans le presse-papiers</string>
     <string name="ocr_error">Erreur : %1$s</string>
+    <string name="ocr_parsed_title">Ticket interprété</string>
+    <string name="ocr_parsed_date">Date : %1$s</string>
+    <string name="ocr_parsed_total">Total %1$s · articles %2$s</string>
+    <string name="ocr_parsed_consistent">La somme des articles correspond au total.</string>
+    <string name="ocr_parsed_inconsistent">La somme des articles ne correspond pas au total.</string>
+    <string name="ocr_parsed_no_total">Total introuvable.</string>
+    <string name="ocr_parsed_discount">remise %1$s</string>
+    <string name="ocr_parsed_corrected">corrigé, lu comme %1$s</string>
+    <string name="ocr_parsed_unparsed">Lignes non interprétées dans la liste des articles : %1$d</string>
 </resources>

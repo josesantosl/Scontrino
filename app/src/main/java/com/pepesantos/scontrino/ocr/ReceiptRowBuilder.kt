@@ -11,8 +11,9 @@ data class ReceiptRow(
     /** Words ordered left to right. */
     val words: List<OcrWord>,
     /** Groups of words separated by a wide horizontal gap (e.g. name | price). */
-    val segments: List<String>,
+    val segmentWords: List<List<OcrWord>>,
 ) {
+    val segments: List<String> get() = segmentWords.map { segment -> segment.joinToString(" ") { it.text } }
     val box: BoundingBox get() = words.map { it.box }.reduce(BoundingBox::union)
     val text: String get() = segments.joinToString("  ")
 }
@@ -114,7 +115,7 @@ object ReceiptRowBuilder {
         }
         return ReceiptRow(
             words = sorted,
-            segments = segments.map { segment -> segment.joinToString(" ") { it.text } },
+            segmentWords = segments,
         )
     }
 

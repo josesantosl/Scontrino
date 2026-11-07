@@ -119,4 +119,13 @@
     <string name="ocr_copy_text">Text kopieren</string>
     <string name="ocr_copied">In die Zwischenablage kopiert</string>
     <string name="ocr_error">Fehler: %1$s</string>
+    <string name="ocr_parsed_title">Erkannter Kassenbon</string>
+    <string name="ocr_parsed_date">Datum: %1$s</string>
+    <string name="ocr_parsed_total">Summe %1$s · Artikel %2$s</string>
+    <string name="ocr_parsed_consistent">Die Artikel ergeben die Summe.</string>
+    <string name="ocr_parsed_inconsistent">Die Artikel ergeben nicht die Summe.</string>
+    <string name="ocr_parsed_no_total">Summe nicht gefunden.</string>
+    <string name="ocr_parsed_discount">Rabatt %1$s</string>
+    <string name="ocr_parsed_corrected">korrigiert, gelesen als %1$s</string>
+    <string name="ocr_parsed_unparsed">Nicht erkannte Zeilen in der Artikelliste: %1$d</string>
 </resources>

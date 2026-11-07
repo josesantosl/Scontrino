@@ -120,4 +120,13 @@
     <string name="ocr_copy_text">Copiar texto</string>
     <string name="ocr_copied">Copiado al portapapeles</string>
     <string name="ocr_error">Error: %1$s</string>
+    <string name="ocr_parsed_title">Ticket interpretado</string>
+    <string name="ocr_parsed_date">Fecha: %1$s</string>
+    <string name="ocr_parsed_total">Total %1$s · productos %2$s</string>
+    <string name="ocr_parsed_consistent">Los productos suman el total.</string>
+    <string name="ocr_parsed_inconsistent">Los productos no suman el total.</string>
+    <string name="ocr_parsed_no_total">No se encontró el total.</string>
+    <string name="ocr_parsed_discount">descuento %1$s</string>
+    <string name="ocr_parsed_corrected">corregido, se leyó %1$s</string>
+    <string name="ocr_parsed_unparsed">Filas sin interpretar en la lista de productos: %1$d</string>
 </resources>

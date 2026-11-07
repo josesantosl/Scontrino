@@ -120,4 +120,13 @@
     <string name="ocr_copy_text">Copia testo</string>
     <string name="ocr_copied">Copiato negli appunti</string>
     <string name="ocr_error">Errore: %1$s</string>
+    <string name="ocr_parsed_title">Scontrino interpretato</string>
+    <string name="ocr_parsed_date">Data: %1$s</string>
+    <string name="ocr_parsed_total">Totale %1$s · articoli %2$s</string>
+    <string name="ocr_parsed_consistent">Gli articoli corrispondono al totale.</string>
+    <string name="ocr_parsed_inconsistent">Gli articoli non corrispondono al totale.</string>
+    <string name="ocr_parsed_no_total">Totale non trovato.</string>
+    <string name="ocr_parsed_discount">sconto %1$s</string>
+    <string name="ocr_parsed_corrected">corretto, letto come %1$s</string>
+    <string name="ocr_parsed_unparsed">Righe non interpretate nell\'elenco articoli: %1$d</string>
 </resources>

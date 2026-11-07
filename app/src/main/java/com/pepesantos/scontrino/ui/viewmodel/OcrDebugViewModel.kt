@@ -16,6 +16,8 @@ import com.pepesantos.scontrino.ocr.ReceiptRow
 import com.pepesantos.scontrino.ocr.ReceiptRowBuilder
 import com.pepesantos.scontrino.ocr.ReceiptTextRecognizer
 import com.pepesantos.scontrino.ocr.TesseractTextRecognizer
+import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
+import com.pepesantos.scontrino.ocr.parse.ReceiptParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +45,7 @@ data class OcrDebugUiState(
     val skewAngle: Double? = null,
     val result: OcrResult? = null,
     val rows: List<ReceiptRow> = emptyList(),
+    val parsed: ParsedReceipt? = null,
     val error: String? = null,
 ) {
     val canRun: Boolean get() = sourceUri != null && languages.isNotEmpty() && !isProcessing
@@ -68,7 +71,7 @@ class OcrDebugViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(
                 sourceUri = uri, isProcessing = false, processedImage = null,
-                detection = null, skewAngle = null, result = null, rows = emptyList(), error = null,
+                detection = null, skewAngle = null, result = null, rows = emptyList(), parsed = null, error = null,
             )
         }
         run()
@@ -112,10 +115,11 @@ class OcrDebugViewModel @JvmOverloads constructor(
                 }
 
                 val result = recognizer.recognize(processed.bitmap, state.languages, state.pageSegMode)
-                val rows = withContext(Dispatchers.Default) {
-                    ReceiptRowBuilder.build(result.words, useEngineLines = state.pageSegMode.fullWidthLines)
+                val (rows, parsed) = withContext(Dispatchers.Default) {
+                    val rows = ReceiptRowBuilder.build(result.words, useEngineLines = state.pageSegMode.fullWidthLines)
+                    rows to ReceiptParser.parse(rows)
                 }
-                _uiState.update { it.copy(result = result, rows = rows, isProcessing = false) }
+                _uiState.update { it.copy(result = result, rows = rows, parsed = parsed, isProcessing = false) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

@@ -128,4 +128,13 @@
     <string name="ocr_copy_text">Copy text</string>
     <string name="ocr_copied">Copied to clipboard</string>
     <string name="ocr_error">Error: %1$s</string>
+    <string name="ocr_parsed_title">Interpreted receipt</string>
+    <string name="ocr_parsed_date">Date: %1$s</string>
+    <string name="ocr_parsed_total">Total %1$s · items %2$s</string>
+    <string name="ocr_parsed_consistent">The items add up to the total.</string>
+    <string name="ocr_parsed_inconsistent">The items do not add up to the total.</string>
+    <string name="ocr_parsed_no_total">Total not found.</string>
+    <string name="ocr_parsed_discount">discount %1$s</string>
+    <string name="ocr_parsed_corrected">corrected, read as %1$s</string>
+    <string name="ocr_parsed_unparsed">Rows not interpreted in the item list: %1$d</string>
 </resources>
