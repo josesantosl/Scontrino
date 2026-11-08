@@ -132,4 +132,16 @@
     <string name="ocr_parsed_discount">Rabatt %1$s</string>
     <string name="ocr_parsed_corrected">korrigiert, gelesen als %1$s</string>
     <string name="ocr_parsed_unparsed">Nicht erkannte Zeilen in der Artikelliste: %1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_language_system">Systemsprache</string>
+    <string name="settings_currency">Währung</string>
+    <string name="settings_currency_custom">Andere…</string>
+    <string name="settings_currency_custom_hint">Code oder Symbol (z. B. GBP, £)</string>
+    <string name="settings_currency_scope_title">Währung ändern</string>
+    <string name="settings_currency_scope_message">%1$s auch für bereits gespeicherte Belege verwenden oder nur für neue? Beträge werden nicht umgerechnet.</string>
+    <string name="settings_currency_scope_all">Alle Belege</string>
+    <string name="settings_currency_scope_new">Nur neue</string>
 </resources>

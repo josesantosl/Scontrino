@@ -23,7 +23,7 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
         Store::class,
         LoyaltyCard::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -51,6 +51,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Every receipt so far was in euros.
+                db.execSQL("ALTER TABLE Receipt ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'")
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -65,7 +72,7 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(PrepopulateCallback())
                     // Every version bump needs a migration here: the destructive
                     // fallback below would otherwise wipe the user's receipts.
-                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
+                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

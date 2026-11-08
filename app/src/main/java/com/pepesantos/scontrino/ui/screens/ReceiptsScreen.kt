@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
+import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.viewmodel.ReceiptViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -178,6 +179,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                             storeName = receiptWithStore.storeName,
                             date = receiptWithStore.receipt.date,
                             total = receiptWithStore.receipt.total,
+                            currency = receiptWithStore.receipt.currency,
                             storeColor = receiptWithStore.storeColor,
                             onClick = {
                                 viewModel.loadReceiptById(receiptWithStore.receipt.id)
@@ -200,6 +202,7 @@ fun ReceiptCard(
     storeName: String,
     date: Long,
     total: Double,
+    currency: String = "EUR",
     storeColor: Long? = null,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
@@ -258,7 +261,7 @@ fun ReceiptCard(
                         color = secondaryColor
                     )
                     Text(
-                        text = "€%.2f".format(total),
+                        text = Money.format(total, currency),
                         style = MaterialTheme.typography.bodyMedium,
                         color = contentColor,
                         fontWeight = FontWeight.Bold

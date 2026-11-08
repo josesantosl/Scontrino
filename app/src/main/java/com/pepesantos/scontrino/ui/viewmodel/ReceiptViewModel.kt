@@ -31,6 +31,8 @@ class ReceiptViewModel(
     private val productRepository: ProductRepository,
     private val itemRepository: ItemRepository,
     private val categoryRepository: CategoryRepository,
+    /** Currency chosen in the settings, given to new receipts. */
+    private val currencyProvider: () -> String = { "EUR" },
 ) : ViewModel() {
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
@@ -175,7 +177,8 @@ class ReceiptViewModel(
                 date = date,
                 total = total,
                 storeId = store.id,
-                note = note?.ifBlank { null }
+                note = note?.ifBlank { null },
+                currency = currencyProvider(),
             )
 
             // 4. Resolve products and build item entities

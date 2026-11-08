@@ -21,6 +21,10 @@ class ReceiptRepository(
 
     suspend fun getAll() = receiptDao.getAllWithStoreName()
 
+    suspend fun count() = receiptDao.count()
+
+    suspend fun setCurrencyForAll(currency: String) = receiptDao.setCurrencyForAll(currency)
+
     //suspend fun getById(id: Int) = receiptDao.getById(id)
     suspend fun getById(id: Int) = receiptDao.getByIdWithStoreName(id)
     suspend fun getByStore(storeId: Int) = receiptDao.getByStore(storeId)

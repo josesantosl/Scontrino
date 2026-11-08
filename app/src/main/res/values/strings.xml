@@ -141,4 +141,16 @@
     <string name="ocr_parsed_discount">discount %1$s</string>
     <string name="ocr_parsed_corrected">corrected, read as %1$s</string>
     <string name="ocr_parsed_unparsed">Rows not interpreted in the item list: %1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System language</string>
+    <string name="settings_currency">Currency</string>
+    <string name="settings_currency_custom">Other…</string>
+    <string name="settings_currency_custom_hint">Code or symbol (e.g. GBP, £)</string>
+    <string name="settings_currency_scope_title">Change currency</string>
+    <string name="settings_currency_scope_message">Use %1$s for the receipts already saved too, or only for new ones? Amounts are not converted.</string>
+    <string name="settings_currency_scope_all">All receipts</string>
+    <string name="settings_currency_scope_new">Only new ones</string>
 </resources>

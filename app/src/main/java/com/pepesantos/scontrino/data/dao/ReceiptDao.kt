@@ -20,6 +20,13 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt ORDER BY date DESC")
     suspend fun getAll(): List<Receipt>
 
+    @Query("SELECT COUNT(*) FROM Receipt")
+    suspend fun count(): Int
+
+    /** Changes the currency of every receipt (amounts are kept as they are). */
+    @Query("UPDATE Receipt SET currency = :currency")
+    suspend fun setCurrencyForAll(currency: String)
+
     @Query("""
     SELECT Receipt.*, Store.name AS storeName, Store.color AS storeColor
     FROM Receipt 

@@ -34,6 +34,8 @@ import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.StoreSpending
 import com.pepesantos.scontrino.data.model.TopCategorySpending
 import com.pepesantos.scontrino.data.model.TopProductSpending
+import com.pepesantos.scontrino.ui.components.LocalCurrency
+import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.getCategoryDisplayName
 import com.pepesantos.scontrino.ui.viewmodel.DailySpendingPoint
@@ -238,7 +240,7 @@ fun TotalSpendingCard(
             )
 
             Text(
-                text = "€%.2f".format(total),
+                text = Money.format(total, LocalCurrency.current),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -352,7 +354,7 @@ fun StoreSpendingCard(
                                 )
                             }
                             Text(
-                                text = "€%.2f".format(store.totalSpent),
+                                text = Money.format(store.totalSpent, LocalCurrency.current),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -601,7 +603,7 @@ fun TopProductsCard(
                             }
 
                             Text(
-                                text = "€%.2f".format(product.totalSpent),
+                                text = Money.format(product.totalSpent, LocalCurrency.current),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -667,7 +669,7 @@ fun TopProductsCard(
                             }
 
                             Text(
-                                text = "€%.2f".format(category.totalSpent),
+                                text = Money.format(category.totalSpent, LocalCurrency.current),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )

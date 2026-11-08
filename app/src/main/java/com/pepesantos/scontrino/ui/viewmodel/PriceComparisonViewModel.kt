@@ -121,8 +121,8 @@ class PriceComparisonViewModel(
 
     private fun pricePerUnit(price: Double, weight: Double, unit: MeasureUnit): Double =
         when (unit) {
-            MeasureUnit.KG -> price / weight * 1000.0 // weight in g -> €/kg
-            MeasureUnit.L -> price / weight           // volume in L -> €/L
+            MeasureUnit.KG -> price / weight * 1000.0 // weight in g -> price per kg
+            MeasureUnit.L -> price / weight           // volume in L -> price per L
         }
 
     private fun defaultWeightFor(unit: MeasureUnit): Double =

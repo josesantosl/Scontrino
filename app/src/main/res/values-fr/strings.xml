@@ -133,4 +133,16 @@
     <string name="ocr_parsed_discount">remise %1$s</string>
     <string name="ocr_parsed_corrected">corrigé, lu comme %1$s</string>
     <string name="ocr_parsed_unparsed">Lignes non interprétées dans la liste des articles : %1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_language_system">Langue du système</string>
+    <string name="settings_currency">Devise</string>
+    <string name="settings_currency_custom">Autre…</string>
+    <string name="settings_currency_custom_hint">Code ou symbole (ex. GBP, £)</string>
+    <string name="settings_currency_scope_title">Changer de devise</string>
+    <string name="settings_currency_scope_message">Utiliser %1$s aussi pour les tickets déjà enregistrés, ou seulement pour les nouveaux ? Les montants ne sont pas convertis.</string>
+    <string name="settings_currency_scope_all">Tous</string>
+    <string name="settings_currency_scope_new">Seulement les nouveaux</string>
 </resources>

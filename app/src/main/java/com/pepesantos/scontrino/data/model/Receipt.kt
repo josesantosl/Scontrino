@@ -15,6 +15,8 @@ data class Receipt(
     val total: Double,
     val storeId: Int,
     val note: String? = null,
+    /** ISO 4217 code (EUR, USD, CHF...) or a custom symbol chosen by the user. */
+    val currency: String = "EUR",
 )
 data class ReceiptWithStoreName(
     @Embedded val receipt: Receipt,

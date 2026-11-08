@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.ComparableProduct
+import com.pepesantos.scontrino.ui.components.LocalCurrency
+import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.viewmodel.MeasureUnit
 import com.pepesantos.scontrino.ui.viewmodel.PriceComparisonState
 import com.pepesantos.scontrino.ui.viewmodel.PriceComparisonViewModel
@@ -229,7 +231,7 @@ private fun ComparisonCard(state: PriceComparisonState) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€/$unitLabel",
+                    text = "${Money.symbol(LocalCurrency.current)}/$unitLabel",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -278,7 +280,7 @@ private fun StorePriceItem(
             )
             SourceBadge(source = row.source, unit = unit)
             Text(
-                text = "€%.2f/%s".format(row.pricePerUnit, unitLabel(unit)),
+                text = "${Money.format(row.pricePerUnit, LocalCurrency.current)}/${unitLabel(unit)}",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (isCheapest) CheapestColor else MaterialTheme.colorScheme.onSurface
@@ -296,7 +298,7 @@ private fun StorePriceItem(
         )
 
         Text(
-            text = stringResource(R.string.compare_paid, "€%.2f".format(row.price)),
+            text = stringResource(R.string.compare_paid, Money.format(row.price, LocalCurrency.current)),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -337,6 +339,7 @@ private fun SavingsCard(state: PriceComparisonState) {
     val cheapest = state.cheapest ?: return
     val expensive = state.mostExpensive ?: return
     val fraction = state.savingsFraction ?: return
+    val currency = LocalCurrency.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -361,7 +364,7 @@ private fun SavingsCard(state: PriceComparisonState) {
                         cheapest.storeName,
                         (fraction * 100).roundToInt(),
                         expensive.storeName,
-                        "€%.2f/%s".format(expensive.pricePerUnit - cheapest.pricePerUnit, unitLabel(state.unit))
+                        "${Money.format(expensive.pricePerUnit - cheapest.pricePerUnit, currency)}/${unitLabel(state.unit)}"
                     )
                 },
                 style = MaterialTheme.typography.bodyMedium,

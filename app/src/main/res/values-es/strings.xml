@@ -133,4 +133,16 @@
     <string name="ocr_parsed_discount">descuento %1$s</string>
     <string name="ocr_parsed_corrected">corregido, se leyó %1$s</string>
     <string name="ocr_parsed_unparsed">Filas sin interpretar en la lista de productos: %1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Idioma del sistema</string>
+    <string name="settings_currency">Moneda</string>
+    <string name="settings_currency_custom">Otra…</string>
+    <string name="settings_currency_custom_hint">Código o símbolo (ej. GBP, £)</string>
+    <string name="settings_currency_scope_title">Cambiar moneda</string>
+    <string name="settings_currency_scope_message">¿Usar %1$s también en los tickets ya guardados, o solo en los nuevos? Los importes no se convierten.</string>
+    <string name="settings_currency_scope_all">Todos</string>
+    <string name="settings_currency_scope_new">Solo los nuevos</string>
 </resources>
