@@ -130,10 +130,15 @@ class ReceiptViewModel(
 
     /**
      * Builds the prefilled data for the new receipt screen from a receipt read by
-     * OCR, using the stores, products and categories already loaded.
+     * OCR, using the stores, products and categories already loaded. If the store is
+     * recognised, weights are taken from earlier purchases there at the same price.
      */
-    fun createDraft(parsed: ParsedReceipt): ReceiptDraft =
-        ReceiptDraftBuilder.build(parsed, _stores.value, _products.value, _categories.value)
+    suspend fun createDraft(parsed: ParsedReceipt): ReceiptDraft {
+        val draft = ReceiptDraftBuilder.build(parsed, _stores.value, _products.value, _categories.value)
+        if (draft.storeName.isBlank()) return draft
+        val history = PurchaseHistory(itemRepository.getPurchasesInStore(draft.storeName, excludeReceiptId = -1))
+        return ReceiptDraftBuilder.withKnownWeights(draft, history)
+    }
 
     /**
      * Saves a new receipt with its associated items.

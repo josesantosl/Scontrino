@@ -1,6 +1,8 @@
 package com.pepesantos.scontrino.ocr.draft
 
 import com.pepesantos.scontrino.data.model.ItemEntry
+import com.pepesantos.scontrino.data.model.PastPurchase
+import com.pepesantos.scontrino.ui.viewmodel.PurchaseHistory
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.OcrFixtures
@@ -79,5 +81,34 @@ class ReceiptDraftBuilderTest {
 
         assertEquals("Il mio supermercato", draft.storeName)
         assertEquals(utcMidnight(2026, 11, 7), draft.dateMillis)
+    }
+
+    @Test
+    fun `known weights are filled in for the same product at the same price`() {
+        val draft = ReceiptDraft(
+            storeName = "Bennet",
+            storeVatNumber = null,
+            dateMillis = null,
+            items = listOf(
+                ItemEntry(name = "LATTE PS INTERO", price = 1.29),
+                ItemEntry(name = "BANANE", price = 1.87),
+                ItemEntry(name = "PANE", price = 2.10, weight = 400.0),
+            ),
+            receiptTotal = null,
+            addsUp = false,
+        )
+        val history = PurchaseHistory(
+            listOf(
+                PastPurchase("Latte PS intero", price = 1.29, weight = 1.0, date = 100L),
+                PastPurchase("BANANE", price = 1.52, weight = 850.0, date = 100L),
+                PastPurchase("PANE", price = 2.10, weight = 500.0, date = 100L),
+            )
+        )
+
+        val items = ReceiptDraftBuilder.withKnownWeights(draft, history).items
+
+        assertEquals(1.0, items[0].weight)
+        assertNull(items[1].weight) // different price: no guess
+        assertEquals(400.0, items[2].weight) // already known: kept
     }
 }

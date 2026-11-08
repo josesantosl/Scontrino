@@ -35,6 +35,20 @@ class PurchaseHistory(purchases: List<PastPurchase>) {
         return LastPurchase(price = last.price, date = last.date, weight = weight)
     }
 
+    /**
+     * Weight of the latest purchase of [name] at exactly this unit [price] (any date).
+     * The same price means the same package for packaged goods and, for goods sold by
+     * weight, most likely the same weight; a different price gives nothing rather than
+     * a wrong guess.
+     */
+    fun weightAtPrice(name: String, price: Double): Double? {
+        if (name.isBlank() || price <= 0.0) return null
+        val cents = Math.round(price * 100)
+        return byName[key(name)]
+            ?.firstOrNull { Math.round(it.price * 100) == cents && (it.weight ?: 0.0) > 0.0 }
+            ?.weight
+    }
+
     companion object {
         val EMPTY = PurchaseHistory(emptyList())
 

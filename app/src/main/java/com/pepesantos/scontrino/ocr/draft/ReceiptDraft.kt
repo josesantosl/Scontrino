@@ -6,6 +6,7 @@ import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
+import com.pepesantos.scontrino.ui.viewmodel.PurchaseHistory
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -76,6 +77,18 @@ object ReceiptDraftBuilder {
             )
         }
     }
+
+    /**
+     * Fills the weight of the items that were bought before in the draft's store with the
+     * same name and price (receipts don't print weights). [history] is that store's.
+     */
+    fun withKnownWeights(draft: ReceiptDraft, history: PurchaseHistory): ReceiptDraft =
+        draft.copy(
+            items = draft.items.map { item ->
+                if (item.weight != null) item
+                else item.copy(weight = history.weightAtPrice(item.name, item.price))
+            }
+        )
 
     private fun normalize(name: String) = name.trim().uppercase(Locale.ROOT).replace(Regex("\\s+"), " ")
 

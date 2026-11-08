@@ -42,6 +42,21 @@ class PurchaseHistoryTest {
     }
 
     @Test
+    fun `weight at price needs the same name and price, any date`() {
+        assertEquals(1.0, history.weightAtPrice(" latte INTERO", 1.29)!!, 0.0)
+        assertEquals(0.5, history.weightAtPrice("Latte intero", 1.19)!!, 0.0)
+        assertEquals(500.0, history.weightAtPrice("Pane", 2.1)!!, 0.0)
+    }
+
+    @Test
+    fun `no weight at price without a weighed purchase at that price`() {
+        assertNull(history.weightAtPrice("Latte intero", 1.35)) // bought at that price, without weight
+        assertNull(history.weightAtPrice("Latte intero", 1.30))
+        assertNull(history.weightAtPrice("Burro", 2.10))
+        assertNull(history.weightAtPrice("Pane", 0.0))
+    }
+
+    @Test
     fun `empty price and weight are prefilled`() {
         val last = LastPurchase(price = 2.10, date = 250L, weight = 500.0)
         val (entry, auto) = ItemEntry(name = "Pane").prefilledWith(last, AutoFilled())

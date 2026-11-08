@@ -26,6 +26,7 @@ import com.pepesantos.scontrino.ui.viewmodel.ReceiptViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReceiptsScreen(viewModel: ReceiptViewModel) {
@@ -47,6 +48,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     val stores by viewModel.stores.collectAsState()
     val products by viewModel.products.collectAsState()
     val purchaseHistory by viewModel.purchaseHistory.collectAsState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.loadStoresAndProducts()
@@ -64,8 +66,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
             OcrDebugScreen(
                 onNavigateBack = { showOcrDebug = false },
                 onUseReceipt = { parsed ->
-                    scanDraft = viewModel.createDraft(parsed)
-                    showOcrDebug = false
+                    // Short database read (the store's past weights), then the review screen.
+                    scope.launch {
+                        scanDraft = viewModel.createDraft(parsed)
+                        showOcrDebug = false
+                    }
                 },
             )
         }
