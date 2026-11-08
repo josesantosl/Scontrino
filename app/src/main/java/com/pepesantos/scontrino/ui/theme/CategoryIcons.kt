@@ -27,19 +27,25 @@ object CategoryIcons {
     val defaults: Map<String, DefaultCategoryStyle> = linkedMapOf(
         "other" to DefaultCategoryStyle("MoreHoriz", 0xFF94A3B8),
         "vegetables_fruit" to DefaultCategoryStyle("Apple", 0xFFFF6F00),
-        "plant_protein" to DefaultCategoryStyle("Eco", 0xFF8BC34A),
-        "animal_protein" to DefaultCategoryStyle("SetMeal", 0xFFFF5722),
-        "dairy_alternatives" to DefaultCategoryStyle("LocalDrink", 0xFF03A9F4),
-        "grains_pasta_bread" to DefaultCategoryStyle("Spa", 0xFFFFB300),
+        "meat" to DefaultCategoryStyle("KebabDining", 0xFFFF5722),
+        "seafood" to DefaultCategoryStyle("SetMeal", 0xFF009688),
+        "dairy" to DefaultCategoryStyle("LocalDrink", 0xFF03A9F4),
+        "eggs" to DefaultCategoryStyle("Egg", 0xFFFFCA28),
+        "legumes" to DefaultCategoryStyle("Eco", 0xFF8BC34A),
+        "bakery" to DefaultCategoryStyle("BakeryDining", 0xFFC68B59),
+        "pasta_rice" to DefaultCategoryStyle("DinnerDining", 0xFFFFB300),
+        "condiments" to DefaultCategoryStyle("Opacity", 0xFFCDDC39),
         "snacks_sweets" to DefaultCategoryStyle("Cookie", 0xFFE91E63),
+        "ready_meals" to DefaultCategoryStyle("Microwave", 0xFF3F51B5),
         "beverages" to DefaultCategoryStyle("Bottle", 0xFF795548),
-        "canned_sauces" to DefaultCategoryStyle("SoupKitchen", 0xFFFF9800),
-        "oils_condiments" to DefaultCategoryStyle("Opacity", 0xFFCDDC39),
-        "cleaning" to DefaultCategoryStyle("CleaningServices", 0xFF00BCD4),
+        "alcohol" to DefaultCategoryStyle("WineBar", 0xFF880E4F),
+        "household" to DefaultCategoryStyle("CleaningServices", 0xFF00BCD4),
         "personal_hygiene" to DefaultCategoryStyle("Soap", 0xFF9C27B0),
+        "baby" to DefaultCategoryStyle("ChildFriendly", 0xFFB39DDB),
         "pets" to DefaultCategoryStyle("Pets", 0xFF607D8B),
-        "pharmacy" to DefaultCategoryStyle("LocalPharmacy", 0xFFF44336),
+        "health" to DefaultCategoryStyle("LocalPharmacy", 0xFFF44336),
         "transport" to DefaultCategoryStyle("Train", 0xFF2196F3),
+        "eating_out" to DefaultCategoryStyle("Restaurant", 0xFF43A047),
     )
 
     /**
@@ -64,20 +70,28 @@ object CategoryIcons {
             "Bottle" -> ImageVector.vectorResource(R.drawable.ic_bottle)
 
             "MoreHoriz" -> Icons.Default.MoreHoriz
-            "Eco" -> Icons.Default.Eco
+            "KebabDining" -> Icons.Default.KebabDining
             "SetMeal" -> Icons.Default.SetMeal
-            "Spa" -> Icons.Default.Spa
             "LocalDrink" -> Icons.Default.LocalDrink
-            "Cookie" -> Icons.Default.Cookie
-            "SoupKitchen" -> Icons.Default.SoupKitchen
+            "Egg" -> Icons.Default.Egg
+            "Eco" -> Icons.Default.Eco
+            "BakeryDining" -> Icons.Default.BakeryDining
+            "DinnerDining" -> Icons.Default.DinnerDining
             "Opacity" -> Icons.Default.Opacity
+            "Cookie" -> Icons.Default.Cookie
+            "Microwave" -> Icons.Default.Microwave
+            "WineBar" -> Icons.Default.WineBar
             "CleaningServices" -> Icons.Default.CleaningServices
             "Soap" -> Icons.Default.Soap
+            "ChildFriendly" -> Icons.Default.ChildFriendly
             "Pets" -> Icons.Default.Pets
             "LocalPharmacy" -> Icons.Default.LocalPharmacy
             "Train" -> Icons.Default.Train
+            "Restaurant" -> Icons.Default.Restaurant
 
             // Legacy names still stored in existing databases
+            "Spa" -> Icons.Default.Spa
+            "SoupKitchen" -> Icons.Default.SoupKitchen
             "Grass" -> Icons.Default.Grass
             "RiceBowl" -> Icons.Default.RiceBowl
             "LocalCafe" -> Icons.Default.LocalCafe

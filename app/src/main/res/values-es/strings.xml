@@ -58,20 +58,26 @@
     <string name="category_select_title">Seleccionar categoría</string>
     <string name="category_label">Categoría</string>
     <string name="category_other">Otros</string>
-    <string name="category_vegetables_fruit">Frutas y verduras</string>
-    <string name="category_plant_protein">Proteína vegetal</string>
-    <string name="category_animal_protein">Proteína animal</string>
-    <string name="category_dairy_alternatives">Lácteos y alternativas</string>
-    <string name="category_grains_pasta_bread">Cereales, pasta y pan</string>
-    <string name="category_snacks_sweets">Snacks y dulces</string>
+    <string name="category_vegetables_fruit">Fruta y verdura</string>
+    <string name="category_meat">Carne</string>
+    <string name="category_seafood">Marisco y pescado</string>
+    <string name="category_dairy">Lácteos</string>
+    <string name="category_eggs">Huevos</string>
+    <string name="category_legumes">Legumbres</string>
+    <string name="category_bakery">Panadería</string>
+    <string name="category_pasta_rice">Pasta y arroz</string>
+    <string name="category_condiments">Condimentos</string>
+    <string name="category_snacks_sweets">Dulces y snacks</string>
+    <string name="category_ready_meals">Platos preparados</string>
     <string name="category_beverages">Bebidas</string>
-    <string name="category_canned_sauces">Conservas y salsas</string>
-    <string name="category_oils_condiments">Aceites y condimentos</string>
-    <string name="category_cleaning">Limpieza</string>
+    <string name="category_alcohol">Alcohol</string>
+    <string name="category_household">Hogar</string>
     <string name="category_personal_hygiene">Higiene personal</string>
+    <string name="category_baby">Bebé</string>
     <string name="category_pets">Mascotas</string>
-    <string name="category_pharmacy">Farmacia</string>
+    <string name="category_health">Salud</string>
     <string name="category_transport">Transporte</string>
+    <string name="category_eating_out">Restaurantes</string>
 
     <!-- Comparativa de precios -->
     <string name="stats_compare_title">Comparar precios</string>

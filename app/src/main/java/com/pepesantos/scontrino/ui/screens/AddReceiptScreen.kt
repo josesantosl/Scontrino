@@ -594,7 +594,7 @@ fun ItemRow(
         )
     }
 
-    val isBeverage = currentCategory?.label == "beverages"
+    val isBeverage = currentCategory?.label == "beverages" || currentCategory?.label == "alcohol"
     val weightOrVolumeLabel = if (isBeverage) {
         stringResource(R.string.add_receipt_volume)
     } else {

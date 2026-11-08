@@ -59,19 +59,25 @@
     <string name="category_label">Catégorie</string>
     <string name="category_other">Autre</string>
     <string name="category_vegetables_fruit">Fruits et légumes</string>
-    <string name="category_plant_protein">Protéines végétales</string>
-    <string name="category_animal_protein">Protéines animales</string>
-    <string name="category_dairy_alternatives">Produits laitiers et alternatives</string>
-    <string name="category_grains_pasta_bread">Céréales, pâtes et pain</string>
-    <string name="category_snacks_sweets">Snacks et friandises</string>
+    <string name="category_meat">Viande</string>
+    <string name="category_seafood">Produits de la mer</string>
+    <string name="category_dairy">Produits laitiers</string>
+    <string name="category_eggs">Œufs</string>
+    <string name="category_legumes">Légumineuses</string>
+    <string name="category_bakery">Boulangerie</string>
+    <string name="category_pasta_rice">Pâtes et riz</string>
+    <string name="category_condiments">Condiments</string>
+    <string name="category_snacks_sweets">Snacks et sucreries</string>
+    <string name="category_ready_meals">Plats préparés</string>
     <string name="category_beverages">Boissons</string>
-    <string name="category_canned_sauces">Conserves et sauces</string>
-    <string name="category_oils_condiments">Huiles et condiments</string>
-    <string name="category_cleaning">Nettoyage</string>
+    <string name="category_alcohol">Alcool</string>
+    <string name="category_household">Maison</string>
     <string name="category_personal_hygiene">Hygiène personnelle</string>
+    <string name="category_baby">Bébé</string>
     <string name="category_pets">Animaux</string>
-    <string name="category_pharmacy">Pharmacie</string>
+    <string name="category_health">Santé</string>
     <string name="category_transport">Transports</string>
+    <string name="category_eating_out">Restaurants</string>
 
     <!-- Comparaison des prix -->
     <string name="stats_compare_title">Comparer les prix</string>

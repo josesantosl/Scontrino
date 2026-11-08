@@ -59,19 +59,25 @@
     <string name="category_label">Categoria</string>
     <string name="category_other">Altro</string>
     <string name="category_vegetables_fruit">Frutta e verdura</string>
-    <string name="category_plant_protein">Proteine vegetali</string>
-    <string name="category_animal_protein">Proteine animali</string>
-    <string name="category_dairy_alternatives">Latticini e alternative</string>
-    <string name="category_grains_pasta_bread">Cereali, pasta e pane</string>
-    <string name="category_snacks_sweets">Snack e dolci</string>
+    <string name="category_meat">Carne</string>
+    <string name="category_seafood">Pesce</string>
+    <string name="category_dairy">Latticini</string>
+    <string name="category_eggs">Uova</string>
+    <string name="category_legumes">Legumi</string>
+    <string name="category_bakery">Panetteria</string>
+    <string name="category_pasta_rice">Pasta e riso</string>
+    <string name="category_condiments">Condimenti</string>
+    <string name="category_snacks_sweets">Dolci e snack</string>
+    <string name="category_ready_meals">Piatti pronti</string>
     <string name="category_beverages">Bevande</string>
-    <string name="category_canned_sauces">Conserve e salse</string>
-    <string name="category_oils_condiments">Oli e condimenti</string>
-    <string name="category_cleaning">Pulizia</string>
+    <string name="category_alcohol">Alcolici</string>
+    <string name="category_household">Casa</string>
     <string name="category_personal_hygiene">Igiene personale</string>
-    <string name="category_pets">Animali domestici</string>
-    <string name="category_pharmacy">Farmacia</string>
+    <string name="category_baby">Infanzia</string>
+    <string name="category_pets">Animali</string>
+    <string name="category_health">Salute</string>
     <string name="category_transport">Trasporti</string>
+    <string name="category_eating_out">Ristoranti</string>
 
     <!-- Confronto prezzi -->
     <string name="stats_compare_title">Confronta prezzi</string>

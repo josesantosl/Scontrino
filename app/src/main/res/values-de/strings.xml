@@ -59,19 +59,25 @@
     <string name="category_label">Kategorie</string>
     <string name="category_other">Sonstiges</string>
     <string name="category_vegetables_fruit">Obst &amp; Gemüse</string>
-    <string name="category_plant_protein">Pflanzliches Eiweiß</string>
-    <string name="category_animal_protein">Tierisches Eiweiß</string>
-    <string name="category_dairy_alternatives">Milchprodukte &amp; Alternativen</string>
-    <string name="category_grains_pasta_bread">Getreide, Nudeln &amp; Brot</string>
-    <string name="category_snacks_sweets">Snacks &amp; Süßigkeiten</string>
+    <string name="category_meat">Fleisch</string>
+    <string name="category_seafood">Fisch &amp; Meeresfrüchte</string>
+    <string name="category_dairy">Milchprodukte</string>
+    <string name="category_eggs">Eier</string>
+    <string name="category_legumes">Hülsenfrüchte</string>
+    <string name="category_bakery">Backwaren</string>
+    <string name="category_pasta_rice">Nudeln &amp; Reis</string>
+    <string name="category_condiments">Würzmittel</string>
+    <string name="category_snacks_sweets">Süßes &amp; Snacks</string>
+    <string name="category_ready_meals">Fertiggerichte</string>
     <string name="category_beverages">Getränke</string>
-    <string name="category_canned_sauces">Konserven &amp; Saucen</string>
-    <string name="category_oils_condiments">Öle &amp; Gewürze</string>
-    <string name="category_cleaning">Reinigung</string>
+    <string name="category_alcohol">Alkohol</string>
+    <string name="category_household">Haushalt</string>
     <string name="category_personal_hygiene">Körperpflege</string>
+    <string name="category_baby">Baby</string>
     <string name="category_pets">Haustiere</string>
-    <string name="category_pharmacy">Apotheke</string>
+    <string name="category_health">Gesundheit</string>
     <string name="category_transport">Transport</string>
+    <string name="category_eating_out">Restaurants</string>
 
     <!-- Preisvergleich -->
     <string name="stats_compare_title">Preise vergleichen</string>

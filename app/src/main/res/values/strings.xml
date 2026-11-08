@@ -67,20 +67,26 @@
     <string name="category_select_title">Select category</string>
     <string name="category_label">Category</string>
     <string name="category_other">Other</string>
-    <string name="category_vegetables_fruit">Vegetables &amp; Fruit</string>
-    <string name="category_plant_protein">Plant protein</string>
-    <string name="category_animal_protein">Animal protein</string>
-    <string name="category_dairy_alternatives">Dairy &amp; alternatives</string>
-    <string name="category_grains_pasta_bread">Grains, pasta &amp; bread</string>
+    <string name="category_vegetables_fruit">Fruit &amp; veg</string>
+    <string name="category_meat">Meat</string>
+    <string name="category_seafood">Seafood</string>
+    <string name="category_dairy">Dairy</string>
+    <string name="category_eggs">Eggs</string>
+    <string name="category_legumes">Legumes</string>
+    <string name="category_bakery">Bakery</string>
+    <string name="category_pasta_rice">Pasta &amp; rice</string>
+    <string name="category_condiments">Condiments</string>
     <string name="category_snacks_sweets">Snacks &amp; sweets</string>
-    <string name="category_beverages">Beverages</string>
-    <string name="category_canned_sauces">Canned &amp; sauces</string>
-    <string name="category_oils_condiments">Oils &amp; condiments</string>
-    <string name="category_cleaning">Cleaning</string>
-    <string name="category_personal_hygiene">Personal hygiene</string>
+    <string name="category_ready_meals">Ready meals</string>
+    <string name="category_beverages">Drinks</string>
+    <string name="category_alcohol">Alcohol</string>
+    <string name="category_household">Household</string>
+    <string name="category_personal_hygiene">Personal care</string>
+    <string name="category_baby">Baby</string>
     <string name="category_pets">Pets</string>
-    <string name="category_pharmacy">Pharmacy</string>
+    <string name="category_health">Health</string>
     <string name="category_transport">Transport</string>
+    <string name="category_eating_out">Eating out</string>
 
     <!-- Price comparison -->
     <string name="stats_compare_title">Compare prices</string>
