@@ -119,7 +119,7 @@ private fun ProductSearchField(
     onClear: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var query by remember(selectedProduct?.productId) { mutableStateOf(selectedProduct?.name ?: "") }
+    var query by remember(selectedProduct?.name) { mutableStateOf(selectedProduct?.name ?: "") }
     var expanded by remember { mutableStateOf(false) }
 
     val suggestions = remember(query, products, selectedProduct) {

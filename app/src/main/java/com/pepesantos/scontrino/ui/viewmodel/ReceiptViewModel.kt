@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pepesantos.scontrino.data.alias.AliasRules
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Receipt
@@ -182,18 +183,7 @@ class ReceiptViewModel(
             )
 
             // 4. Resolve products and build item entities
-            val roomItems = items
-                .filter { it.name.isNotBlank() }
-                .map { entry ->
-                    val product = productRepository.getOrCreate(entry.name, entry.categoryId)
-                    Item(
-                        productId = product.id,
-                        price = entry.price,
-                        quantity = entry.quantity,
-                        receiptId = 0, // Assigned in the repository level
-                        weight = entry.weight
-                    )
-                }
+            val roomItems = toRoomItems(items, receiptId = 0) // Assigned in the repository level
 
             // 5. Atomic insertion
             receiptRepository.insert(receipt, roomItems)
@@ -203,6 +193,30 @@ class ReceiptViewModel(
             loadStoresAndProducts()
         }
     }
+
+    /**
+     * Finds or creates the product of every named entry, saving the alias given to it in
+     * the receipt screen when it changed, and builds the items of receipt [receiptId].
+     */
+    private suspend fun toRoomItems(items: List<ItemEntry>, receiptId: Int): List<Item> =
+        items
+            .filter { it.name.isNotBlank() }
+            .map { entry ->
+                val product = productRepository.getOrCreate(entry.name, entry.categoryId)
+                // Null means "not touched here": never wipe an alias set elsewhere.
+                entry.alias?.let { wanted ->
+                    if (AliasRules.normalize(wanted) != product.alias) {
+                        productRepository.setAlias(product.id, wanted)
+                    }
+                }
+                Item(
+                    productId = product.id,
+                    price = entry.price,
+                    quantity = entry.quantity,
+                    receiptId = receiptId,
+                    weight = entry.weight
+                )
+            }
 
     /**
      * Loads a specific receipt and its items into the "selected" states for editing.
@@ -260,19 +274,7 @@ class ReceiptViewModel(
 
             // Delete old items and insert new ones to handle removals/additions simply
             itemRepository.deleteByReceipt(receipt.id)
-            val roomItems = items
-                .filter { it.name.isNotBlank() }
-                .map { entry ->
-                    val product = productRepository.getOrCreate(entry.name, entry.categoryId)
-                    Item(
-                        productId = product.id,
-                        price = entry.price,
-                        quantity = entry.quantity,
-                        receiptId = receipt.id,
-                        weight = entry.weight
-                    )
-                }
-            itemRepository.insertAll(roomItems)
+            itemRepository.insertAll(toRoomItems(items, receipt.id))
 
             loadReceipts()
             loadStoresAndProducts()

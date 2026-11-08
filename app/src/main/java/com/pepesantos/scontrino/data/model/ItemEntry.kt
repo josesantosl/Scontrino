@@ -6,4 +6,9 @@ data class ItemEntry(
     val quantity: Int = 1,
     val categoryId: Int = 1,
     val weight: Double? = null,
+    /**
+     * Alias of the product called [name], saved on the product with the receipt.
+     * Null leaves the product's alias as it is; blank removes it.
+     */
+    val alias: String? = null,
 )

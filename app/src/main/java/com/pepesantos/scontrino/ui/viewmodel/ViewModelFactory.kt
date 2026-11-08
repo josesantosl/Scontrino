@@ -34,7 +34,7 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(PriceComparisonViewModel::class.java) ->
                 PriceComparisonViewModel(itemRepository) as T
             modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
-                SettingsViewModel(settingsRepository, receiptRepository) as T
+                SettingsViewModel(settingsRepository, productRepository, receiptRepository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }

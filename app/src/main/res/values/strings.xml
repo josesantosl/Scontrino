@@ -153,4 +153,23 @@
     <string name="settings_currency_scope_message">Use %1$s for the receipts already saved too, or only for new ones? Amounts are not converted.</string>
     <string name="settings_currency_scope_all">All receipts</string>
     <string name="settings_currency_scope_new">Only new ones</string>
+    <string name="settings_aliases">Product aliases</string>
+    <string name="settings_aliases_subtitle">Group the same product from different brands or stores</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Aliases</string>
+    <string name="aliases_search_hint">Search product or alias</string>
+    <string name="aliases_empty">No products yet: they appear here as you save receipts.</string>
+    <string name="aliases_no_match">No product matches the search.</string>
+    <string name="aliases_section_without">Without alias (%1$d)</string>
+    <string name="aliases_section_with">With alias (%1$d)</string>
+    <string name="alias_dialog_title">Alias</string>
+    <string name="alias_field">Alias</string>
+    <string name="alias_placeholder">e.g. soy milk</string>
+    <string name="alias_suggestions">Suggestions</string>
+    <string name="alias_suggestion_alias">Existing alias</string>
+    <string name="alias_suggestion_product">Product</string>
+    <string name="alias_save">Save</string>
+    <string name="alias_remove">Remove</string>
+    <string name="alias_edit">Edit alias</string>
 </resources>

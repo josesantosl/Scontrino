@@ -145,4 +145,23 @@
     <string name="settings_currency_scope_message">Usare %1$s anche per gli scontrini già salvati o solo per quelli nuovi? Gli importi non vengono convertiti.</string>
     <string name="settings_currency_scope_all">Tutti</string>
     <string name="settings_currency_scope_new">Solo i nuovi</string>
+    <string name="settings_aliases">Alias dei prodotti</string>
+    <string name="settings_aliases_subtitle">Raggruppa lo stesso prodotto di marche o negozi diversi</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Alias</string>
+    <string name="aliases_search_hint">Cerca prodotto o alias</string>
+    <string name="aliases_empty">Ancora nessun prodotto: compaiono qui salvando gli scontrini.</string>
+    <string name="aliases_no_match">Nessun prodotto corrisponde alla ricerca.</string>
+    <string name="aliases_section_without">Senza alias (%1$d)</string>
+    <string name="aliases_section_with">Con alias (%1$d)</string>
+    <string name="alias_dialog_title">Alias</string>
+    <string name="alias_field">Alias</string>
+    <string name="alias_placeholder">es. latte di soia</string>
+    <string name="alias_suggestions">Suggerimenti</string>
+    <string name="alias_suggestion_alias">Alias esistente</string>
+    <string name="alias_suggestion_product">Prodotto</string>
+    <string name="alias_save">Salva</string>
+    <string name="alias_remove">Rimuovi</string>
+    <string name="alias_edit">Modifica alias</string>
 </resources>

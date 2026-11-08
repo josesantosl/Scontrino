@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.data.dao
 
 import androidx.room.*
 import com.pepesantos.scontrino.data.model.Product
+import com.pepesantos.scontrino.data.model.ProductUsage
 
 @Dao
 interface ProductDao {
@@ -26,4 +27,19 @@ interface ProductDao {
 
     @Query("SELECT * FROM Product WHERE categoryId = :categoryId ORDER BY name ASC")
     suspend fun getByCategory(categoryId: Int): List<Product>
+
+    @Query("UPDATE Product SET alias = :alias WHERE id = :productId")
+    suspend fun setAlias(productId: Int, alias: String?)
+
+    @Query("UPDATE Product SET categoryId = :categoryId WHERE id = :productId")
+    suspend fun setCategory(productId: Int, categoryId: Int)
+
+    /** Products bought at least once, with how many receipt lines they appear in. */
+    @Query("""
+    SELECT Product.*, COUNT(Item.id) AS purchaseCount
+    FROM Product
+    INNER JOIN Item ON Item.productId = Product.id
+    GROUP BY Product.id
+""")
+    suspend fun getUsage(): List<ProductUsage>
 }

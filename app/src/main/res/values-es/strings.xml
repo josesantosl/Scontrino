@@ -145,4 +145,23 @@
     <string name="settings_currency_scope_message">¿Usar %1$s también en los tickets ya guardados, o solo en los nuevos? Los importes no se convierten.</string>
     <string name="settings_currency_scope_all">Todos</string>
     <string name="settings_currency_scope_new">Solo los nuevos</string>
+    <string name="settings_aliases">Alias de productos</string>
+    <string name="settings_aliases_subtitle">Agrupa el mismo producto de distintas marcas o tiendas</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Alias</string>
+    <string name="aliases_search_hint">Buscar producto o alias</string>
+    <string name="aliases_empty">Aún no hay productos: aparecen aquí al guardar tickets.</string>
+    <string name="aliases_no_match">Ningún producto coincide con la búsqueda.</string>
+    <string name="aliases_section_without">Sin alias (%1$d)</string>
+    <string name="aliases_section_with">Con alias (%1$d)</string>
+    <string name="alias_dialog_title">Alias</string>
+    <string name="alias_field">Alias</string>
+    <string name="alias_placeholder">ej. leche de soja</string>
+    <string name="alias_suggestions">Sugerencias</string>
+    <string name="alias_suggestion_alias">Alias existente</string>
+    <string name="alias_suggestion_product">Producto</string>
+    <string name="alias_save">Guardar</string>
+    <string name="alias_remove">Quitar</string>
+    <string name="alias_edit">Editar alias</string>
 </resources>

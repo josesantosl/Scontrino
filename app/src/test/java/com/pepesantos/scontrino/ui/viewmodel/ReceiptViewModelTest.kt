@@ -145,6 +145,27 @@ class ReceiptViewModelTest {
     }
 
     @Test
+    fun `saveReceipt saves new aliases, removes blank ones and leaves untouched ones`() = runTest {
+        val items = listOf(
+            ItemEntry("VALSOIA 1LT", 1.0, alias = "latte di soia"),
+            ItemEntry("PANE", 1.0, alias = ""),
+            ItemEntry("MELE", 1.0, alias = null),
+        )
+        whenever(storeRepository.search("Bennet")).thenReturn(emptyList())
+        whenever(storeRepository.insert(any())).thenReturn(1L)
+        whenever(productRepository.getOrCreate("VALSOIA 1LT", 1)).thenReturn(Product(1, "VALSOIA 1LT"))
+        whenever(productRepository.getOrCreate("PANE", 1)).thenReturn(Product(2, "PANE", alias = "Pane"))
+        whenever(productRepository.getOrCreate("MELE", 1)).thenReturn(Product(3, "MELE", alias = "Mele"))
+
+        viewModel.saveReceipt("Bennet", 1L, null, items)
+        advanceUntilIdle()
+
+        verify(productRepository).setAlias(1, "latte di soia")
+        verify(productRepository).setAlias(2, "")
+        verify(productRepository, never()).setAlias(eq(3), anyOrNull())
+    }
+
+    @Test
     fun `loadStoresAndProducts updates stores and products state flows`() = runTest {
         val testStores = listOf(Store(1, "Mercadona"), Store(2, "Carrefour"))
         val testProducts = listOf(Product(1, "Pan", 1), Product(2, "Leche", 1))

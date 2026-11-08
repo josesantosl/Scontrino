@@ -103,7 +103,7 @@ fun ScontrinoApp(factory: ViewModelFactory, onLanguageChanged: () -> Unit = {}) 
                     onClick = {
                         when (it) {
                             AppDestinations.STATS -> statsViewModel.loadStats()
-                            // The currency may have changed in the settings.
+                            // Currencies or aliases may have changed in the settings.
                             AppDestinations.SCONTRINI -> receiptViewModel.loadReceipts()
                             else -> Unit
                         }

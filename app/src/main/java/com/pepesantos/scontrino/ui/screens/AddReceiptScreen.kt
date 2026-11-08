@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,6 +10,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Remove
@@ -17,16 +19,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.data.alias.AliasRules
 import com.pepesantos.scontrino.data.model.Category
 import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
+import com.pepesantos.scontrino.ui.components.AliasDialog
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.theme.displayColor
@@ -67,6 +75,28 @@ fun AddReceiptScreen(
     var note by remember(receiptId) { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
     
     val items = remember(receiptId) { mutableStateListOf<ItemEntry>() }
+
+    // Alias already given to each product, so that a known name shows its alias at once.
+    val aliasByName = remember(availableProducts) {
+        availableProducts.filter { it.alias != null }.associate { it.name.trim().lowercase() to it.alias }
+    }
+    fun knownAlias(name: String): String? = aliasByName[name.trim().lowercase()]
+
+    fun detectedCategoryId(text: String): Int? =
+        CategoryMatcher.detectCategoryLabel(text)?.let { label -> categories.find { it.label == label }?.id }
+
+    /**
+     * Category of a row: the one already used by its alias group wins (it was chosen or
+     * confirmed by the user), then the one detected from the name, then from the alias,
+     * and otherwise [current]. [products] may include rows not saved yet.
+     */
+    fun categoryFor(name: String, alias: String?, current: Int, products: List<Product> = availableProducts): Int =
+        alias?.takeIf { it.isNotBlank() }?.let { AliasRules.groupCategoryId(it, products) }
+            ?: detectedCategoryId(name)
+            ?: alias?.takeIf { it.isNotBlank() }?.let { detectedCategoryId(it) }
+            ?: current
+    // Row whose alias is being edited (long press on its card).
+    var aliasRowIndex by remember { mutableStateOf<Int?>(null) }
     
     // Effect to populate items when loading from database (handles async loading)
     LaunchedEffect(receiptId, existingItems) {
@@ -75,7 +105,18 @@ fun AddReceiptScreen(
             items.addAll(existingItems)
             items.add(ItemEntry(categoryId = 1)) // Add empty row for new additions
         } else if (receiptId == -1 && items.isEmpty()) {
-            draft?.let { items.addAll(it.items) }
+            draft?.let { d ->
+                items.addAll(d.items.map { entry ->
+                    val alias = entry.alias ?: knownAlias(entry.name)
+                    // The draft already took the category of a known product or of its name:
+                    // the alias group's category still wins, the alias text only fills "other".
+                    val categoryId = alias?.let { AliasRules.groupCategoryId(it, availableProducts) }
+                        ?: entry.categoryId.takeIf { it != 1 }
+                        ?: alias?.let { detectedCategoryId(it) }
+                        ?: entry.categoryId
+                    entry.copy(alias = alias, categoryId = categoryId)
+                })
+            }
             items.add(ItemEntry(categoryId = 1))
         }
     }
@@ -163,6 +204,47 @@ fun AddReceiptScreen(
     }
 
     BackHandler(enabled = true, onBack = handleBack)
+
+    val aliasEntry = aliasRowIndex?.let { items.getOrNull(it) }?.takeIf { it.name.isNotBlank() }
+    if (aliasEntry != null) {
+        val entry = aliasEntry
+        // Aliases given in this receipt (not saved yet) are suggested too.
+        val unsaved = items
+            .filter { !it.alias.isNullOrBlank() && !it.name.equals(entry.name, ignoreCase = true) }
+            .mapIndexed { i, it -> Product(id = -1 - i, name = it.name, categoryId = it.categoryId, alias = it.alias) }
+        val products = unsaved + availableProducts
+        AliasDialog(
+            productName = entry.name,
+            currentAlias = entry.alias?.takeIf { it.isNotBlank() },
+            products = products,
+            onConfirm = { typed ->
+                val selfId = availableProducts.firstOrNull { it.name.equals(entry.name, ignoreCase = true) }?.id
+                val resolution = AliasRules.resolve(typed, products, selfId)
+                val promotedName = resolution.promotedProductId?.let { id -> products.find { it.id == id }?.name }
+                // Every row of the same product shares the alias (saved on the product).
+                for (i in items.indices) {
+                    val row = items[i]
+                    if (row.name.equals(entry.name, ignoreCase = true)) {
+                        // Blank (not null) so that saving removes the product's alias.
+                        val alias = resolution.alias ?: ""
+                        val groupProducts = products.filterNot { it.name.equals(entry.name, ignoreCase = true) }
+                        items[i] = row.copy(
+                            alias = alias,
+                            categoryId = alias.takeIf { it.isNotBlank() }
+                                ?.let { AliasRules.groupCategoryId(it, groupProducts) }
+                                ?: row.categoryId.takeIf { it != 1 }
+                                ?: alias.takeIf { it.isNotBlank() }?.let { detectedCategoryId(it) }
+                                ?: row.categoryId
+                        )
+                    } else if (promotedName != null && row.alias == null && row.name.equals(promotedName, ignoreCase = true)) {
+                        items[i] = row.copy(alias = promotedName)
+                    }
+                }
+                aliasRowIndex = null
+            },
+            onDismiss = { aliasRowIndex = null },
+        )
+    }
 
     if (showDiscardDialog) {
         AlertDialog(
@@ -334,17 +416,13 @@ fun AddReceiptScreen(
                     categories = categories,
                     availableProducts = availableProducts,
                     onNameChange = { name ->
-                        var categoryId = items[index].categoryId
-                        // Automatically detect category based on product name
-                        val detectedLabel = CategoryMatcher.detectCategoryLabel(name)
-                        if (detectedLabel != null) {
-                            val category = categories.find { it.label == detectedLabel }
-                            if (category != null) {
-                                categoryId = category.id
-                            }
-                        }
-                        
-                        val updated = prefill(index, items[index].copy(name = name, categoryId = categoryId))
+                        // Category from the alias group, else detected from the name or the alias
+                        val alias = knownAlias(name)
+                        val categoryId = categoryFor(name, alias, items[index].categoryId)
+                        val updated = prefill(
+                            index,
+                            items[index].copy(name = name, categoryId = categoryId, alias = alias)
+                        )
                         items[index] = updated
                         // Add new empty row if user started typing in the last one
                         if (index == items.lastIndex && updated.name.isNotBlank()) {
@@ -356,7 +434,11 @@ fun AddReceiptScreen(
                             index,
                             items[index].copy(
                                 name = selectedProduct.name,
-                                categoryId = selectedProduct.categoryId
+                                categoryId = selectedProduct.alias
+                                    ?.let { AliasRules.groupCategoryId(it, availableProducts) }
+                                    ?: selectedProduct.categoryId.takeIf { it != 1 }
+                                    ?: categoryFor(selectedProduct.name, selectedProduct.alias, selectedProduct.categoryId),
+                                alias = selectedProduct.alias
                             )
                         )
                         items[index] = updated
@@ -389,7 +471,8 @@ fun AddReceiptScreen(
                     },
                     onCategoryChange = { catId ->
                         items[index] = items[index].copy(categoryId = catId)
-                    }
+                    },
+                    onEditAlias = { if (items[index].name.isNotBlank()) aliasRowIndex = index }
                 )
             }
             item {
@@ -459,8 +542,12 @@ fun ItemRow(
     onPriceChange: (Double) -> Unit,
     onWeightChange: (Double?) -> Unit,
     onQuantityChange: (Int) -> Unit,
-    onCategoryChange: (Int) -> Unit
+    onCategoryChange: (Int) -> Unit,
+    /** Long press on the card, or tap on the alias: add or change the product's alias. */
+    onEditAlias: () -> Unit = {},
 ) {
+    val haptics = LocalHapticFeedback.current
+    val currentOnEditAlias by rememberUpdatedState(onEditAlias)
     var showCategoryDialog by remember { mutableStateOf(false) }
     val currentCategory = categories.find { it.id == item.categoryId } ?: categories.firstOrNull()
 
@@ -520,7 +607,14 @@ fun ItemRow(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    currentOnEditAlias()
+                })
+            },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -557,18 +651,23 @@ fun ItemRow(
                     }
                 }
 
+                // With an alias the field shows it (the name used in the statistics); the
+                // name read on the receipt goes small below. Typing changes the product.
+                val alias = item.alias?.takeIf { it.isNotBlank() }
                 ExposedDropdownMenuBox(
                     expanded = productExpanded && filteredProducts.isNotEmpty(),
                     onExpandedChange = { productExpanded = it },
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = item.name,
+                        value = alias ?: item.name,
                         onValueChange = {
                             onNameChange(it)
                             productExpanded = true
                         },
-                        label = { Text(stringResource(R.string.add_receipt_item_name)) },
+                        label = {
+                            Text(stringResource(if (alias != null) R.string.alias_field else R.string.add_receipt_item_name))
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
@@ -590,6 +689,31 @@ fun ItemRow(
                             }
                         }
                     }
+                }
+            }
+
+            // Original name (as on the receipt) when the field shows the alias.
+            if (!item.alias.isNullOrBlank()) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 56.dp)
+                        .clickable(onClickLabel = stringResource(R.string.alias_edit), onClick = onEditAlias),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
 

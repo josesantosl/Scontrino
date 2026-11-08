@@ -60,8 +60,8 @@ fun StatsScreen(
     } else {
         StatsContent(
             viewModel = viewModel,
-            onOpenComparison = { productId ->
-                priceComparisonViewModel.open(productId)
+            onOpenComparison = { productName ->
+                priceComparisonViewModel.open(productName)
                 showComparison = true
             }
         )
@@ -72,7 +72,7 @@ fun StatsScreen(
 @Composable
 private fun StatsContent(
     viewModel: StatsViewModel,
-    onOpenComparison: (productId: Int?) -> Unit,
+    onOpenComparison: (productName: String?) -> Unit,
 ) {
     val state by viewModel.stats.collectAsState()
 
@@ -138,7 +138,7 @@ private fun StatsContent(
                     onTopModeSelected = { viewModel.selectTopMode(it) },
                     topProducts = state.topProducts,
                     topCategories = state.topCategories,
-                    onProductClick = { onOpenComparison(it.productId) }
+                    onProductClick = { onOpenComparison(it.productName) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

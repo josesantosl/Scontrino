@@ -145,4 +145,23 @@
     <string name="settings_currency_scope_message">Utiliser %1$s aussi pour les tickets déjà enregistrés, ou seulement pour les nouveaux ? Les montants ne sont pas convertis.</string>
     <string name="settings_currency_scope_all">Tous</string>
     <string name="settings_currency_scope_new">Seulement les nouveaux</string>
+    <string name="settings_aliases">Alias des produits</string>
+    <string name="settings_aliases_subtitle">Regroupe le même produit de marques ou magasins différents</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Alias</string>
+    <string name="aliases_search_hint">Rechercher un produit ou un alias</string>
+    <string name="aliases_empty">Pas encore de produits : ils apparaissent ici en enregistrant des tickets.</string>
+    <string name="aliases_no_match">Aucun produit ne correspond à la recherche.</string>
+    <string name="aliases_section_without">Sans alias (%1$d)</string>
+    <string name="aliases_section_with">Avec alias (%1$d)</string>
+    <string name="alias_dialog_title">Alias</string>
+    <string name="alias_field">Alias</string>
+    <string name="alias_placeholder">ex. lait de soja</string>
+    <string name="alias_suggestions">Suggestions</string>
+    <string name="alias_suggestion_alias">Alias existant</string>
+    <string name="alias_suggestion_product">Produit</string>
+    <string name="alias_save">Enregistrer</string>
+    <string name="alias_remove">Supprimer</string>
+    <string name="alias_edit">Modifier l\'alias</string>
 </resources>

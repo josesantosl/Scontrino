@@ -6,10 +6,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,7 +27,7 @@ import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
- * App settings: language and currency.
+ * App settings: language, currency and the product aliases screen.
  * [onLanguageChanged] must recreate the activity so that the new language is applied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +36,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onLanguageChanged: () -> Unit,
 ) {
+    var showAliases by rememberSaveable { mutableStateOf(false) }
+    if (showAliases) {
+        AliasesScreen(viewModel = viewModel, onNavigateBack = { showAliases = false })
+        return
+    }
+
     val language by viewModel.language.collectAsState()
     val currency by viewModel.currency.collectAsState()
     val scope = rememberCoroutineScope()
@@ -75,6 +84,17 @@ fun SettingsScreen(
                     supportingContent = { Text(Money.displayName(currency)) },
                     leadingContent = { Icon(Icons.Filled.Payments, contentDescription = null) },
                     modifier = Modifier.clickable { showCurrencyDialog = true }
+                )
+                HorizontalDivider()
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_aliases)) },
+                    supportingContent = { Text(stringResource(R.string.settings_aliases_subtitle)) },
+                    leadingContent = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = null) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        viewModel.loadAliases()
+                        showAliases = true
+                    }
                 )
             }
 

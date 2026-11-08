@@ -66,15 +66,18 @@ class PriceComparisonViewModel(
 
     private var comparisonJob: Job? = null
 
-    /** Reloads the searchable products and, if a product is given, opens its comparison. */
-    fun open(productId: Int? = null) {
+    /**
+     * Reloads the searchable products and, if a product group (alias or product name) is
+     * given, opens its comparison.
+     */
+    fun open(productName: String? = null) {
         viewModelScope.launch {
             val products = itemRepository.getComparableProducts()
             _state.update { it.copy(products = products) }
-            val target = productId?.let { id -> products.find { it.productId == id } }
+            val target = productName?.let { name -> products.find { it.name == name } }
             if (target != null) {
                 selectProduct(target)
-            } else if (productId != null) {
+            } else if (productName != null) {
                 clearSelection()
             }
         }
@@ -91,8 +94,8 @@ class PriceComparisonViewModel(
 
         comparisonJob?.cancel()
         comparisonJob = viewModelScope.launch {
-            val latest = itemRepository.getLatestPricePerStore(product.productId)
-            val storeWeights = itemRepository.getLastKnownWeightPerStore(product.productId)
+            val latest = itemRepository.getLatestPricePerStore(product.name)
+            val storeWeights = itemRepository.getLastKnownWeightPerStore(product.name)
             val weightByStore = storeWeights.associate { it.storeId to it.weight }
             // Only used for stores that never recorded a weight for this product.
             val mostRecentWeightAnyStore = storeWeights.maxByOrNull { it.date }?.weight

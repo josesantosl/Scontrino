@@ -53,6 +53,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE Product ADD COLUMN alias TEXT DEFAULT NULL")
                 // Every receipt so far was in euros.
                 db.execSQL("ALTER TABLE Receipt ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'")
             }

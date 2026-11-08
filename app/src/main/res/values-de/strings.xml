@@ -144,4 +144,23 @@
     <string name="settings_currency_scope_message">%1$s auch für bereits gespeicherte Belege verwenden oder nur für neue? Beträge werden nicht umgerechnet.</string>
     <string name="settings_currency_scope_all">Alle Belege</string>
     <string name="settings_currency_scope_new">Nur neue</string>
+    <string name="settings_aliases">Produkt-Aliasse</string>
+    <string name="settings_aliases_subtitle">Gleiches Produkt verschiedener Marken oder Läden zusammenfassen</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Aliasse</string>
+    <string name="aliases_search_hint">Produkt oder Alias suchen</string>
+    <string name="aliases_empty">Noch keine Produkte: Sie erscheinen hier, sobald Belege gespeichert werden.</string>
+    <string name="aliases_no_match">Kein Produkt passt zur Suche.</string>
+    <string name="aliases_section_without">Ohne Alias (%1$d)</string>
+    <string name="aliases_section_with">Mit Alias (%1$d)</string>
+    <string name="alias_dialog_title">Alias</string>
+    <string name="alias_field">Alias</string>
+    <string name="alias_placeholder">z. B. Sojamilch</string>
+    <string name="alias_suggestions">Vorschläge</string>
+    <string name="alias_suggestion_alias">Vorhandener Alias</string>
+    <string name="alias_suggestion_product">Produkt</string>
+    <string name="alias_save">Speichern</string>
+    <string name="alias_remove">Entfernen</string>
+    <string name="alias_edit">Alias bearbeiten</string>
 </resources>
