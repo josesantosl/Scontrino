@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +19,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.layout.WindowInsetsRulers
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -206,6 +212,9 @@ fun AddReceiptScreen(
 
     BackHandler(enabled = true, onBack = handleBack)
 
+    // Enter on the keyboard goes to the next field (store → item name → price → weight → next item).
+    val focusManager = LocalFocusManager.current
+
     val aliasEntry = aliasRowIndex?.let { items.getOrNull(it) }?.takeIf { it.name.isNotBlank() }
     if (aliasEntry != null) {
         val entry = aliasEntry
@@ -269,6 +278,10 @@ fun AddReceiptScreen(
     }
 
     Scaffold(
+        // Fit the whole screen above the keyboard, so the save button rises with it and
+        // never gets hidden. A ruler, unlike imePadding(), measures from where this screen
+        // really ends (above the app's navigation bar), so there's no extra gap.
+        modifier = Modifier.fitInside(WindowInsetsRulers.Ime.current),
         topBar = {
             TopAppBar(
                 title = {
@@ -355,7 +368,12 @@ fun AddReceiptScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = {
+                            storeExpanded = false
+                            focusManager.moveFocus(FocusDirection.Next)
+                        })
                     )
                     if (filteredStoreSuggestions.isNotEmpty()) {
                         ExposedDropdownMenu(
@@ -380,7 +398,10 @@ fun AddReceiptScreen(
                     value = selectedDate,
                     onValueChange = {},
                     label = { Text(stringResource(R.string.add_receipt_date)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    // Picked with the dialog: skipped when moving to the next field.
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusProperties { canFocus = false },
                     readOnly = true,
                     trailingIcon = {
                         IconButton(onClick = { showDatePicker = true }) {
@@ -556,6 +577,7 @@ fun ItemRow(
     onEditAlias: () -> Unit = {},
 ) {
     val haptics = LocalHapticFeedback.current
+    val focusManager = LocalFocusManager.current
     val currentOnEditAlias by rememberUpdatedState(onEditAlias)
     var showCategoryDialog by remember { mutableStateOf(false) }
     val currentCategory = categories.find { it.id == item.categoryId } ?: categories.firstOrNull()
@@ -655,7 +677,12 @@ fun ItemRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = {
+                            productExpanded = false
+                            focusManager.moveFocus(FocusDirection.Next)
+                        })
                     )
                     if (filteredProducts.isNotEmpty()) {
                         ExposedDropdownMenu(
@@ -716,7 +743,8 @@ fun ItemRow(
                         }
                     },
                     label = { Text(stringResource(R.string.add_receipt_price)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                     modifier = Modifier.weight(1f)
                 )
 
@@ -730,7 +758,8 @@ fun ItemRow(
                         }
                     },
                     label = { Text(weightOrVolumeLabel) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                     modifier = Modifier.weight(1f)
                 )
                 
