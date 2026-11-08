@@ -34,6 +34,10 @@ interface ProductDao {
     @Query("UPDATE Product SET categoryId = :categoryId WHERE id = :productId")
     suspend fun setCategory(productId: Int, categoryId: Int)
 
+    /** Keeps the products of an alias in the alias's category. */
+    @Query("UPDATE Product SET categoryId = :categoryId WHERE alias = :alias")
+    suspend fun setCategoryForAlias(alias: String, categoryId: Int)
+
     /** Products bought at least once, with how many receipt lines they appear in. */
     @Query("""
     SELECT Product.*, COUNT(Item.id) AS purchaseCount

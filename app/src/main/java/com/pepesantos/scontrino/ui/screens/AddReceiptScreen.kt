@@ -35,6 +35,7 @@ import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
 import com.pepesantos.scontrino.ui.components.AliasDialog
+import com.pepesantos.scontrino.ui.components.CategoryPickerDialog
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.displayName
 import com.pepesantos.scontrino.ui.theme.displayColor
@@ -470,7 +471,15 @@ fun AddReceiptScreen(
                         }
                     },
                     onCategoryChange = { catId ->
-                        items[index] = items[index].copy(categoryId = catId)
+                        // The category of a product with alias is the alias's: the whole
+                        // group changes, here and (when saved) everywhere.
+                        val alias = items[index].alias?.takeIf { it.isNotBlank() }
+                        for (i in items.indices) {
+                            val row = items[i]
+                            if (i == index || (alias != null && row.alias.equals(alias, ignoreCase = true))) {
+                                items[i] = row.copy(categoryId = catId)
+                            }
+                        }
                     },
                     onEditAlias = { if (items[index].name.isNotBlank()) aliasRowIndex = index }
                 )
@@ -571,38 +580,13 @@ fun ItemRow(
     }
 
     if (showCategoryDialog) {
-        AlertDialog(
-            onDismissRequest = { showCategoryDialog = false },
-            title = { Text(stringResource(R.string.category_select_title)) },
-            text = {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(categories) { category ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onCategoryChange(category.id)
-                                    showCategoryDialog = false
-                                }
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = category.icon(),
-                                contentDescription = category.displayName(),
-                                tint = category.displayColor()
-                            )
-                            Text(category.displayName())
-                        }
-                    }
-                }
+        CategoryPickerDialog(
+            categories = categories,
+            onSelect = {
+                onCategoryChange(it)
+                showCategoryDialog = false
             },
-            confirmButton = {
-                TextButton(onClick = { showCategoryDialog = false }) {
-                    Text(stringResource(R.string.delete_cancel))
-                }
-            }
+            onDismiss = { showCategoryDialog = false },
         )
     }
 

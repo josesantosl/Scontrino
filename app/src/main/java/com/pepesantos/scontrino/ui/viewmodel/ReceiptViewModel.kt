@@ -2,7 +2,6 @@ package com.pepesantos.scontrino.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pepesantos.scontrino.data.alias.AliasRules
 import com.pepesantos.scontrino.data.model.Item
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Receipt
@@ -195,20 +194,16 @@ class ReceiptViewModel(
     }
 
     /**
-     * Finds or creates the product of every named entry, saving the alias given to it in
-     * the receipt screen when it changed, and builds the items of receipt [receiptId].
+     * Finds or creates the product of every named entry, saving the alias and category
+     * given to it in the receipt screen (a category change on a product with alias moves
+     * the whole group), and builds the items of receipt [receiptId].
      */
     private suspend fun toRoomItems(items: List<ItemEntry>, receiptId: Int): List<Item> =
         items
             .filter { it.name.isNotBlank() }
             .map { entry ->
-                val product = productRepository.getOrCreate(entry.name, entry.categoryId)
-                // Null means "not touched here": never wipe an alias set elsewhere.
-                entry.alias?.let { wanted ->
-                    if (AliasRules.normalize(wanted) != product.alias) {
-                        productRepository.setAlias(product.id, wanted)
-                    }
-                }
+                // A null alias means "not touched here": never wipe an alias set elsewhere.
+                val product = productRepository.getOrCreate(entry.name, entry.categoryId, entry.alias)
                 Item(
                     productId = product.id,
                     price = entry.price,

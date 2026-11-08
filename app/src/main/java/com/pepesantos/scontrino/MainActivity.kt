@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
         val factory = ViewModelFactory(
             receiptRepository = ReceiptRepository(database.receiptDao(), database.itemDao()),
             storeRepository = StoreRepository(database.storeDao()),
-            productRepository = ProductRepository(database.productDao()),
+            productRepository = ProductRepository(database.productDao(), database.aliasDao()),
             loyaltyCardRepository = LoyaltyCardRepository(database.loyaltyCardDao()),
             itemRepository = ItemRepository(database.itemDao()),
             categoryRepository = CategoryRepository(database.categoryDao()),

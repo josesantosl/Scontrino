@@ -145,24 +145,22 @@ class ReceiptViewModelTest {
     }
 
     @Test
-    fun `saveReceipt saves new aliases, removes blank ones and leaves untouched ones`() = runTest {
+    fun `saveReceipt passes each row's alias and category to the product`() = runTest {
         val items = listOf(
-            ItemEntry("VALSOIA 1LT", 1.0, alias = "latte di soia"),
+            ItemEntry("VALSOIA 1LT", 1.0, categoryId = 5, alias = "latte di soia"),
             ItemEntry("PANE", 1.0, alias = ""),
             ItemEntry("MELE", 1.0, alias = null),
         )
         whenever(storeRepository.search("Bennet")).thenReturn(emptyList())
         whenever(storeRepository.insert(any())).thenReturn(1L)
-        whenever(productRepository.getOrCreate("VALSOIA 1LT", 1)).thenReturn(Product(1, "VALSOIA 1LT"))
-        whenever(productRepository.getOrCreate("PANE", 1)).thenReturn(Product(2, "PANE", alias = "Pane"))
-        whenever(productRepository.getOrCreate("MELE", 1)).thenReturn(Product(3, "MELE", alias = "Mele"))
+        whenever(productRepository.getOrCreate(any(), any(), anyOrNull())).thenReturn(Product(1, "x"))
 
         viewModel.saveReceipt("Bennet", 1L, null, items)
         advanceUntilIdle()
 
-        verify(productRepository).setAlias(1, "latte di soia")
-        verify(productRepository).setAlias(2, "")
-        verify(productRepository, never()).setAlias(eq(3), anyOrNull())
+        verify(productRepository).getOrCreate("VALSOIA 1LT", 5, "latte di soia")
+        verify(productRepository).getOrCreate("PANE", 1, "")
+        verify(productRepository).getOrCreate("MELE", 1, null)
     }
 
     @Test

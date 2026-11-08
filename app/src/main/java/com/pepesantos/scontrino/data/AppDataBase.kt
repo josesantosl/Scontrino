@@ -22,8 +22,9 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
         Receipt::class,
         Store::class,
         LoyaltyCard::class,
+        ProductAlias::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +35,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun receiptDao(): ReceiptDao
     abstract fun storeDao(): StoreDao
     abstract fun loyaltyCardDao(): LoyaltyCardDao
+    abstract fun aliasDao(): AliasDao
 
     companion object {
         @Volatile
@@ -59,6 +61,32 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `ProductAlias` (`name` TEXT NOT NULL, `categoryId` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`name`), FOREIGN KEY(`categoryId`) REFERENCES `Category`(`id`) " +
+                        "ON UPDATE NO ACTION ON DELETE NO ACTION )"
+                )
+                // Each alias takes the most used real category of its products (1 = other).
+                db.execSQL(
+                    """
+                    INSERT INTO ProductAlias (name, categoryId)
+                    SELECT p.alias, COALESCE(
+                        (SELECT p2.categoryId FROM Product p2
+                         WHERE p2.alias = p.alias AND p2.categoryId != 1
+                         GROUP BY p2.categoryId ORDER BY COUNT(*) DESC LIMIT 1), 1)
+                    FROM Product p WHERE p.alias IS NOT NULL GROUP BY p.alias
+                    """.trimIndent()
+                )
+                // Products mirror the category of their alias.
+                db.execSQL(
+                    "UPDATE Product SET categoryId = (SELECT categoryId FROM ProductAlias WHERE name = Product.alias) " +
+                        "WHERE alias IS NOT NULL"
+                )
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -73,7 +101,7 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(PrepopulateCallback())
                     // Every version bump needs a migration here: the destructive
                     // fallback below would otherwise wipe the user's receipts.
-                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
