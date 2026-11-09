@@ -2,6 +2,8 @@ package com.pepesantos.scontrino.ui.viewmodel
 
 import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.ReceiptRepository
+import com.pepesantos.scontrino.data.settings.SettingsRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -16,6 +18,9 @@ class StatsViewModelTest {
 
     private val receiptRepository: ReceiptRepository = mock()
     private val itemRepository: ItemRepository = mock()
+    private val settingsRepository: SettingsRepository = mock {
+        on { collapsedStatsCards } doReturn MutableStateFlow(emptySet())
+    }
     private lateinit var viewModel: StatsViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -30,7 +35,7 @@ class StatsViewModelTest {
         whenever(itemRepository.getTopProductsSpendingInRange(any(), any())).thenReturn(emptyList())
         whenever(itemRepository.getTopCategoriesSpendingInRange(any(), any())).thenReturn(emptyList())
 
-        viewModel = StatsViewModel(receiptRepository, itemRepository)
+        viewModel = StatsViewModel(receiptRepository, itemRepository, settingsRepository)
     }
 
     @After
