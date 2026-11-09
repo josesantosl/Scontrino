@@ -94,4 +94,29 @@ class ReceiptParserFixtureTest {
         assertEquals("07071700152", receipt.vatNumber)
         assertNull(receipt.items.first { it.name.startsWith("BIA") }.code)
     }
+
+    @Test
+    fun `bennet 2026-11-08 - clean read, total from the large font, VAT letters D and C`() {
+        val receipt = parse("bennet-torino-san-paolo-2026-11-08")
+
+        assertEquals(
+            listOf(
+                Triple("SACC.UMIDO BENNET 10LT P", "1,50", 0L),
+                Triple("SAC .TRASP.BENNET 110LT P", "1,99", 0L),
+                Triple("SOYADRINK CLASSICO LT 1", "2,49", 75L),
+                Triple("VERDURE ORTO PASTELLA", "2,32", 0L),
+                Triple("PIZZA POMODORISSIM", "1,35", 0L),
+            ),
+            receipt.items.map { Triple(it.name, Amounts.format(it.priceCents), it.discountCents) }
+        )
+        assertEquals("265", receipt.items.last().code)
+        assertTrue(receipt.items.all { it.correctedFromCents == null })
+
+        assertEquals(890L, receipt.totalCents)
+        assertTrue(receipt.isConsistent)
+        // "D: IVA 22,0%" / "C: IVA 10,0%".
+        assertEquals(listOf(22.0, 22.0, 22.0, 10.0, 10.0), receipt.items.map { it.vatRate })
+        assertEquals(ReceiptDate(2026, 11, 8, 14, 30), receipt.date)
+        assertEquals("07071700152", receipt.vatNumber)
+    }
 }
