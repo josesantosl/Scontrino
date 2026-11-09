@@ -12,6 +12,9 @@
     <string name="stats_period_three_months">3 Months</string>
     <string name="stats_period_this_year">Year</string>
     <string name="stats_total_spending">Total Spending</string>
+    <string name="stats_card_expand">Expand</string>
+    <string name="stats_card_collapse">Collapse</string>
+    <string name="stats_chart_tap_hint">Tap the chart to see the amount</string>
     <string name="stats_vs_prev_period">vs prev period</string>
     <string name="stats_no_prev_data">No prior data</string>
     <string name="stats_spending_by_store">Spending by Supermarket</string>

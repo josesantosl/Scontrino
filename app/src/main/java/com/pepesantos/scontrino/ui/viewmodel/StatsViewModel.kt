@@ -8,6 +8,7 @@ import com.pepesantos.scontrino.data.model.TopCategorySpending
 import com.pepesantos.scontrino.data.model.TopProductSpending
 import com.pepesantos.scontrino.data.repository.ItemRepository
 import com.pepesantos.scontrino.data.repository.ReceiptRepository
+import com.pepesantos.scontrino.data.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -20,6 +21,14 @@ enum class TimePeriod {
     THIS_MONTH,
     THREE_MONTHS,
     THIS_YEAR
+}
+
+/** Collapsible cards of the statistics screen. Names are persisted: don't rename them. */
+enum class StatsCard {
+    TOTAL,
+    STORES,
+    EVOLUTION,
+    TOP
 }
 
 enum class TopMode {
@@ -49,11 +58,18 @@ data class StatsState(
 
 class StatsViewModel(
     private val receiptRepository: ReceiptRepository,
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _stats = MutableStateFlow(StatsState())
     val stats: StateFlow<StatsState> = _stats
+
+    /** Collapsed cards, persisted: some totals are better not seen again. */
+    val collapsedCards: StateFlow<Set<String>> = settingsRepository.collapsedStatsCards
+
+    fun toggleCard(card: StatsCard) =
+        settingsRepository.setStatsCardCollapsed(card.name, card.name !in collapsedCards.value)
 
     init {
         loadStats(TimePeriod.THIS_MONTH)

@@ -8,6 +8,9 @@
     <string name="stats_period_three_months">3 mois</string>
     <string name="stats_period_this_year">Année</string>
     <string name="stats_total_spending">Dépense totale</string>
+    <string name="stats_card_expand">Développer</string>
+    <string name="stats_card_collapse">Réduire</string>
+    <string name="stats_chart_tap_hint">Touchez le graphique pour voir le montant</string>
     <string name="stats_vs_prev_period">vs période précédente</string>
     <string name="stats_no_prev_data">Pas de données antérieures</string>
     <string name="stats_spending_by_store">Dépenses par supermarché</string>

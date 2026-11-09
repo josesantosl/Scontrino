@@ -12,6 +12,9 @@
     <string name="stats_period_three_months">3 个月</string>
     <string name="stats_period_this_year">今年</string>
     <string name="stats_total_spending">总支出</string>
+    <string name="stats_card_expand">展开</string>
+    <string name="stats_card_collapse">收起</string>
+    <string name="stats_chart_tap_hint">点按图表查看金额</string>
     <string name="stats_vs_prev_period">与上期相比</string>
     <string name="stats_no_prev_data">无上期数据</string>
     <string name="stats_spending_by_store">各超市支出</string>

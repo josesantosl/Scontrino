@@ -8,6 +8,9 @@
     <string name="stats_period_three_months">3 mesi</string>
     <string name="stats_period_this_year">Anno</string>
     <string name="stats_total_spending">Spesa totale</string>
+    <string name="stats_card_expand">Espandi</string>
+    <string name="stats_card_collapse">Comprimi</string>
+    <string name="stats_chart_tap_hint">Tocca il grafico per vedere l\'importo</string>
     <string name="stats_vs_prev_period">vs periodo precedente</string>
     <string name="stats_no_prev_data">Nessun dato precedente</string>
     <string name="stats_spending_by_store">Spesa per supermercato</string>

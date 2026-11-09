@@ -23,6 +23,18 @@ class SettingsRepository(context: Context) {
     /** Currency of new receipts and of the statistics. */
     val currency: StateFlow<String> = _currency.asStateFlow()
 
+    private val _collapsedStatsCards = MutableStateFlow(
+        prefs.getStringSet(KEY_COLLAPSED_STATS_CARDS, null)?.toSet() ?: emptySet()
+    )
+    /** Keys of the statistics cards the user has collapsed. */
+    val collapsedStatsCards: StateFlow<Set<String>> = _collapsedStatsCards.asStateFlow()
+
+    fun setStatsCardCollapsed(key: String, collapsed: Boolean) {
+        val updated = if (collapsed) _collapsedStatsCards.value + key else _collapsedStatsCards.value - key
+        prefs.edit { putStringSet(KEY_COLLAPSED_STATS_CARDS, updated) }
+        _collapsedStatsCards.value = updated
+    }
+
     fun setLanguage(tag: String) {
         prefs.edit { putString(KEY_LANGUAGE, tag) }
         _language.value = tag
@@ -38,6 +50,7 @@ class SettingsRepository(context: Context) {
         private const val FILE = "settings"
         private const val KEY_LANGUAGE = "language"
         private const val KEY_CURRENCY = "currency"
+        private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
 
         private fun preferences(context: Context): SharedPreferences =
             context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)

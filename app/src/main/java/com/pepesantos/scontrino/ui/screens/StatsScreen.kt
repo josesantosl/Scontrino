@@ -1,6 +1,9 @@
 package com.pepesantos.scontrino.ui.screens
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,17 +19,22 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,10 +48,12 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
 import com.pepesantos.scontrino.ui.theme.getCategoryDisplayName
 import com.pepesantos.scontrino.ui.viewmodel.DailySpendingPoint
 import com.pepesantos.scontrino.ui.viewmodel.PriceComparisonViewModel
+import com.pepesantos.scontrino.ui.viewmodel.StatsCard
 import com.pepesantos.scontrino.ui.viewmodel.StatsViewModel
 import com.pepesantos.scontrino.ui.viewmodel.TimePeriod
 import com.pepesantos.scontrino.ui.viewmodel.TopMode
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 fun StatsScreen(
@@ -75,6 +85,8 @@ private fun StatsContent(
     onOpenComparison: (productName: String?) -> Unit,
 ) {
     val state by viewModel.stats.collectAsState()
+    val collapsed by viewModel.collapsedCards.collectAsState()
+    fun isCollapsed(card: StatsCard) = card.name in collapsed
 
     Scaffold(
         topBar = {
@@ -115,18 +127,24 @@ private fun StatsContent(
                 // Card Gasto Total
                 TotalSpendingCard(
                     total = state.totalSpent,
-                    percentageChange = state.percentageChange
+                    percentageChange = state.percentageChange,
+                    collapsed = isCollapsed(StatsCard.TOTAL),
+                    onToggle = { viewModel.toggleCard(StatsCard.TOTAL) }
                 )
 
                 // Card Gasto por Supermercado
                 StoreSpendingCard(
                     storeSpendings = state.storeSpendings,
-                    overallTotal = state.totalSpent
+                    overallTotal = state.totalSpent,
+                    collapsed = isCollapsed(StatsCard.STORES),
+                    onToggle = { viewModel.toggleCard(StatsCard.STORES) }
                 )
 
                 // Card Evolución del Gasto
                 SpendingEvolutionCard(
-                    dailySpendings = state.dailySpendings
+                    dailySpendings = state.dailySpendings,
+                    collapsed = isCollapsed(StatsCard.EVOLUTION),
+                    onToggle = { viewModel.toggleCard(StatsCard.EVOLUTION) }
                 )
 
                 // Acceso a la comparativa de precios
@@ -138,7 +156,9 @@ private fun StatsContent(
                     onTopModeSelected = { viewModel.selectTopMode(it) },
                     topProducts = state.topProducts,
                     topCategories = state.topCategories,
-                    onProductClick = { onOpenComparison(it.productName) }
+                    onProductClick = { onOpenComparison(it.productName) },
+                    collapsed = isCollapsed(StatsCard.TOP),
+                    onToggle = { viewModel.toggleCard(StatsCard.TOP) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -218,27 +238,98 @@ fun PeriodSelector(
     }
 }
 
+/**
+ * Statistics card whose content can be folded away by tapping its header.
+ * Only the header toggles, so taps on the content (chart, product rows) keep working.
+ */
+@Composable
+private fun CollapsibleCard(
+    title: String,
+    icon: ImageVector?,
+    collapsed: Boolean,
+    onToggle: () -> Unit,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable () -> Unit,
+) {
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (collapsed) 0f else 180f,
+        label = "collapseArrow"
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(onClick = onToggle)
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (icon != null) {
+                    Icon(imageVector = icon, contentDescription = null, tint = iconTint)
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = stringResource(
+                        if (collapsed) R.string.stats_card_expand else R.string.stats_card_collapse
+                    ),
+                    tint = contentColor.copy(alpha = 0.7f),
+                    modifier = Modifier.rotate(arrowRotation)
+                )
+            }
+
+            if (!collapsed) {
+                Box(modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)) {
+                    content()
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun TotalSpendingCard(
     total: Double,
+    percentageChange: Double?,
+    collapsed: Boolean,
+    onToggle: () -> Unit,
+) {
+    CollapsibleCard(
+        title = stringResource(R.string.stats_total_spending),
+        icon = Icons.Default.AccountBalanceWallet,
+        collapsed = collapsed,
+        onToggle = onToggle,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+        TotalSpendingDetails(total = total, percentageChange = percentageChange)
+    }
+}
+
+@Composable
+private fun TotalSpendingDetails(
+    total: Double,
     percentageChange: Double?
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.stats_total_spending),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = Money.format(total, LocalCurrency.current),
                 style = MaterialTheme.typography.headlineLarge,
@@ -282,37 +373,25 @@ fun TotalSpendingCard(
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
             }
-        }
     }
 }
 
 @Composable
 fun StoreSpendingCard(
     storeSpendings: List<StoreSpending>,
-    overallTotal: Double
+    overallTotal: Double,
+    collapsed: Boolean,
+    onToggle: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
+    CollapsibleCard(
+        title = stringResource(R.string.stats_spending_by_store),
+        icon = Icons.Default.ShoppingCart,
+        collapsed = collapsed,
+        onToggle = onToggle
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.stats_spending_by_store),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
 
             if (storeSpendings.isEmpty()) {
                 Text(
@@ -378,30 +457,19 @@ fun StoreSpendingCard(
 
 @Composable
 fun SpendingEvolutionCard(
-    dailySpendings: List<DailySpendingPoint>
+    dailySpendings: List<DailySpendingPoint>,
+    collapsed: Boolean,
+    onToggle: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
+    CollapsibleCard(
+        title = stringResource(R.string.stats_spending_evolution),
+        icon = Icons.AutoMirrored.Filled.TrendingUp,
+        collapsed = collapsed,
+        onToggle = onToggle
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.stats_spending_evolution),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
 
             if (dailySpendings.isEmpty()) {
                 Text(
@@ -412,12 +480,46 @@ fun SpendingEvolutionCard(
             } else {
                 val lineColor = MaterialTheme.colorScheme.primary
                 val gradientColor = lineColor.copy(alpha = 0.2f)
+                val guideColor = MaterialTheme.colorScheme.outlineVariant
+                var selectedIndex by remember(dailySpendings) { mutableStateOf<Int?>(null) }
+                val selected = selectedIndex?.let { dailySpendings.getOrNull(it) }
 
                 Column {
+                    // Detalle del punto tocado (altura fija para que la gráfica no salte)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(28.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (selected != null) {
+                            Text(
+                                text = "${selected.label} · ${Money.format(selected.amount, LocalCurrency.current)}",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = lineColor
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.stats_chart_tap_hint),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
                     Canvas(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
+                            .pointerInput(dailySpendings) {
+                                detectTapGestures { tap ->
+                                    val count = dailySpendings.size
+                                    val index = if (count == 1) 0 else
+                                        (tap.x / size.width * (count - 1)).roundToInt().coerceIn(0, count - 1)
+                                    selectedIndex = if (selectedIndex == index) null else index
+                                }
+                            }
                     ) {
                         val maxAmount = dailySpendings.maxOf { it.amount }.coerceAtLeast(1.0)
                         val points = dailySpendings.mapIndexed { index, point ->
@@ -480,6 +582,17 @@ fun SpendingEvolutionCard(
                                 )
                             }
                         }
+
+                        selectedIndex?.let { points.getOrNull(it) }?.let { point ->
+                            drawLine(
+                                color = guideColor,
+                                start = Offset(point.x, 0f),
+                                end = Offset(point.x, size.height),
+                                strokeWidth = 1.dp.toPx()
+                            )
+                            drawCircle(color = lineColor.copy(alpha = 0.25f), radius = 12.dp.toPx(), center = point)
+                            drawCircle(color = lineColor, radius = 6.dp.toPx(), center = point)
+                        }
                     }
 
                     Row(
@@ -508,30 +621,19 @@ fun TopProductsCard(
     onTopModeSelected: (TopMode) -> Unit,
     topProducts: List<TopProductSpending>,
     topCategories: List<TopCategorySpending>,
-    onProductClick: (TopProductSpending) -> Unit = {}
+    onProductClick: (TopProductSpending) -> Unit = {},
+    collapsed: Boolean,
+    onToggle: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
+    CollapsibleCard(
+        title = stringResource(R.string.stats_top_products),
+        icon = Icons.Default.Star,
+        collapsed = collapsed,
+        onToggle = onToggle
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.stats_top_products),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

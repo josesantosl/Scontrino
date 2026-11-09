@@ -8,6 +8,9 @@
     <string name="stats_period_three_months">3 Monate</string>
     <string name="stats_period_this_year">Jahr</string>
     <string name="stats_total_spending">Gesamtausgaben</string>
+    <string name="stats_card_expand">Aufklappen</string>
+    <string name="stats_card_collapse">Zuklappen</string>
+    <string name="stats_chart_tap_hint">Tippe auf das Diagramm, um den Betrag zu sehen</string>
     <string name="stats_vs_prev_period">vs. Vorperiode</string>
     <string name="stats_no_prev_data">Keine Vorperiodendaten</string>
     <string name="stats_spending_by_store">Ausgaben nach Supermarkt</string>

@@ -30,7 +30,7 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(WalletViewModel::class.java) ->
                 WalletViewModel(loyaltyCardRepository, storeRepository) as T
             modelClass.isAssignableFrom(StatsViewModel::class.java) ->
-                StatsViewModel(receiptRepository, itemRepository) as T
+                StatsViewModel(receiptRepository, itemRepository, settingsRepository) as T
             modelClass.isAssignableFrom(PriceComparisonViewModel::class.java) ->
                 PriceComparisonViewModel(itemRepository) as T
             modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
