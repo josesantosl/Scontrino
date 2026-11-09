@@ -8,7 +8,6 @@ import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ui.viewmodel.CategoryMatcher
 import com.pepesantos.scontrino.ui.viewmodel.PurchaseHistory
 import java.util.Calendar
-import java.util.Locale
 import java.util.TimeZone
 
 /**
@@ -55,7 +54,7 @@ object ReceiptDraftBuilder {
      * same product bought twice) become one entry with quantity 2.
      */
     private fun items(parsed: ParsedReceipt, products: List<Product>, categories: List<Category>): List<ItemEntry> {
-        val productsByName = products.associateBy { normalize(it.name) }
+        val productsByName = products.associateBy { ProductNames.normalize(it.name) }
         val categoryIdByLabel = categories.associate { it.label to it.id }
 
         val grouped = linkedMapOf<Pair<String, Long>, Int>()
@@ -66,7 +65,7 @@ object ReceiptDraftBuilder {
         return grouped.map { (key, quantity) ->
             val (name, netCents) = key
             // Reuse the user's own product (name and category) when it matches.
-            val existing = productsByName[normalize(name)]
+            val existing = productsByName[ProductNames.normalize(name)]
             ItemEntry(
                 name = existing?.name ?: name,
                 price = netCents / 100.0,
@@ -90,7 +89,6 @@ object ReceiptDraftBuilder {
             }
         )
 
-    private fun normalize(name: String) = name.trim().uppercase(Locale.ROOT).replace(Regex("\\s+"), " ")
 
     private fun utcMidnight(year: Int, month: Int, day: Int): Long =
         Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {

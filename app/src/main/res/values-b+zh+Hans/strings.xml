@@ -130,6 +130,11 @@
     <string name="ocr_document_region">看不到四角：已按明亮区域定位并裁剪小票。</string>
     <string name="ocr_deskew">拉直文字行</string>
     <string name="ocr_remove_lines">去除线条和折痕</string>
+    <string name="ocr_try_other_modes">如果合计对不上，尝试其他版面模式</string>
+    <string name="ocr_mode_used">使用的版面模式：%1$s</string>
+    <string name="ocr_mode_attempt">%1$s：%2$d 件商品 · %3$s · 名称可信度 %4$d%% · 已知 %5$d 个</string>
+    <string name="ocr_attempt_adds_up">对得上</string>
+    <string name="ocr_attempt_does_not_add_up">对不上</string>
     <string name="ocr_skew_corrected">已校正旋转：%1$s°</string>
     <string name="ocr_rows">重建的行</string>
     <string name="ocr_copy_json">复制 JSON</string>

@@ -123,6 +123,11 @@
     <string name="ocr_document_region">Angoli non visibili: scontrino individuato come zona chiara e ritagliato.</string>
     <string name="ocr_deskew">Raddrizza le righe di testo</string>
     <string name="ocr_remove_lines">Cancella linee e pieghe</string>
+    <string name="ocr_try_other_modes">Se non torna, prova le altre modalità di layout</string>
+    <string name="ocr_mode_used">Modalità di layout usata: %1$s</string>
+    <string name="ocr_mode_attempt">%1$s: %2$d articoli · %3$s · nomi %4$d%% · %5$d conosciuti</string>
+    <string name="ocr_attempt_adds_up">torna</string>
+    <string name="ocr_attempt_does_not_add_up">non torna</string>
     <string name="ocr_skew_corrected">Rotazione corretta: %1$s°</string>
     <string name="ocr_rows">Righe ricostruite</string>
     <string name="ocr_copy_json">Copia JSON</string>

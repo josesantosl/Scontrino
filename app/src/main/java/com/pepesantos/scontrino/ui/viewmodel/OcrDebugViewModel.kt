@@ -6,6 +6,10 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.pepesantos.scontrino.data.AppDatabase
+import com.pepesantos.scontrino.ocr.LayoutAttempt
+import com.pepesantos.scontrino.ocr.draft.ProductNames
+import com.pepesantos.scontrino.ocr.LayoutChoice
 import com.pepesantos.scontrino.ocr.OcrJson
 import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.OcrPageSegMode
@@ -13,11 +17,9 @@ import com.pepesantos.scontrino.ocr.OcrResult
 import com.pepesantos.scontrino.ocr.ReceiptImageLoader
 import com.pepesantos.scontrino.ocr.ReceiptImagePreprocessor
 import com.pepesantos.scontrino.ocr.ReceiptRow
-import com.pepesantos.scontrino.ocr.ReceiptRowBuilder
 import com.pepesantos.scontrino.ocr.ReceiptTextRecognizer
 import com.pepesantos.scontrino.ocr.TesseractTextRecognizer
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
-import com.pepesantos.scontrino.ocr.parse.ReceiptParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,8 @@ data class OcrDebugUiState(
     // AUTO's column analysis read Bennet's price column as vertical text, even with
     // vertical detection disabled; a single column is what a receipt is.
     val pageSegMode: OcrPageSegMode = OcrPageSegMode.SINGLE_COLUMN,
+    /** If the chosen mode's reading does not add up, try the other modes too. */
+    val tryOtherModes: Boolean = true,
     val isProcessing: Boolean = false,
     val processedImage: Bitmap? = null,
     val detection: ReceiptImagePreprocessor.Detection? = null,
@@ -47,6 +51,11 @@ data class OcrDebugUiState(
     val result: OcrResult? = null,
     val rows: List<ReceiptRow> = emptyList(),
     val parsed: ParsedReceipt? = null,
+    /** Every mode tried on the last run, in order; the chosen one is [usedMode]. */
+    val attempts: List<LayoutAttempt> = emptyList(),
+    val usedMode: OcrPageSegMode? = null,
+    /** The user's product names (normalized), to rank readings by names already known. */
+    val knownNames: Set<String> = emptySet(),
     val error: String? = null,
 ) {
     val canRun: Boolean get() = sourceUri != null && languages.isNotEmpty() && !isProcessing
@@ -72,7 +81,8 @@ class OcrDebugViewModel @JvmOverloads constructor(
         _uiState.update {
             it.copy(
                 sourceUri = uri, isProcessing = false, processedImage = null,
-                detection = null, skewAngle = null, result = null, rows = emptyList(), parsed = null, error = null,
+                detection = null, skewAngle = null, result = null, rows = emptyList(), parsed = null,
+                attempts = emptyList(), usedMode = null, error = null,
             )
         }
         run()
@@ -88,6 +98,7 @@ class OcrDebugViewModel @JvmOverloads constructor(
     fun setRemoveLines(enabled: Boolean) = _uiState.update { it.copy(removeLines = enabled) }
     fun setBinarize(enabled: Boolean) = _uiState.update { it.copy(binarize = enabled) }
     fun setPageSegMode(mode: OcrPageSegMode) = _uiState.update { it.copy(pageSegMode = mode) }
+    fun setTryOtherModes(enabled: Boolean) = _uiState.update { it.copy(tryOtherModes = enabled) }
 
     fun run() {
         val state = _uiState.value
@@ -117,12 +128,34 @@ class OcrDebugViewModel @JvmOverloads constructor(
                     )
                 }
 
-                val result = recognizer.recognize(processed.bitmap, state.languages, state.pageSegMode)
-                val (rows, parsed) = withContext(Dispatchers.Default) {
-                    val rows = ReceiptRowBuilder.build(result.words, useEngineLines = state.pageSegMode.fullWidthLines)
-                    rows to ReceiptParser.parse(rows)
+                suspend fun attempt(mode: OcrPageSegMode): LayoutAttempt {
+                    val result = recognizer.recognize(processed.bitmap, state.languages, mode)
+                    return withContext(Dispatchers.Default) { LayoutAttempt.of(mode, result) }
                 }
-                _uiState.update { it.copy(result = result, rows = rows, parsed = parsed, isProcessing = false) }
+
+                // The chosen mode first; the others only if its reading does not add up,
+                // so a receipt that is read well costs a single OCR pass.
+                val attempts = mutableListOf(attempt(state.pageSegMode))
+                if (state.tryOtherModes && !LayoutChoice.isGoodEnough(attempts.first())) {
+                    for (mode in LayoutChoice.fallbacksAfter(state.pageSegMode)) {
+                        attempts += attempt(mode)
+                    }
+                }
+                // Only needed to choose among several readings.
+                val knownNames = if (attempts.size > 1) loadKnownNames() else emptySet()
+                val best = LayoutChoice.best(attempts, knownNames)
+
+                _uiState.update {
+                    it.copy(
+                        result = best.result,
+                        rows = best.rows,
+                        parsed = best.parsed,
+                        attempts = attempts,
+                        usedMode = best.mode,
+                        knownNames = knownNames,
+                        isProcessing = false,
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -130,6 +163,12 @@ class OcrDebugViewModel @JvmOverloads constructor(
                 _uiState.update { it.copy(isProcessing = false, error = e.message ?: e.javaClass.simpleName) }
             }
         }
+    }
+
+    private suspend fun loadKnownNames(): Set<String> = withContext(Dispatchers.IO) {
+        AppDatabase.getDatabase(getApplication()).productDao().getAll()
+            .map { ProductNames.normalize(it.name) }
+            .toSet()
     }
 
     fun exportJson(): String? {

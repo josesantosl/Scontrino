@@ -117,6 +117,7 @@ fun OcrDebugScreen(
                     onRemoveLinesChange = viewModel::setRemoveLines,
                     onBinarizeChange = viewModel::setBinarize,
                     onPageSegModeChange = viewModel::setPageSegMode,
+                    onTryOtherModesChange = viewModel::setTryOtherModes,
                 )
             }
 
@@ -199,6 +200,7 @@ fun OcrDebugScreen(
                         ),
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    LayoutAttemptsSummary(state)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                         OutlinedButton(onClick = {
                             viewModel.exportJson()?.let { copyToClipboard(context, "receipt-ocr.json", it) }
@@ -296,6 +298,7 @@ private fun OcrSettings(
     onRemoveLinesChange: (Boolean) -> Unit,
     onBinarizeChange: (Boolean) -> Unit,
     onPageSegModeChange: (OcrPageSegMode) -> Unit,
+    onTryOtherModesChange: (Boolean) -> Unit,
 ) {
     val appLocale = LocalConfiguration.current.locales[0]
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -323,6 +326,7 @@ private fun OcrSettings(
                 )
             }
         }
+        SwitchRow(stringResource(R.string.ocr_try_other_modes), state.tryOtherModes, onTryOtherModesChange)
 
         SwitchRow(stringResource(R.string.ocr_detect_document), state.detectDocument, onDetectDocumentChange)
         SwitchRow(stringResource(R.string.ocr_deskew), state.deskew, onDeskewChange)
@@ -336,6 +340,35 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Text(label, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+/** Which layout mode was used and, if several were tried, how each one did. */
+@Composable
+private fun LayoutAttemptsSummary(state: OcrDebugUiState) {
+    val used = state.usedMode ?: return
+    Text(
+        stringResource(R.string.ocr_mode_used, stringResource(used.label)),
+        style = MaterialTheme.typography.bodySmall,
+    )
+    if (state.attempts.size < 2) return
+    state.attempts.forEach { attempt ->
+        Text(
+            stringResource(
+                R.string.ocr_mode_attempt,
+                stringResource(attempt.mode.label),
+                attempt.parsed.items.size,
+                stringResource(
+                    if (attempt.parsed.isConsistent) R.string.ocr_attempt_adds_up
+                    else R.string.ocr_attempt_does_not_add_up
+                ),
+                attempt.nameConfidence.toInt(),
+                attempt.knownNames(state.knownNames),
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            color = if (attempt.mode == used) MaterialTheme.colorScheme.primary else Color.Unspecified,
+        )
     }
 }
 

@@ -140,6 +140,7 @@ object ReceiptParser {
             vatCode = vatCode,
             vatRate = vatRate,
             priceConfidence = priceWord.confidence,
+            nameConfidence = name.confidence,
             rowIndex = rowIndex,
         )
     }
@@ -172,7 +173,7 @@ object ReceiptParser {
         )
     }
 
-    private class Name(val text: String, val code: String?) {
+    private class Name(val text: String, val code: String?, val confidence: Float) {
         /** A product name needs some letters; "." or "00" is OCR noise. */
         val isValid: Boolean get() = text.count { it.isLetter() } >= 2
     }
@@ -186,9 +187,12 @@ object ReceiptParser {
         // Some stores print an article code first: "353406 CONT.LEGGEREZZA G".
         val hasCode = tokens.size > 1 && tokens.first().length >= 3 && tokens.first().all { it.isDigit() }
         val nameTokens = if (hasCode) tokens.drop(1) else tokens
+        // Confidence of the words that make the name itself, not of codes or specks.
+        val nameWords = words.filter { word -> word.text.any { it.isLetter() } }
         return Name(
             text = nameTokens.joinToString(" ").trim { it in ".,;:|-_=" || it.isWhitespace() },
             code = if (hasCode) tokens.first() else null,
+            confidence = if (nameWords.isEmpty()) 0f else nameWords.map { it.confidence }.average().toFloat(),
         )
     }
 

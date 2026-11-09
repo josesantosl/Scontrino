@@ -123,6 +123,11 @@
     <string name="ocr_document_region">Coins non visibles : ticket repéré comme zone claire et recadré.</string>
     <string name="ocr_deskew">Redresser les lignes de texte</string>
     <string name="ocr_remove_lines">Effacer les lignes et les plis</string>
+    <string name="ocr_try_other_modes">Si le total ne correspond pas, essayer les autres modes de mise en page</string>
+    <string name="ocr_mode_used">Mode de mise en page utilisé : %1$s</string>
+    <string name="ocr_mode_attempt">%1$s : %2$d articles · %3$s · noms %4$d %% · %5$d connus</string>
+    <string name="ocr_attempt_adds_up">correspond</string>
+    <string name="ocr_attempt_does_not_add_up">ne correspond pas</string>
     <string name="ocr_skew_corrected">Rotation corrigée : %1$s°</string>
     <string name="ocr_rows">Lignes reconstruites</string>
     <string name="ocr_copy_json">Copier le JSON</string>

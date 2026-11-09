@@ -122,6 +122,11 @@
     <string name="ocr_document_region">Ecken nicht sichtbar: Kassenbon als heller Bereich erkannt und zugeschnitten.</string>
     <string name="ocr_deskew">Textzeilen begradigen</string>
     <string name="ocr_remove_lines">Linien und Knicke entfernen</string>
+    <string name="ocr_try_other_modes">Wenn die Summe nicht stimmt, die anderen Layoutmodi probieren</string>
+    <string name="ocr_mode_used">Verwendeter Layoutmodus: %1$s</string>
+    <string name="ocr_mode_attempt">%1$s: %2$d Artikel · %3$s · Namen %4$d %% · %5$d bekannt</string>
+    <string name="ocr_attempt_adds_up">stimmt</string>
+    <string name="ocr_attempt_does_not_add_up">stimmt nicht</string>
     <string name="ocr_skew_corrected">Drehung korrigiert: %1$s°</string>
     <string name="ocr_rows">Rekonstruierte Zeilen</string>
     <string name="ocr_copy_json">JSON kopieren</string>

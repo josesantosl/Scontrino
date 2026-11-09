@@ -131,6 +131,11 @@
     <string name="ocr_document_region">Corners not visible: receipt located as a bright area and cropped.</string>
     <string name="ocr_deskew">Straighten text lines</string>
     <string name="ocr_remove_lines">Erase lines and creases</string>
+    <string name="ocr_try_other_modes">If it doesn\'t add up, try the other layout modes</string>
+    <string name="ocr_mode_used">Layout mode used: %1$s</string>
+    <string name="ocr_mode_attempt">%1$s: %2$d items · %3$s · names %4$d%% · %5$d known</string>
+    <string name="ocr_attempt_adds_up">adds up</string>
+    <string name="ocr_attempt_does_not_add_up">doesn\'t add up</string>
     <string name="ocr_skew_corrected">Rotation corrected: %1$s°</string>
     <string name="ocr_rows">Reconstructed rows</string>
     <string name="ocr_copy_json">Copy JSON</string>

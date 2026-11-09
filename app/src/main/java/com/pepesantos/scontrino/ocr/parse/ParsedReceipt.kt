@@ -40,6 +40,11 @@ data class ParsedItem(
     val vatRate: Double? = null,
     /** OCR confidence of the price (0..100). */
     val priceConfidence: Float,
+    /**
+     * Mean OCR confidence (0..100) of the words of the name. The name is what links
+     * an item to the user's products, aliases and price history.
+     */
+    val nameConfidence: Float = 0f,
     /** Original price if it was auto-corrected so that the receipt adds up. */
     val correctedFromCents: Long? = null,
     /** Index of the source row, to point back at the photo. */
