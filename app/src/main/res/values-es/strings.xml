@@ -39,7 +39,6 @@
     <string name="add_receipt_ok">OK</string>
     <string name="add_receipt_fab">Añadir factura</string>
     <string name="nav_wallet">Cartera</string>
-    <string name="wallet_your_cards" >Tus tarjetas</string>
     <string name="wallet_edit" >Editar</string>
     <string name="wallet_add_card">Añadir una tarjeta</string>
     <string name="edit_receipt_title">"Editar factura "</string>

@@ -39,7 +39,6 @@
     <string name="add_receipt_ok">OK</string>
     <string name="add_receipt_fab">Ajouter un reçu</string>
     <string name="nav_wallet">Portefeuille</string>
-    <string name="wallet_your_cards" >Vos cartes</string>
     <string name="wallet_edit" >Modifier</string>
     <string name="wallet_add_card">Ajouter une carte</string>
     <string name="edit_receipt_title">Modifier le reçu</string>

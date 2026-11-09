@@ -89,6 +89,7 @@ fun generateBarcode(content: String, width: Int = 600, height: Int = 300): Bitma
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletScreen(viewModel: WalletViewModel) {
     var selectedCard by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
@@ -148,25 +149,24 @@ fun WalletScreen(viewModel: WalletViewModel) {
         )
     }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.nav_wallet),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            )
+        }
+    ) { innerPadding ->
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(innerPadding)
             .padding(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.wallet_your_cards),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -193,6 +193,7 @@ fun WalletScreen(viewModel: WalletViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             textAlign = TextAlign.Center
         )
+    }
     }
 }
 

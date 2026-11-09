@@ -39,7 +39,6 @@
     <string name="add_receipt_ok">OK</string>
     <string name="add_receipt_fab">Beleg hinzufügen</string>
     <string name="nav_wallet">Brieftasche</string>
-    <string name="wallet_your_cards" >Ihre Karten</string>
     <string name="wallet_edit" >Bearbeiten</string>
     <string name="wallet_add_card">Karte hinzufügen</string>
     <string name="edit_receipt_title">Beleg bearbeiten</string>
