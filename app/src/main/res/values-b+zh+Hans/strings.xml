@@ -1,0 +1,180 @@
+<resources>
+    <string name="app_name">Scontrino</string>
+
+    <!-- Navigation -->
+    <string name="nav_receipts">小票</string>
+    <string name="nav_stats">统计</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- Stats -->
+    <string name="stats_title">统计</string>
+    <string name="stats_period_this_month">本月</string>
+    <string name="stats_period_three_months">3 个月</string>
+    <string name="stats_period_this_year">今年</string>
+    <string name="stats_total_spending">总支出</string>
+    <string name="stats_vs_prev_period">与上期相比</string>
+    <string name="stats_no_prev_data">无上期数据</string>
+    <string name="stats_spending_by_store">各超市支出</string>
+    <string name="stats_spending_evolution">支出趋势</string>
+    <string name="stats_top_products">支出排行</string>
+    <string name="stats_top_by_product">按商品</string>
+    <string name="stats_top_by_category">按类别</string>
+    <string name="stats_no_data">此期间没有小票数据</string>
+
+    <!-- AddReceiptScreen -->
+    <string name="add_receipt_title">新小票</string>
+    <string name="add_receipt_back">返回</string>
+    <string name="unsaved_changes_title">未保存的更改</string>
+    <string name="unsaved_changes_message">确定不保存就离开吗？</string>
+    <string name="unsaved_changes_leave">离开</string>
+    <string name="add_receipt_store">商店</string>
+    <string name="add_receipt_date">日期</string>
+    <string name="add_receipt_items">商品</string>
+    <string name="add_receipt_item_name">商品名称</string>
+    <string name="add_receipt_price">价格</string>
+    <string name="add_receipt_weight">重量（克）</string>
+    <string name="add_receipt_volume">容量（升）</string>
+    <string name="add_receipt_quantity">数量</string>
+    <string name="add_receipt_note">备注</string>
+    <string name="add_receipt_save">保存小票</string>
+    <string name="add_receipt_select_date">选择日期</string>
+    <string name="add_receipt_ok">确定</string>
+
+    <!-- ReceiptsScreen -->
+    <string name="add_receipt_fab">添加小票</string>
+    <string name="nav_wallet">卡包</string>
+    <string name="wallet_your_cards">我的卡片</string>
+    <string name="wallet_edit">编辑</string>
+    <string name="wallet_add_card">添加卡片</string>
+    <string name="edit_receipt_title">编辑小票</string>
+    <string name="delete_receipt_title">删除小票</string>
+    <string name="delete_receipt_message">确定要删除这张小票吗？</string>
+    <string name="delete_confirm">删除</string>
+    <string name="delete_cancel">取消</string>
+
+    <!-- Wallet -->
+    <string name="delete_card_title">删除卡片</string>
+    <string name="delete_card_message">确定要删除这张卡片吗？</string>
+    <string name="wallet_add_card_title">新卡片</string>
+    <string name="wallet_card_name">名称</string>
+    <string name="wallet_card_number">卡号</string>
+    <string name="wallet_select_color">选择颜色</string>
+    <string name="wallet_save">保存</string>
+    <string name="wallet_cancel">取消</string>
+    <string name="wallet_scan">扫描条形码</string>
+
+    <!-- Categories -->
+    <string name="category_select_title">选择类别</string>
+    <string name="category_label">类别</string>
+    <string name="category_other">其他</string>
+    <string name="category_vegetables_fruit">果蔬</string>
+    <string name="category_meat">肉类</string>
+    <string name="category_seafood">海鲜</string>
+    <string name="category_dairy">乳制品</string>
+    <string name="category_eggs">蛋类</string>
+    <string name="category_legumes">豆类</string>
+    <string name="category_bakery">烘焙</string>
+    <string name="category_pasta_rice">面食与米</string>
+    <string name="category_condiments">调味品</string>
+    <string name="category_snacks_sweets">零食甜点</string>
+    <string name="category_ready_meals">即食食品</string>
+    <string name="category_beverages">饮料</string>
+    <string name="category_alcohol">酒类</string>
+    <string name="category_household">家居用品</string>
+    <string name="category_personal_hygiene">个人护理</string>
+    <string name="category_baby">母婴</string>
+    <string name="category_pets">宠物</string>
+    <string name="category_health">健康</string>
+    <string name="category_transport">交通</string>
+    <string name="category_eating_out">外出就餐</string>
+
+    <!-- Price comparison -->
+    <string name="stats_compare_title">比价</string>
+    <string name="stats_compare_subtitle">看看哪家超市的商品最便宜</string>
+    <string name="compare_title">价格比较</string>
+    <string name="compare_search_hint">搜索商品</string>
+    <string name="compare_clear">清除</string>
+    <string name="compare_empty_hint">搜索商品，比较它在各超市的最新价格。</string>
+    <string name="compare_no_data">还没有购买过这个商品。</string>
+    <string name="compare_single_store">只在一家超市买过。去别家买一次才能比较。</string>
+    <string name="compare_paid">实付 %1$s</string>
+    <string name="compare_source_weight">按重量</string>
+    <string name="compare_source_volume">按容量</string>
+    <string name="compare_source_estimated">≈ 估算</string>
+    <string name="compare_source_unit">按件</string>
+    <string name="compare_savings">在 %1$s 购买比 %3$s（%4$s）便宜 %2$d%%。</string>
+    <string name="compare_same_price">各超市价格相同。</string>
+    <plurals name="compare_store_count">
+        <item quantity="other">%d 家商店</item>
+    </plurals>
+
+    <!-- Receipt OCR (debug) -->
+    <string name="ocr_debug_open">扫描小票（测试版）</string>
+    <string name="ocr_debug_title">小票识别（测试版）</string>
+    <string name="ocr_pick_image">选择照片</string>
+    <string name="ocr_run">识别文字</string>
+    <string name="ocr_languages">小票语言</string>
+    <string name="ocr_detect_document">检测并拉直小票</string>
+    <string name="ocr_binarize">黑白（二值化）</string>
+    <string name="ocr_page_mode">版面模式</string>
+    <string name="ocr_psm_auto">自动</string>
+    <string name="ocr_psm_single_column">单列</string>
+    <string name="ocr_psm_single_block">单个文本块</string>
+    <string name="ocr_psm_sparse">稀疏文本</string>
+    <string name="ocr_no_image">选择一张小票照片开始。</string>
+    <string name="ocr_summary">%1$d 个词 · %2$d 行 · 置信度 %3$d%% · %4$d 毫秒</string>
+    <string name="ocr_document_detected">已检测到小票边缘并拉直。</string>
+    <string name="ocr_document_not_detected">未检测到小票边缘：使用整张照片。</string>
+    <string name="ocr_document_region">看不到四角：已按明亮区域定位并裁剪小票。</string>
+    <string name="ocr_deskew">拉直文字行</string>
+    <string name="ocr_skew_corrected">已校正旋转：%1$s°</string>
+    <string name="ocr_rows">重建的行</string>
+    <string name="ocr_copy_json">复制 JSON</string>
+    <string name="ocr_copy_text">复制文字</string>
+    <string name="ocr_copied">已复制到剪贴板</string>
+    <string name="ocr_error">错误：%1$s</string>
+    <string name="ocr_parsed_title">解析结果</string>
+    <string name="ocr_use_receipt">使用这张小票</string>
+    <string name="scan_review_notice">从照片读取：保存前请核对商店、日期和每件商品。</string>
+    <string name="scan_totals">小票总额 %1$s · 商品合计 %2$s</string>
+    <string name="scan_totals_mismatch">商品合计与小票总额不符：请核对价格。</string>
+    <string name="ocr_parsed_date">日期：%1$s</string>
+    <string name="ocr_parsed_total">总额 %1$s · 商品 %2$s</string>
+    <string name="ocr_parsed_consistent">商品合计与总额一致。</string>
+    <string name="ocr_parsed_inconsistent">商品合计与总额不一致。</string>
+    <string name="ocr_parsed_no_total">未找到总额。</string>
+    <string name="ocr_parsed_discount">折扣 %1$s</string>
+    <string name="ocr_parsed_corrected">已校正，原识别为 %1$s</string>
+    <string name="ocr_parsed_unparsed">商品列表中未解析的行：%1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_system">跟随系统</string>
+    <string name="settings_currency">货币</string>
+    <string name="settings_currency_custom">其他…</string>
+    <string name="settings_currency_custom_hint">代码或符号（如 GBP、£）</string>
+    <string name="settings_currency_scope_title">更改货币</string>
+    <string name="settings_currency_scope_message">已保存的小票也使用 %1$s，还是只用于新小票？金额不会换算。</string>
+    <string name="settings_currency_scope_all">所有小票</string>
+    <string name="settings_currency_scope_new">仅新小票</string>
+    <string name="settings_aliases">商品别名</string>
+    <string name="settings_aliases_subtitle">把不同品牌或商店的同一种商品归为一组</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">别名</string>
+    <string name="aliases_search_hint">搜索商品或别名</string>
+    <string name="aliases_empty">还没有商品：保存小票后会显示在这里。</string>
+    <string name="aliases_no_match">没有符合搜索的商品。</string>
+    <string name="aliases_section_without">无别名（%1$d）</string>
+    <string name="aliases_section_with">有别名（%1$d）</string>
+    <string name="alias_dialog_title">别名</string>
+    <string name="alias_field">别名</string>
+    <string name="alias_placeholder">例如：豆奶</string>
+    <string name="alias_suggestions">建议</string>
+    <string name="alias_suggestion_alias">已有别名</string>
+    <string name="alias_suggestion_product">商品</string>
+    <string name="alias_save">保存</string>
+    <string name="alias_remove">移除</string>
+    <string name="alias_edit">编辑别名</string>
+</resources>

@@ -14,9 +14,9 @@ val LocalCurrency = compositionLocalOf { "EUR" }
 object Money {
 
     /** Currencies offered directly in the settings. */
-    val presets = listOf("EUR", "USD", "GBP", "CHF")
+    val presets = listOf("EUR", "USD", "GBP", "CHF", "CNY")
 
-    private val knownSymbols = mapOf("EUR" to "€", "USD" to "$", "CHF" to "CHF", "GBP" to "£", "JPY" to "¥")
+    private val knownSymbols = mapOf("EUR" to "€", "USD" to "$", "CHF" to "CHF", "GBP" to "£", "JPY" to "¥", "CNY" to "¥")
 
     fun symbol(currency: String): String {
         knownSymbols[currency.uppercase(Locale.ROOT)]?.let { return it }

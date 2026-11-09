@@ -13,7 +13,7 @@ import java.util.Locale
 object AppLocale {
 
     /** Languages the app is translated to, as BCP 47 tags. Empty tag = system language. */
-    val supported = listOf("en", "es", "it", "fr", "de")
+    val supported = listOf("en", "es", "it", "fr", "de", "zh-Hans")
 
     fun wrap(base: Context): Context {
         val tag = SettingsRepository.storedLanguage(base)
@@ -26,10 +26,14 @@ object AppLocale {
         return base.createConfigurationContext(config)
     }
 
-    /** Name of a language in that same language, e.g. "Español". */
+    /**
+     * Name of a language in that same language, e.g. "Español". Tags with a script
+     * keep it, so "zh-Hans" reads "中文 (简体)" and not just "中文".
+     */
     fun displayName(tag: String): String {
         val locale = Locale.forLanguageTag(tag)
-        return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
+        val name = if (locale.script.isEmpty()) locale.getDisplayLanguage(locale) else locale.getDisplayName(locale)
+        return name.replaceFirstChar { it.titlecase(locale) }
     }
 
     private fun systemLocale(): Locale = Resources.getSystem().configuration.locales[0]

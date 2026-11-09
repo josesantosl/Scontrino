@@ -200,7 +200,7 @@ private fun <T> OptionsDialog(
     )
 }
 
-/** Euro, dollar, Swiss franc, or a currency typed by the user (code or symbol). */
+/** One of [Money.presets], or a currency typed by the user (code or symbol). */
 @Composable
 private fun CurrencyDialog(
     current: String,
