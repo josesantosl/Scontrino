@@ -153,6 +153,46 @@ class ReceiptParserTest {
     }
 
     @Test
+    fun `ecuadorian layout - DESCR header, dot decimals, CAMBIO is not the total`() {
+        // Names and numbers are made up; the layout is that of a real receipt.
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("CORPORACION EJEMPLO S.A."),
+                row("RUC:0990000000001"),
+                row("CODIGO DESCR. CANT. P.UNIT.", "VALOR"),
+                row("008336 HIELO 1", "0.99", "0.99"),
+                row("001242 TILAPIA 1", "5.70", "5.70"),
+                row("SUBTOTAL", "6.69"),
+                row("TOTAL", "6.69"),
+                row("CAMBIO", "3.31"),
+                row("2026/11/08 TIENDA:5 POS:202"),
+                row("NOMBRE : CLIENTE DE PRUEBA"),
+                row("RUC/CED/PAS: 0900000000"),
+                row("RUC Proveedor: 0990000000002"),
+            )
+        )
+        assertEquals(listOf("008336", "001242"), parsed.items.map { it.code })
+        assertEquals(listOf(99L, 570L), parsed.items.map { it.priceCents })
+        assertEquals(669L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        assertEquals(ReceiptDate(2026, 11, 8), parsed.date)
+        // The store's RUC, not the customer's id nor the e-invoicing provider's.
+        assertEquals("0990000000001", parsed.vatNumber)
+    }
+
+    @Test
+    fun `a product containing DESCR is not the column header`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("PANE", "1,20"),
+                row("LECHE DESCREMADA", "0,99"),
+                row("TOTALE", "2,19"),
+            )
+        )
+        assertEquals(listOf("PANE", "LECHE DESCREMADA"), parsed.items.map { it.name })
+    }
+
+    @Test
     fun `noise rows in the item list are reported, not turned into items`() {
         val parsed = ReceiptParser.parse(
             listOf(

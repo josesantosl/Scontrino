@@ -69,6 +69,12 @@ class AmountsAndDatesTest {
     }
 
     @Test
+    fun `year first dates`() {
+        assertEquals(ReceiptDate(2026, 11, 8), ReceiptDateParser.find(listOf("2026/11/08 TIENDA:5 POS:202 <A>")))
+        assertEquals(ReceiptDate(2026, 3, 5, 14, 2), ReceiptDateParser.find(listOf("2026-03-05 14:02")))
+    }
+
+    @Test
     fun `numbers that only look like dates are ignored`() {
         assertNull(ReceiptDateParser.find(listOf("DOCUMENTO N. 0755-9021", "tel:+39 800 919024")))
         assertNull(ReceiptDateParser.find(listOf("45-13-2026")))

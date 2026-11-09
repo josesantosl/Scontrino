@@ -4,13 +4,22 @@ package com.pepesantos.scontrino.ocr.parse
 object ReceiptDateParser {
 
     // "@" is included because the OCR sometimes reads a slashed zero that way.
-    private val DATE = Regex("""(?<![\d@])([\d@]{1,2})[-/.]([\d@]{1,2})[-/.]([\d@]{4}|[\d@]{2})(?![\d@])""")
+    /** Day first: "17-08-2026", "07/11/2026", "05.03.26" (Italy, Spain...). */
+    private val DAY_FIRST = Regex("""(?<![\d@])([\d@]{1,2})[-/.]([\d@]{1,2})[-/.]([\d@]{4}|[\d@]{2})(?![\d@])""")
+
+    /** Year first: "2026/11/08" (Ecuador, ISO). Four-digit year only, to avoid ambiguity. */
+    private val YEAR_FIRST = Regex("""(?<![\d@])([\d@]{4})[-/.]([\d@]{1,2})[-/.]([\d@]{1,2})(?![\d@])""")
+
     private val TIME = Regex("""(?<!\d)(\d{1,2}):(\d{2})(?!\d)""")
 
     fun find(lines: List<String>): ReceiptDate? {
         for (line in lines) {
-            for (match in DATE.findAll(line)) {
-                val (rawDay, rawMonth, rawYear) = match.destructured
+            val candidates = YEAR_FIRST.findAll(line).map { it to true } +
+                DAY_FIRST.findAll(line).map { it to false }
+            for ((match, yearFirst) in candidates) {
+                val (first, second, third) = match.destructured
+                val (rawDay, rawMonth, rawYear) = if (yearFirst) Triple(third, second, first) else Triple(first, second, third)
+
                 val day = readNumber(rawDay, 1..31) ?: continue
                 val month = readNumber(rawMonth, 1..12) ?: continue
                 val year = readNumber(rawYear, 0..9999)

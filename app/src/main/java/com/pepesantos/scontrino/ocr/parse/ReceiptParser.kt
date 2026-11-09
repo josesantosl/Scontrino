@@ -21,21 +21,38 @@ import kotlin.math.abs
  */
 object ReceiptParser {
 
-    private val COLUMN_HEADER = listOf("DESCRIZIONE", "DESCRIPCION", "DESCRIPCIÓN", "PREZZO")
+    /**
+     * Column header words, as whole words: "DESCR." (Ecuador), "DESCRIZIONE",
+     * "DESCRIPCION", "PREZZO". Whole words so that an item like "LECHE DESCREMADA"
+     * is not mistaken for the header.
+     */
+    private val COLUMN_HEADER = Regex("""\b(DESCR(\.|IZIONE\b|IPCI[OÓ]N\b|IPTION\b|\b)|PREZZO\b)""")
     private val DISCOUNT = listOf("SCONT", "DESCUENTO", "RABATT", "REMISE")
-    private val PAYMENT = listOf("PAGAMENTO", "PAGATO", "BANCOMAT", "CONTANTI", "IMPORTO")
+    private val PAYMENT = listOf(
+        "PAGAMENTO", "PAGATO", "BANCOMAT", "CONTANTI", "IMPORTO",
+        "EFECTIVO", "TARJETA", "VISA", "MASTERCARD",
+    )
 
     /** Lines with an amount that is not the total: VAT breakdown, change, savings. */
-    private val NOT_TOTAL = listOf("IVA", "RESTO", "SCONT", "RISPARMI")
+    private val NOT_TOTAL = listOf("IVA", "RESTO", "CAMBIO", "VUELTO", "CHANGE", "SCONT", "RISPARMI")
 
     private val VAT_LEGEND = Regex("""^([A-F])\s*[:.]?\s*IVA\s*(\d{1,2}(?:[,.]\d{1,2})?)\s*%""")
     private val VAT_LETTER = Regex("""^[A-F]$""")
-    private val VAT_NUMBER = Regex("""P\.?\s*I\.?\s*V\.?\s*A\.?\s*:?\s*(\d{11})""")
+    /**
+     * The store's tax id, by country. Only labels that identify the store: on
+     * Ecuadorian receipts "RUC/CED/PAS" is the customer and "RUC Proveedor" the
+     * e-invoicing provider, so "RUC" must be followed directly by the colon.
+     */
+    private val TAX_IDS = listOf(
+        Regex("""P\.?\s*I\.?\s*V\.?\s*A\.?\s*:?\s*(\d{11})"""), // Italy, P.IVA
+        Regex("""\bRUC\s*:\s*(\d{13})\b"""), // Ecuador, RUC
+        Regex("""\b(?:CIF|NIF)\s*:?\s*([A-Z]\d{7}[A-Z0-9])\b"""), // Spain
+    )
 
     fun parse(rows: List<ReceiptRow>): ParsedReceipt {
         val upper = rows.map { it.text.uppercase(Locale.ROOT) }
 
-        val columnHeader = upper.indexOfFirst { line -> COLUMN_HEADER.any { it in line } }
+        val columnHeader = upper.indexOfFirst { COLUMN_HEADER.containsMatchIn(it) }
         val start = if (columnHeader >= 0) columnHeader + 1 else 0
         val end = (start until rows.size).firstOrNull { "TOTAL" in upper[it] } ?: rows.size
 
@@ -94,7 +111,9 @@ object ReceiptParser {
             items = checkedItems,
             totalCents = total,
             date = ReceiptDateParser.find(rows.map { it.text }),
-            vatNumber = upper.firstNotNullOfOrNull { VAT_NUMBER.find(it)?.groupValues?.get(1) },
+            vatNumber = upper.firstNotNullOfOrNull { line ->
+                TAX_IDS.firstNotNullOfOrNull { it.find(line)?.groupValues?.get(1) }
+            },
             headerLines = rows.take(if (columnHeader >= 0) columnHeader else start)
                 .map { it.text }
                 .filter { it.isNotBlank() },
