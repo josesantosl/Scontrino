@@ -122,6 +122,7 @@
     <string name="ocr_document_not_detected">No se detectaron los bordes: se usa la foto completa.</string>
     <string name="ocr_document_region">Esquinas no visibles: ticket localizado como zona clara y recortado.</string>
     <string name="ocr_deskew">Enderezar las líneas de texto</string>
+    <string name="ocr_remove_lines">Borrar líneas y pliegues</string>
     <string name="ocr_skew_corrected">Rotación corregida: %1$s°</string>
     <string name="ocr_rows">Filas reconstruidas</string>
     <string name="ocr_copy_json">Copiar JSON</string>

@@ -35,6 +35,7 @@ data class OcrDebugUiState(
     val languages: List<OcrLanguage> = OcrLanguage.defaultFor(Locale.getDefault()),
     val detectDocument: Boolean = true,
     val deskew: Boolean = true,
+    val removeLines: Boolean = false,
     val binarize: Boolean = true,
     // AUTO's column analysis read Bennet's price column as vertical text, even with
     // vertical detection disabled; a single column is what a receipt is.
@@ -84,6 +85,7 @@ class OcrDebugViewModel @JvmOverloads constructor(
 
     fun setDetectDocument(enabled: Boolean) = _uiState.update { it.copy(detectDocument = enabled) }
     fun setDeskew(enabled: Boolean) = _uiState.update { it.copy(deskew = enabled) }
+    fun setRemoveLines(enabled: Boolean) = _uiState.update { it.copy(removeLines = enabled) }
     fun setBinarize(enabled: Boolean) = _uiState.update { it.copy(binarize = enabled) }
     fun setPageSegMode(mode: OcrPageSegMode) = _uiState.update { it.copy(pageSegMode = mode) }
 
@@ -102,6 +104,7 @@ class OcrDebugViewModel @JvmOverloads constructor(
                         ReceiptImagePreprocessor.Options(
                             detectDocument = state.detectDocument,
                             deskew = state.deskew,
+                            removeLines = state.removeLines,
                             binarize = state.binarize,
                         )
                     ).also { original.recycle() }

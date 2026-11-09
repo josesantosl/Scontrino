@@ -122,6 +122,7 @@
     <string name="ocr_document_not_detected">Bordi non rilevati: viene usata la foto intera.</string>
     <string name="ocr_document_region">Angoli non visibili: scontrino individuato come zona chiara e ritagliato.</string>
     <string name="ocr_deskew">Raddrizza le righe di testo</string>
+    <string name="ocr_remove_lines">Cancella linee e pieghe</string>
     <string name="ocr_skew_corrected">Rotazione corretta: %1$s°</string>
     <string name="ocr_rows">Righe ricostruite</string>
     <string name="ocr_copy_json">Copia JSON</string>

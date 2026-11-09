@@ -114,6 +114,7 @@ fun OcrDebugScreen(
                     onToggleLanguage = viewModel::toggleLanguage,
                     onDetectDocumentChange = viewModel::setDetectDocument,
                     onDeskewChange = viewModel::setDeskew,
+                    onRemoveLinesChange = viewModel::setRemoveLines,
                     onBinarizeChange = viewModel::setBinarize,
                     onPageSegModeChange = viewModel::setPageSegMode,
                 )
@@ -292,6 +293,7 @@ private fun OcrSettings(
     onToggleLanguage: (OcrLanguage) -> Unit,
     onDetectDocumentChange: (Boolean) -> Unit,
     onDeskewChange: (Boolean) -> Unit,
+    onRemoveLinesChange: (Boolean) -> Unit,
     onBinarizeChange: (Boolean) -> Unit,
     onPageSegModeChange: (OcrPageSegMode) -> Unit,
 ) {
@@ -324,6 +326,7 @@ private fun OcrSettings(
 
         SwitchRow(stringResource(R.string.ocr_detect_document), state.detectDocument, onDetectDocumentChange)
         SwitchRow(stringResource(R.string.ocr_deskew), state.deskew, onDeskewChange)
+        SwitchRow(stringResource(R.string.ocr_remove_lines), state.removeLines, onRemoveLinesChange)
         SwitchRow(stringResource(R.string.ocr_binarize), state.binarize, onBinarizeChange)
     }
 }

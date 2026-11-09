@@ -130,6 +130,7 @@
     <string name="ocr_document_not_detected">Receipt edges not detected: using the whole photo.</string>
     <string name="ocr_document_region">Corners not visible: receipt located as a bright area and cropped.</string>
     <string name="ocr_deskew">Straighten text lines</string>
+    <string name="ocr_remove_lines">Erase lines and creases</string>
     <string name="ocr_skew_corrected">Rotation corrected: %1$s°</string>
     <string name="ocr_rows">Reconstructed rows</string>
     <string name="ocr_copy_json">Copy JSON</string>

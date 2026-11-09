@@ -129,6 +129,7 @@
     <string name="ocr_document_not_detected">未检测到小票边缘：使用整张照片。</string>
     <string name="ocr_document_region">看不到四角：已按明亮区域定位并裁剪小票。</string>
     <string name="ocr_deskew">拉直文字行</string>
+    <string name="ocr_remove_lines">去除线条和折痕</string>
     <string name="ocr_skew_corrected">已校正旋转：%1$s°</string>
     <string name="ocr_rows">重建的行</string>
     <string name="ocr_copy_json">复制 JSON</string>

@@ -121,6 +121,7 @@
     <string name="ocr_document_not_detected">Ränder nicht erkannt: Das ganze Foto wird verwendet.</string>
     <string name="ocr_document_region">Ecken nicht sichtbar: Kassenbon als heller Bereich erkannt und zugeschnitten.</string>
     <string name="ocr_deskew">Textzeilen begradigen</string>
+    <string name="ocr_remove_lines">Linien und Knicke entfernen</string>
     <string name="ocr_skew_corrected">Drehung korrigiert: %1$s°</string>
     <string name="ocr_rows">Rekonstruierte Zeilen</string>
     <string name="ocr_copy_json">JSON kopieren</string>

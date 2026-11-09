@@ -27,7 +27,8 @@ import kotlin.math.roundToInt
  * 3. deskew so text lines are horizontal (row reconstruction depends on it)
  * 4. upscale small images
  * 5. flatten uneven lighting
- * 6. (optional) binarize with a strict threshold that drops faint show-through
+ * 6. (optional) erase long lines: paper edges, creases, separator rules
+ * 7. (optional) binarize with a strict threshold that drops faint show-through
  *    printing from the back of the paper
  */
 class ReceiptImagePreprocessor {
@@ -35,6 +36,12 @@ class ReceiptImagePreprocessor {
     data class Options(
         val detectDocument: Boolean = true,
         val deskew: Boolean = true,
+        /**
+         * Off by default: unvalidated lab option. Preprocessing has no automated
+         * tests (fixtures start after OCR), so it must be checked on real photos
+         * before becoming a default.
+         */
+        val removeLines: Boolean = false,
         val binarize: Boolean = true,
     )
 
@@ -87,6 +94,10 @@ class ReceiptImagePreprocessor {
         }
 
         working = replace(working, normalizeIllumination(working))
+
+        if (options.removeLines) {
+            working = replace(working, removeLongLines(working))
+        }
 
         if (options.binarize) {
             working = replace(working, binarize(working))
@@ -332,6 +343,49 @@ class ReceiptImagePreprocessor {
      * Adaptive threshold on the flattened image. The large offset keeps the dark
      * front-side ink and drops the light gray show-through from the back.
      */
+    /**
+     * Paints white every ink stroke much longer than any character: the paper's
+     * edges, a crease across the receipt, separator rules. Tesseract can discard a
+     * whole region of text that touches such a stroke (on one receipt the header and
+     * the first items above a crease were missing entirely). Characters survive
+     * because their strokes are short; dashed rules made of separate dashes are kept.
+     */
+    private fun removeLongLines(gray: Mat): Mat {
+        val ink = Mat()
+        Imgproc.adaptiveThreshold(
+            gray, ink, 255.0,
+            Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV,
+            oddBlockSize(gray), BINARIZE_OFFSET
+        )
+
+        val horizontalKernel = Imgproc.getStructuringElement(
+            Imgproc.MORPH_RECT, Size((gray.cols() / LINE_LENGTH_DIVISOR).toDouble(), 1.0)
+        )
+        val verticalKernel = Imgproc.getStructuringElement(
+            Imgproc.MORPH_RECT, Size(1.0, (gray.rows() / LINE_LENGTH_DIVISOR).toDouble())
+        )
+        val horizontal = Mat()
+        val vertical = Mat()
+        Imgproc.morphologyEx(ink, horizontal, Imgproc.MORPH_OPEN, horizontalKernel)
+        Imgproc.morphologyEx(ink, vertical, Imgproc.MORPH_OPEN, verticalKernel)
+
+        val lines = Mat()
+        Core.bitwise_or(horizontal, vertical, lines)
+        // Grow a little to also catch the blurry rim of each line.
+        val grow = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(3.0, 3.0))
+        Imgproc.dilate(lines, lines, grow)
+
+        val cleaned = gray.clone()
+        cleaned.setTo(Scalar(255.0), lines)
+        listOf(ink, horizontalKernel, verticalKernel, horizontal, vertical, lines, grow).forEach { it.release() }
+        return cleaned
+    }
+
+    private fun oddBlockSize(gray: Mat): Int {
+        val size = (gray.cols() / 20).coerceIn(15, 151)
+        return if (size % 2 == 0) size + 1 else size
+    }
+
     private fun binarize(gray: Mat): Mat {
         var blockSize = (gray.cols() / 20).coerceIn(15, 151)
         if (blockSize % 2 == 0) blockSize++
@@ -358,6 +412,11 @@ class ReceiptImagePreprocessor {
         const val MIN_OCR_WIDTH = 1200
         const val MAX_UPSCALE = 3.0
         const val BINARIZE_OFFSET = 25.0
+        /**
+         * A stroke counts as a line from 1/12 of the image size: ~100 px on a
+         * receipt 1200 px wide, while a character is ~30 px.
+         */
+        const val LINE_LENGTH_DIVISOR = 12
     }
 }
 
