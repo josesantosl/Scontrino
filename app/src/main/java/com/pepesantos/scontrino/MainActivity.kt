@@ -2,10 +2,12 @@ package com.pepesantos.scontrino
 
 import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CreditCard
@@ -47,6 +49,8 @@ import com.pepesantos.scontrino.ui.viewmodel.StatsViewModel
 import com.pepesantos.scontrino.ui.viewmodel.PriceComparisonViewModel
 import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 
+private const val SPLASH_MIN_MILLIS = 500L
+
 class MainActivity : ComponentActivity() {
 
     // The language chosen in the settings, applied before any resource is read.
@@ -55,6 +59,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Keep the logo up for at least half a second on a cold start.
+        val splashShownAt = SystemClock.uptimeMillis()
+        installSplashScreen().setKeepOnScreenCondition {
+            SystemClock.uptimeMillis() - splashShownAt < SPLASH_MIN_MILLIS
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val database = AppDatabase.getDatabase(applicationContext)
