@@ -64,6 +64,20 @@ class ReceiptDraftBuilderTest {
     }
 
     @Test
+    fun `carrefour - a printed quantity line becomes unit price and quantity`() {
+        val draft = draft("carrefour-torino-2026-11-09")
+
+        // "2 x 0,79" then "FARINA\"00\" CRF KG1  1,58".
+        val flour = draft.items.single { it.name.startsWith("FARINA") }
+        assertEquals(0.79, flour.price, 1e-9)
+        assertEquals(2, flour.quantity)
+
+        assertEquals(3, draft.items.size)
+        assertEquals(8.06, draft.items.sumOf { it.price * it.quantity }, 1e-9)
+        assertTrue(draft.addsUp)
+    }
+
+    @Test
     fun `an existing product gives its own name and category`() {
         val farinata = Product(id = 7, name = "Farinata", categoryId = 6)
         val draft = draft("bennet-torino-san-paolo-lines", products = listOf(farinata))

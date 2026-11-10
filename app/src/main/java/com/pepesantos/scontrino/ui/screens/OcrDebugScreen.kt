@@ -327,7 +327,8 @@ private fun ParsedReceiptSection(parsed: ParsedReceipt, onUse: () -> Unit) {
                 }
             }
             Text(
-                "${item.name}  ${Amounts.format(item.priceCents)}" +
+                (if (item.quantity > 1) "${item.quantity} x " else "") +
+                    "${item.name}  ${Amounts.format(item.priceCents)}" +
                     if (details.isEmpty()) "" else "  (${details.joinToString(" · ")})",
                 fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.bodySmall,

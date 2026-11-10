@@ -31,7 +31,13 @@ data class ParsedItem(
     val name: String,
     /** Article code printed before the name by some stores (e.g. Bennet "353406"). */
     val code: String?,
+    /** Line total as printed: for [quantity] > 1, the price of all the units. */
     val priceCents: Long,
+    /**
+     * Units bought, from a quantity line such as "2 x 0,79" that matches [priceCents]
+     * exactly. 1 when the receipt prints none.
+     */
+    val quantity: Int = 1,
     /** Sum of the discount lines that follow the item, as a positive amount. */
     val discountCents: Long = 0,
     /** VAT as printed: a rate ("22%") or a letter code ("C"). */

@@ -119,4 +119,51 @@ class ReceiptParserFixtureTest {
         assertEquals(ReceiptDate(2026, 11, 8, 14, 30), receipt.date)
         assertEquals("07071700152", receipt.vatNumber)
     }
+
+    @Test
+    fun `carrefour 2026-11-09 - quantity line before the item, noise at the left edge`() {
+        val receipt = parse("carrefour-torino-2026-11-09")
+
+        assertEquals(
+            listOf(
+                "DRINK SOIA CRF BIO 1" to "2,19",
+                "FARINA\"00\" CRF KG1" to "1,58",
+                "SEITAN NATURALE GR90" to "4,29",
+            ),
+            receipt.items.map { it.name to Amounts.format(it.priceCents) }
+        )
+        assertTrue(receipt.items.all { it.correctedFromCents == null })
+        // "2 x 0,79" is printed on its own line, before the flour.
+        assertEquals(listOf(1, 2, 1), receipt.items.map { it.quantity })
+        // The VAT column holds plain numbers ("22,00"); the flour's 4,00 slid onto
+        // the quantity line.
+        assertEquals(listOf(22.0, 4.0, 10.0), receipt.items.map { it.vatRate })
+        assertTrue(receipt.unparsedRows.isEmpty())
+
+        assertEquals(806L, receipt.totalCents)
+        assertTrue(receipt.isConsistent)
+        assertEquals(ReceiptDate(2026, 11, 9, 19, 55), receipt.date)
+        assertEquals("02924950963", receipt.vatNumber)
+    }
+
+    @Test
+    fun `carrefour 2026-11-09 retake - misread quantity line with a speck and a doubled sign`() {
+        // Printed "2 X 0,79", read "2. xX 0,79".
+        val receipt = parse("carrefour-torino-2026-11-09-retake")
+
+        assertEquals(
+            listOf(
+                Triple("DRINK SOIA CRF BIO 1", "2,19", 1),
+                Triple("FARINA\"00\" CRF KG1", "1,58", 2),
+                Triple("SEITAN NATURALE GR30", "4,29", 1),
+            ),
+            receipt.items.map { Triple(it.name, Amounts.format(it.priceCents), it.quantity) }
+        )
+        // The flour's VAT was cut short to "04,": unknown, but not taken as a price.
+        assertEquals(listOf(22.0, null, 10.0), receipt.items.map { it.vatRate })
+        assertTrue(receipt.unparsedRows.isEmpty())
+
+        assertEquals(806L, receipt.totalCents)
+        assertTrue(receipt.isConsistent)
+    }
 }

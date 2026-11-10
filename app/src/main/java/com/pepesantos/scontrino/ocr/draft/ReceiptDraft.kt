@@ -59,8 +59,13 @@ object ReceiptDraftBuilder {
 
         val grouped = linkedMapOf<Pair<String, Long>, Int>()
         for (item in parsed.items) {
-            val key = item.name to item.netCents
-            grouped[key] = (grouped[key] ?: 0) + 1
+            // ItemEntry holds the unit price; a line "2 x 0,79 = 1,58" becomes 2 × 0,79,
+            // unless a discount makes the units differ in price.
+            val perUnit = item.quantity > 1 && item.netCents % item.quantity == 0L
+            val unitCents = if (perUnit) item.netCents / item.quantity else item.netCents
+            val units = if (perUnit) item.quantity else 1
+            val key = item.name to unitCents
+            grouped[key] = (grouped[key] ?: 0) + units
         }
         return grouped.map { (key, quantity) ->
             val (name, netCents) = key
