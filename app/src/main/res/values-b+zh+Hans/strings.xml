@@ -114,6 +114,12 @@
     <string name="ocr_debug_open">扫描小票（测试版）</string>
     <string name="ocr_debug_title">小票识别（测试版）</string>
     <string name="ocr_pick_image">选择照片</string>
+    <string name="ocr_take_photo">拍照</string>
+    <string name="ocr_camera_hint">将小票平放，完整置于框内，手指不要遮挡</string>
+    <string name="ocr_camera_capture">拍摄照片</string>
+    <string name="ocr_camera_torch">手电筒</string>
+    <string name="ocr_camera_close">关闭相机</string>
+    <string name="ocr_camera_permission_denied">需要相机权限才能拍照</string>
     <string name="ocr_run">识别文字</string>
     <string name="ocr_languages">小票语言</string>
     <string name="ocr_detect_document">检测并拉直小票</string>

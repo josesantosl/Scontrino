@@ -115,6 +115,12 @@
     <string name="ocr_debug_open">Scan receipt (beta)</string>
     <string name="ocr_debug_title">Receipt OCR (beta)</string>
     <string name="ocr_pick_image">Choose photo</string>
+    <string name="ocr_take_photo">Take photo</string>
+    <string name="ocr_camera_hint">Lay the receipt flat, whole inside the frame, with no fingers over it</string>
+    <string name="ocr_camera_capture">Take the photo</string>
+    <string name="ocr_camera_torch">Torch</string>
+    <string name="ocr_camera_close">Close camera</string>
+    <string name="ocr_camera_permission_denied">The camera permission is needed to take the photo</string>
     <string name="ocr_run">Recognize text</string>
     <string name="ocr_languages">Receipt languages</string>
     <string name="ocr_detect_document">Detect and straighten receipt</string>

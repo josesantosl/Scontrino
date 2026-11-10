@@ -107,6 +107,12 @@
     <string name="ocr_debug_open">Escanear ticket (beta)</string>
     <string name="ocr_debug_title">OCR de tickets (beta)</string>
     <string name="ocr_pick_image">Elegir foto</string>
+    <string name="ocr_take_photo">Hacer foto</string>
+    <string name="ocr_camera_hint">Pon el ticket plano, entero dentro del marco y sin dedos encima</string>
+    <string name="ocr_camera_capture">Hacer la foto</string>
+    <string name="ocr_camera_torch">Linterna</string>
+    <string name="ocr_camera_close">Cerrar cámara</string>
+    <string name="ocr_camera_permission_denied">Hace falta el permiso de cámara para hacer la foto</string>
     <string name="ocr_run">Reconocer texto</string>
     <string name="ocr_languages">Idiomas del ticket</string>
     <string name="ocr_detect_document">Detectar y enderezar el ticket</string>

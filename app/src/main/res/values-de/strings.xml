@@ -106,6 +106,12 @@
     <string name="ocr_debug_open">Kassenbon scannen (Beta)</string>
     <string name="ocr_debug_title">Kassenbon-OCR (Beta)</string>
     <string name="ocr_pick_image">Foto auswählen</string>
+    <string name="ocr_take_photo">Foto aufnehmen</string>
+    <string name="ocr_camera_hint">Leg den Kassenbon flach und vollständig in den Rahmen, ohne Finger darauf</string>
+    <string name="ocr_camera_capture">Foto aufnehmen</string>
+    <string name="ocr_camera_torch">Taschenlampe</string>
+    <string name="ocr_camera_close">Kamera schließen</string>
+    <string name="ocr_camera_permission_denied">Für das Foto wird die Kameraberechtigung benötigt</string>
     <string name="ocr_run">Text erkennen</string>
     <string name="ocr_languages">Sprachen des Kassenbons</string>
     <string name="ocr_detect_document">Kassenbon erkennen und begradigen</string>

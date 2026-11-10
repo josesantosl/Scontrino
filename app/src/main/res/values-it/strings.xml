@@ -107,6 +107,12 @@
     <string name="ocr_debug_open">Scansiona scontrino (beta)</string>
     <string name="ocr_debug_title">OCR scontrini (beta)</string>
     <string name="ocr_pick_image">Scegli foto</string>
+    <string name="ocr_take_photo">Scatta foto</string>
+    <string name="ocr_camera_hint">Metti lo scontrino piatto, intero dentro la cornice e senza dita sopra</string>
+    <string name="ocr_camera_capture">Scatta la foto</string>
+    <string name="ocr_camera_torch">Torcia</string>
+    <string name="ocr_camera_close">Chiudi fotocamera</string>
+    <string name="ocr_camera_permission_denied">Serve il permesso della fotocamera per scattare la foto</string>
     <string name="ocr_run">Riconosci testo</string>
     <string name="ocr_languages">Lingue dello scontrino</string>
     <string name="ocr_detect_document">Rileva e raddrizza lo scontrino</string>
