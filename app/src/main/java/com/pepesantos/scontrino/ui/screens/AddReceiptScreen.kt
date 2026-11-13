@@ -40,6 +40,9 @@ import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
+import com.pepesantos.scontrino.ui.components.LocalCurrency
+import com.pepesantos.scontrino.ui.components.LocalTaxIncluded
+import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.components.AliasDialog
 import com.pepesantos.scontrino.ui.components.CategoryPickerDialog
 import com.pepesantos.scontrino.ui.theme.CategoryIcons
@@ -60,7 +63,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun AddReceiptScreen(
     onNavigateBack: () -> Unit,
-    onSave: (storeName: String, date: Long, note: String?, items: List<ItemEntry>) -> Unit,
+    /** [tax] is added on top of the items (US sales tax); 0 when prices include it. */
+    onSave: (storeName: String, date: Long, note: String?, items: List<ItemEntry>, tax: Double) -> Unit,
     categories: List<Category> = emptyList(),
     existingReceipt: ReceiptWithStoreName? = null,
     existingItems: List<ItemEntry> = emptyList(),
@@ -80,6 +84,17 @@ fun AddReceiptScreen(
     // State reset logic: when receiptId changes, reset storeName, note, and items
     var storeName by remember(receiptId) { mutableStateOf(existingReceipt?.storeName ?: draft?.storeName ?: "") }
     var note by remember(receiptId) { mutableStateOf(existingReceipt?.receipt?.note ?: "") }
+
+    // Tax on top of the items. Shown when the settings say prices exclude it, and always
+    // for a receipt that already has one (saved, or read from the photo).
+    val initialTax = existingReceipt?.receipt?.tax ?: 0.0
+    var taxInput by remember(receiptId) {
+        val start = if (isEditMode) initialTax else draft?.tax ?: 0.0
+        mutableStateOf(if (start == 0.0) "" else start.toString())
+    }
+    val tax = taxInput.replace(',', '.').toDoubleOrNull() ?: 0.0
+    val showTax = !LocalTaxIncluded.current || initialTax > 0.0 || (draft?.tax ?: 0.0) > 0.0
+    val currency = existingReceipt?.receipt?.currency ?: LocalCurrency.current
     
     val items = remember(receiptId) { mutableStateListOf<ItemEntry>() }
 
@@ -184,6 +199,7 @@ fun AddReceiptScreen(
     val hasChanges = remember(
         storeName,
         note,
+        tax,
         datePickerState.selectedDateMillis,
         items.toList(),
         existingReceipt,
@@ -193,6 +209,7 @@ fun AddReceiptScreen(
         if (isEditMode) {
             storeName != initialStoreName ||
                     note != initialNote ||
+                    tax != initialTax ||
                     (initialDate != null && datePickerState.selectedDateMillis != initialDate) ||
                     currentValidItems != existingItems
         } else {
@@ -312,7 +329,8 @@ fun AddReceiptScreen(
                             storeName,
                             datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
                             note.ifBlank { null },
-                            items.filter { it.name.isNotBlank() }
+                            items.filter { it.name.isNotBlank() },
+                            tax,
                         )
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -334,7 +352,7 @@ fun AddReceiptScreen(
                 item {
                     ScanReviewBanner(
                         draft = draft,
-                        currentItemsTotal = items.sumOf { it.price * it.quantity },
+                        currentItemsTotal = items.sumOf { it.price * it.quantity } + tax,
                     )
                 }
             }
@@ -505,6 +523,16 @@ fun AddReceiptScreen(
                     onEditAlias = { if (items[index].name.isNotBlank()) aliasRowIndex = index }
                 )
             }
+            if (showTax) {
+                item {
+                    TaxField(
+                        taxInput = taxInput,
+                        onTaxInputChange = { taxInput = it },
+                        total = items.sumOf { it.price * it.quantity } + tax,
+                        currency = currency,
+                    )
+                }
+            }
             item {
                 OutlinedTextField(
                     value = note,
@@ -515,6 +543,42 @@ fun AddReceiptScreen(
                 )
             }
         }
+    }
+}
+
+/**
+ * Tax added on top of the items (US sales tax), as printed on the receipt, and the
+ * resulting amount paid.
+ */
+@Composable
+private fun TaxField(
+    taxInput: String,
+    onTaxInputChange: (String) -> Unit,
+    total: Double,
+    currency: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        OutlinedTextField(
+            value = taxInput,
+            onValueChange = { newValue ->
+                if (newValue.isEmpty() || newValue.matches(Regex("""^\d*[.,]?\d*$"""))) {
+                    onTaxInputChange(newValue)
+                }
+            },
+            label = { Text(stringResource(R.string.add_receipt_tax)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            stringResource(R.string.add_receipt_total_with_tax, Money.format(total, currency)),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 

@@ -78,8 +78,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
             val draft = scanDraft!!
             AddReceiptScreen(
                 onNavigateBack = { scanDraft = null },
-                onSave = { storeName, date, note, items ->
-                    viewModel.saveReceipt(storeName, date, note, items, storeVatNumber = draft.storeVatNumber)
+                onSave = { storeName, date, note, items, tax ->
+                    viewModel.saveReceipt(storeName, date, note, items, tax, storeVatNumber = draft.storeVatNumber)
                     scanDraft = null
                 },
                 categories = categories,
@@ -93,8 +93,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
         showAddReceipt -> {
             AddReceiptScreen(
                 onNavigateBack = { showAddReceipt = false },
-                onSave = { storeName, date, note, items ->
-                    viewModel.saveReceipt(storeName, date, note, items)
+                onSave = { storeName, date, note, items, tax ->
+                    viewModel.saveReceipt(storeName, date, note, items, tax)
                     showAddReceipt = false
                 },
                 categories = categories,
@@ -107,8 +107,8 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
         editingReceipt != null -> {
             AddReceiptScreen(
                 onNavigateBack = { editingReceipt = null },
-                onSave = { storeName, date, note, items ->
-                    viewModel.updateReceipt(editingReceipt!!.receipt, storeName, date, note, items)
+                onSave = { storeName, date, note, items, tax ->
+                    viewModel.updateReceipt(editingReceipt!!.receipt, storeName, date, note, items, tax)
                     editingReceipt = null
                 },
                 categories = categories,

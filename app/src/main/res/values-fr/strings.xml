@@ -34,6 +34,8 @@
     <string name="add_receipt_volume">Volume (l)</string>
     <string name="add_receipt_quantity">Qté</string>
     <string name="add_receipt_note">Notes</string>
+    <string name="add_receipt_tax">Taxes</string>
+    <string name="add_receipt_total_with_tax">Total : %1$s</string>
     <string name="add_receipt_save">Enregistrer le reçu</string>
     <string name="add_receipt_select_date">Sélectionner la date</string>
     <string name="add_receipt_ok">OK</string>
@@ -159,6 +161,8 @@
     <string name="settings_language">Langue</string>
     <string name="settings_language_system">Langue du système</string>
     <string name="settings_currency">Devise</string>
+    <string name="settings_tax_included">Prix taxes comprises</string>
+    <string name="settings_tax_included_subtitle">Désactivez-le si les prix sont affichés hors taxes et que le ticket les ajoute à la fin (p. ex. la sales tax aux États-Unis)</string>
     <string name="settings_currency_custom">Autre…</string>
     <string name="settings_currency_custom_hint">Code ou symbole (ex. GBP, £)</string>
     <string name="settings_currency_scope_title">Changer de devise</string>

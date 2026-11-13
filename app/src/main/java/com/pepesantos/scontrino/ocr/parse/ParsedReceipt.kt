@@ -17,14 +17,19 @@ data class ParsedReceipt(
     val unparsedRows: List<String>,
     /** Rows from the first total line on (totals, payment, date, footer). */
     val footerLines: List<String> = emptyList(),
+    /**
+     * Tax printed apart and added to the items (US sales tax), found because the items
+     * plus it make the total. Null where prices include VAT.
+     */
+    val taxCents: Long? = null,
 ) {
     val itemsTotalCents: Long get() = items.sumOf { it.netCents }
 
     /** All the text that is not an item: where the store name usually appears. */
     val nonItemLines: List<String> get() = headerLines + unparsedRows + footerLines
 
-    /** True when the items, after discounts, add up exactly to the total. */
-    val isConsistent: Boolean get() = totalCents != null && totalCents == itemsTotalCents
+    /** True when the items, after discounts, plus the tax add up exactly to the total. */
+    val isConsistent: Boolean get() = totalCents != null && totalCents == itemsTotalCents + (taxCents ?: 0L)
 }
 
 data class ParsedItem(

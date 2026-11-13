@@ -142,6 +142,8 @@ class ReceiptParserFixtureTest {
 
         assertEquals(806L, receipt.totalCents)
         assertTrue(receipt.isConsistent)
+        // "DI CUI IVA 0,84" is VAT included in the prices, not added to them.
+        assertNull(receipt.taxCents)
         assertEquals(ReceiptDate(2026, 11, 9, 19, 55), receipt.date)
         assertEquals("02924950963", receipt.vatNumber)
     }

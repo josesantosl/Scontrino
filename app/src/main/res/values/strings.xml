@@ -39,6 +39,8 @@
     <string name="add_receipt_volume">Volume (L)</string>
     <string name="add_receipt_quantity">Qty</string>
     <string name="add_receipt_note">Notes</string>
+    <string name="add_receipt_tax">Tax</string>
+    <string name="add_receipt_total_with_tax">Total: %1$s</string>
     <string name="add_receipt_save">Save receipt</string>
     <string name="add_receipt_select_date">Select date</string>
     <string name="add_receipt_ok">OK</string>
@@ -167,6 +169,8 @@
     <string name="settings_language">Language</string>
     <string name="settings_language_system">System language</string>
     <string name="settings_currency">Currency</string>
+    <string name="settings_tax_included">Prices include taxes</string>
+    <string name="settings_tax_included_subtitle">Turn off if prices are shown without taxes and the receipt adds them at the end (e.g. US sales tax)</string>
     <string name="settings_currency_custom">Other…</string>
     <string name="settings_currency_custom_hint">Code or symbol (e.g. GBP, £)</string>
     <string name="settings_currency_scope_title">Change currency</string>

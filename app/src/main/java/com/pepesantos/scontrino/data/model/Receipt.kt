@@ -12,11 +12,18 @@ import androidx.room.Embedded
 data class Receipt(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val date: Long,
+    /** Amount paid: the items plus [tax]. */
     val total: Double,
     val storeId: Int,
     val note: String? = null,
     /** ISO 4217 code (EUR, USD, CHF...) or a custom symbol chosen by the user. */
     val currency: String = "EUR",
+    /**
+     * Tax added on top of the items, where prices are shown without it (US sales
+     * tax). 0 where prices already include VAT. Item prices never include it, so
+     * product, category and price comparisons use shelf prices.
+     */
+    val tax: Double = 0.0,
 )
 data class ReceiptWithStoreName(
     @Embedded val receipt: Receipt,

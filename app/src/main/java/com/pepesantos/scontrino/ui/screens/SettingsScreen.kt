@@ -4,12 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,7 +29,7 @@ import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
- * App settings: language, currency and the product aliases screen.
+ * App settings: language, currency, taxes and the product aliases screen.
  * [onLanguageChanged] must recreate the activity so that the new language is applied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +46,7 @@ fun SettingsScreen(
 
     val language by viewModel.language.collectAsState()
     val currency by viewModel.currency.collectAsState()
+    val taxIncluded by viewModel.taxIncluded.collectAsState()
     val scope = rememberCoroutineScope()
 
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -84,6 +87,17 @@ fun SettingsScreen(
                     supportingContent = { Text(Money.displayName(currency)) },
                     leadingContent = { Icon(Icons.Filled.Payments, contentDescription = null) },
                     modifier = Modifier.clickable { showCurrencyDialog = true }
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_tax_included)) },
+                    supportingContent = { Text(stringResource(R.string.settings_tax_included_subtitle)) },
+                    leadingContent = { Icon(Icons.Filled.Percent, contentDescription = null) },
+                    trailingContent = { Switch(checked = taxIncluded, onCheckedChange = null) },
+                    modifier = Modifier.toggleable(
+                        value = taxIncluded,
+                        role = Role.Switch,
+                        onValueChange = viewModel::setTaxIncluded,
+                    )
                 )
                 HorizontalDivider()
                 ListItem(

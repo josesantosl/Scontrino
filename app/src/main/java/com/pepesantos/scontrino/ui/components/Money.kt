@@ -7,6 +7,9 @@ import java.util.Locale
 /** Currency chosen in the settings, for amounts not tied to one receipt (statistics). */
 val LocalCurrency = compositionLocalOf { "EUR" }
 
+/** Whether prices include taxes (settings): if not, receipts show a tax field. */
+val LocalTaxIncluded = compositionLocalOf { true }
+
 /**
  * Formats amounts with a currency that is either an ISO 4217 code or a custom symbol
  * typed by the user ("£", "zł"...).

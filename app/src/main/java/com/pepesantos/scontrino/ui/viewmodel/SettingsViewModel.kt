@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Settings: language, currency and product aliases.
+ * Settings: language, currency, taxes and product aliases.
  */
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
@@ -27,6 +27,9 @@ class SettingsViewModel(
 
     val language: StateFlow<String> = settingsRepository.language
     val currency: StateFlow<String> = settingsRepository.currency
+    val taxIncluded: StateFlow<Boolean> = settingsRepository.taxIncluded
+
+    fun setTaxIncluded(included: Boolean) = settingsRepository.setTaxIncluded(included)
 
     private val _aliasRows = MutableStateFlow<List<ProductUsage>>(emptyList())
     /** Products bought so far, in the order of the aliases screen: see [sortForAliases]. */

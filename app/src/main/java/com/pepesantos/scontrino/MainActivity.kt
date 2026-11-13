@@ -36,6 +36,7 @@ import com.pepesantos.scontrino.data.repository.StoreRepository
 import com.pepesantos.scontrino.data.settings.AppLocale
 import com.pepesantos.scontrino.data.settings.SettingsRepository
 import com.pepesantos.scontrino.ui.components.LocalCurrency
+import com.pepesantos.scontrino.ui.components.LocalTaxIncluded
 import com.pepesantos.scontrino.ui.screens.ReceiptsScreen
 import com.pepesantos.scontrino.ui.screens.SettingsScreen
 import com.pepesantos.scontrino.ui.screens.StatsScreen
@@ -79,8 +80,12 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             val currency by settingsRepository.currency.collectAsState()
+            val taxIncluded by settingsRepository.taxIncluded.collectAsState()
             ScontrinoTheme {
-                CompositionLocalProvider(LocalCurrency provides currency) {
+                CompositionLocalProvider(
+                    LocalCurrency provides currency,
+                    LocalTaxIncluded provides taxIncluded,
+                ) {
                     ScontrinoApp(factory = factory, onLanguageChanged = { recreate() })
                 }
             }

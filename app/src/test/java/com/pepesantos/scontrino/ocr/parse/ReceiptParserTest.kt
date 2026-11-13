@@ -43,6 +43,80 @@ class ReceiptParserTest {
     }
 
     @Test
+    fun `US sales tax is added on top of the items, past a subtotal equal to them`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("WALMART"),
+                row("MILK", "3.49"),
+                row("BREAD", "2.51"),
+                row("SUBTOTAL", "6.00"),
+                row("TAX 1 8.000 %", "0.48"),
+                row("TOTAL", "6.48"),
+                row("VISA TEND", "6.48"),
+            )
+        )
+        assertEquals(listOf("MILK", "BREAD"), parsed.items.map { it.name })
+        assertEquals(48L, parsed.taxCents)
+        assertEquals(648L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        assertTrue(parsed.items.all { it.correctedFromCents == null })
+    }
+
+    @Test
+    fun `state and city taxes add up to the tax`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("COFFEE", "10.00"),
+                row("SUBTOTAL", "10.00"),
+                row("STATE TAX", "0.40"),
+                row("CITY TAX", "0.20"),
+                row("TOTAL", "10.60"),
+            )
+        )
+        assertEquals(60L, parsed.taxCents)
+        assertEquals(1060L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `VAT included in the prices is not added`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("DESCRIZIONE", "PREZZO"),
+                row("PANE", "1,20"),
+                row("LATTE", "0,99"),
+                row("TOTALE COMPLESSIVO", "2,19"),
+                row("DI CUI IVA", "0,14"),
+                row("PAGAMENTO CONTANTE", "2,19"),
+            )
+        )
+        assertNull(parsed.taxCents)
+        assertEquals(219L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `Ecuadorian VAT breakdown is included in the prices, even if a line matches by chance`() {
+        // Prices include IVA: SUBTOTAL 15% is the base, IVA 15% its tax, TOTAL what was paid.
+        // "VALOR TOTAL" repeats the total plus the IVA, as if it were a total with tax added.
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("CODIGO DESCR.", "CANT. P.UNIT. VALOR"),
+                row("000178 MADURO", "2.87"),
+                row("000201 LECHE", "1.15"),
+                row("SUBTOTAL 15%", "3.50"),
+                row("IVA 15%", "0.52"),
+                row("TOTAL", "4.02"),
+                row("VALOR TOTAL", "4.54"),
+                row("EFECTIVO", "4.02"),
+            )
+        )
+        assertNull(parsed.taxCents)
+        assertEquals(402L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
     fun `discount lines reduce the previous item`() {
         val parsed = ReceiptParser.parse(
             listOf(

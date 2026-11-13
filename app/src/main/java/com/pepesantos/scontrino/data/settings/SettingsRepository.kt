@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * App preferences: language and currency. Kept in SharedPreferences because the language
+ * App preferences: language, currency and whether prices include taxes. Kept in SharedPreferences because the language
  * has to be read synchronously before the activity is created (see [AppLocale]).
  */
 class SettingsRepository(context: Context) {
@@ -22,6 +22,18 @@ class SettingsRepository(context: Context) {
     private val _currency = MutableStateFlow(prefs.getString(KEY_CURRENCY, null) ?: DEFAULT_CURRENCY)
     /** Currency of new receipts and of the statistics. */
     val currency: StateFlow<String> = _currency.asStateFlow()
+
+    private val _taxIncluded = MutableStateFlow(prefs.getBoolean(KEY_TAX_INCLUDED, true))
+    /**
+     * Whether shelf prices already include taxes (VAT in Europe). When false (US sales
+     * tax), receipts get a tax field added on top of the items.
+     */
+    val taxIncluded: StateFlow<Boolean> = _taxIncluded.asStateFlow()
+
+    fun setTaxIncluded(included: Boolean) {
+        prefs.edit { putBoolean(KEY_TAX_INCLUDED, included) }
+        _taxIncluded.value = included
+    }
 
     private val _collapsedStatsCards = MutableStateFlow(
         prefs.getStringSet(KEY_COLLAPSED_STATS_CARDS, null)?.toSet() ?: emptySet()
@@ -50,6 +62,7 @@ class SettingsRepository(context: Context) {
         private const val FILE = "settings"
         private const val KEY_LANGUAGE = "language"
         private const val KEY_CURRENCY = "currency"
+        private const val KEY_TAX_INCLUDED = "tax_included"
         private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
 
         private fun preferences(context: Context): SharedPreferences =

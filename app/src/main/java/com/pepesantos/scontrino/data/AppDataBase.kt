@@ -24,7 +24,7 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
         LoyaltyCard::class,
         ProductAlias::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -91,6 +91,13 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) = DefaultCategoriesV10.migrate(db)
         }
 
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Receipts so far had VAT included in their prices.
+                db.execSQL("ALTER TABLE Receipt ADD COLUMN tax REAL NOT NULL DEFAULT 0")
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -105,7 +112,8 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(PrepopulateCallback())
                     // Every version bump needs a migration here: the destructive
                     // fallback below would otherwise wipe the user's receipts.
-                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
+                        MIGRATION_10_11)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

@@ -34,6 +34,8 @@
     <string name="add_receipt_volume">Volume (l)</string>
     <string name="add_receipt_quantity">Qtà</string>
     <string name="add_receipt_note">Note</string>
+    <string name="add_receipt_tax">Imposte</string>
+    <string name="add_receipt_total_with_tax">Totale: %1$s</string>
     <string name="add_receipt_save">Salva scontrino</string>
     <string name="add_receipt_select_date">Seleziona data</string>
     <string name="add_receipt_ok">OK</string>
@@ -159,6 +161,8 @@
     <string name="settings_language">Lingua</string>
     <string name="settings_language_system">Lingua di sistema</string>
     <string name="settings_currency">Valuta</string>
+    <string name="settings_tax_included">Prezzi con imposte incluse</string>
+    <string name="settings_tax_included_subtitle">Disattivalo se i prezzi sono senza imposte e lo scontrino le aggiunge alla fine (es. la sales tax degli USA)</string>
     <string name="settings_currency_custom">Altra…</string>
     <string name="settings_currency_custom_hint">Codice o simbolo (es. GBP, £)</string>
     <string name="settings_currency_scope_title">Cambia valuta</string>

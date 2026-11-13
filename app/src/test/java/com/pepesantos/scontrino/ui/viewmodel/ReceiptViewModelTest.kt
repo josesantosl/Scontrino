@@ -80,6 +80,25 @@ class ReceiptViewModelTest {
     }
 
     @Test
+    fun `saveReceipt adds the tax to the total and keeps it apart`() = runTest {
+        val items = listOf(ItemEntry("Milk", 3.49, 1, 1), ItemEntry("Bread", 2.51, 1, 1))
+
+        whenever(storeRepository.search("Walmart")).thenReturn(emptyList())
+        whenever(storeRepository.insert(any())).thenReturn(1L)
+        whenever(productRepository.getOrCreate(any(), any(), anyOrNull())).thenReturn(Product(id = 1, name = "x", categoryId = 1))
+        whenever(receiptRepository.getAll()).thenReturn(emptyList())
+        whenever(storeRepository.getAll()).thenReturn(emptyList())
+
+        viewModel.saveReceipt("Walmart", 1L, null, items, tax = 0.48)
+        advanceUntilIdle()
+
+        // Items keep their shelf prices; the receipt total is what was paid.
+        verify(receiptRepository).insert(argThat {
+            kotlin.math.abs(this.total - 6.48) < 1e-9 && this.tax == 0.48
+        }, any())
+    }
+
+    @Test
     fun `saveReceipt saves items with price 0 as shopping list items`() = runTest {
         val storeName = "Supermarket"
         val date = 3000L

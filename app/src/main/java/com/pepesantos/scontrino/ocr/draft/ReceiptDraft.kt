@@ -24,8 +24,10 @@ data class ReceiptDraft(
     val items: List<ItemEntry>,
     /** Total printed on the receipt, to compare with the items while reviewing. */
     val receiptTotal: Double?,
-    /** Whether the items add up to [receiptTotal] as read. */
+    /** Whether the items (plus [tax]) add up to [receiptTotal] as read. */
     val addsUp: Boolean,
+    /** Tax added on top of the items (US sales tax), 0 if prices include it. */
+    val tax: Double = 0.0,
 )
 
 object ReceiptDraftBuilder {
@@ -46,6 +48,7 @@ object ReceiptDraftBuilder {
             items = items(parsed, products, categories),
             receiptTotal = parsed.totalCents?.let { it / 100.0 },
             addsUp = parsed.isConsistent,
+            tax = (parsed.taxCents ?: 0L) / 100.0,
         )
     }
 

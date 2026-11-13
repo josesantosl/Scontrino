@@ -148,6 +148,7 @@ class ReceiptViewModel(
      * @param date Timestamp of the receipt.
      * @param note Optional text note.
      * @param items List of items to be saved.
+     * @param tax Tax added on top of the items (US sales tax), 0 if prices include it.
      * @param storeVatNumber VAT number read from a scanned receipt; remembered on the
      * store (if it has none yet) to recognise it on future scans.
      */
@@ -156,6 +157,7 @@ class ReceiptViewModel(
         date: Long,
         note: String?,
         items: List<ItemEntry>,
+        tax: Double = 0.0,
         storeVatNumber: String? = null,
     ) {
         val trimmedStoreName = storeName.trim()
@@ -174,13 +176,14 @@ class ReceiptViewModel(
                 storeRepository.update(store.copy(vatNumber = storeVatNumber))
             }
 
-            // 2. Calculate total based on unit prices and quantities
-            val total = items.sumOf { it.price * it.quantity }
+            // 2. Calculate total based on unit prices and quantities, plus the tax
+            val total = receiptTotal(items, tax)
 
             // 3. Create receipt entity
             val receipt = Receipt(
                 date = date,
                 total = total,
+                tax = tax,
                 storeId = store.id,
                 note = note?.ifBlank { null },
                 currency = currencyProvider(),
@@ -197,6 +200,10 @@ class ReceiptViewModel(
             loadStoresAndProducts()
         }
     }
+
+    /** What was paid: the items at their unit prices and quantities, plus the tax. */
+    private fun receiptTotal(items: List<ItemEntry>, tax: Double): Double =
+        items.sumOf { it.price * it.quantity } + tax
 
     /**
      * Finds or creates the product of every named entry, saving the alias and category
@@ -247,7 +254,8 @@ class ReceiptViewModel(
         storeName: String,
         date: Long,
         note: String?,
-        items: List<ItemEntry>
+        items: List<ItemEntry>,
+        tax: Double = 0.0,
     ) {
         val trimmedStoreName = storeName.trim()
         viewModelScope.launch {
@@ -262,11 +270,10 @@ class ReceiptViewModel(
                     Store(id = id.toInt(), name = trimmedStoreName)
                 }
 
-            val total = items.sumOf { it.price * it.quantity }
-
             val updatedReceipt = receipt.copy(
                 date = date,
-                total = total,
+                total = receiptTotal(items, tax),
+                tax = tax,
                 storeId = store.id,
                 note = note?.ifBlank { null }
             )

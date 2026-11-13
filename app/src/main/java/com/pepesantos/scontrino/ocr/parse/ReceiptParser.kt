@@ -20,7 +20,9 @@ import kotlin.math.abs
  *   the next one (Carrefour) or the previous one;
  * - a negative amount, or a "Sconto" line, is a discount on the previous item;
  * - the total is cross-checked with the payment lines, and if the items do not add
- *   up, a single misread price (one digit off) is corrected.
+ *   up, a single misread price (one digit off) is corrected;
+ * - where prices exclude taxes (US), a tax line whose amount, added to the items,
+ *   makes the total is the tax added on top.
  *
  * Store-specific formats (weights, other quantity wordings) will be added with more receipts.
  */
@@ -38,8 +40,13 @@ object ReceiptParser {
         "EFECTIVO", "TARJETA", "VISA", "MASTERCARD",
     )
 
-    /** Lines with an amount that is not the total: VAT breakdown, change, savings. */
-    private val NOT_TOTAL = listOf("IVA", "RESTO", "CAMBIO", "VUELTO", "CHANGE", "SCONT", "RISPARMI")
+    /** Lines with an amount that is not the total: VAT breakdown, taxes, change, savings. */
+    private val NOT_TOTAL = listOf(
+        "IVA", "TAX", "IMPUESTO", "RESTO", "CAMBIO", "VUELTO", "CHANGE", "SCONT", "RISPARMI",
+    )
+
+    /** Tax lines: VAT included in the prices ("DI CUI IVA") or sales tax added to them. */
+    private val TAX_LINE = listOf("TAX", "IMPUESTO", "IVA")
 
     private val VAT_LEGEND = Regex("""^([A-F])\s*[:.]?\s*IVA\s*(\d{1,2}(?:[,.]\d{1,2})?)\s*%""")
     private val VAT_LETTER = Regex("""^[A-F]$""")
@@ -149,8 +156,11 @@ object ReceiptParser {
         pendingQuantity?.let(::settle)
 
         val itemsTotal = items.sumOf { it.netCents }
-        val total = chooseTotal(rows, upper, from = end, itemsTotal = itemsTotal)
-        val checkedItems = if (total != null) correctSingleMisread(items, total) else items
+        val totals = totalCandidates(rows, upper, from = end)
+        val paid = totalCandidates(rows, upper, from = end, includeSubtotals = false)
+        val tax = addedTax(itemsTotal, paid, taxAmounts(rows, upper, from = end))
+        val total = if (tax != null) itemsTotal + tax else chooseTotal(totals, itemsTotal)
+        val checkedItems = if (total != null && tax == null) correctSingleMisread(items, total) else items
 
         return ParsedReceipt(
             items = checkedItems,
@@ -164,6 +174,7 @@ object ReceiptParser {
                 .filter { it.isNotBlank() },
             unparsedRows = unparsed,
             footerLines = rows.drop(end).map { it.text }.filter { it.isNotBlank() },
+            taxCents = tax,
         )
     }
 
@@ -335,20 +346,53 @@ object ReceiptParser {
 
     // region Total
 
+    /** The last amount of [row], if positive. */
+    private fun lastAmount(row: ReceiptRow): Long? =
+        row.words.asReversed().firstNotNullOfOrNull { word -> Amounts.parseCents(word.text)?.takeIf { it > 0 } }
+
+    /**
+     * Amounts of the total and payment lines from row [from] on, in order; without
+     * [includeSubtotals], only what was paid ("SUBTOTAL", "SUBTOTALE" left out).
+     */
+    private fun totalCandidates(
+        rows: List<ReceiptRow>,
+        upper: List<String>,
+        from: Int,
+        includeSubtotals: Boolean = true,
+    ): List<Long> =
+        (from until rows.size).mapNotNull { index ->
+            val line = upper[index]
+            val isTotal = "TOTAL" in line && (includeSubtotals || "SUBTOTAL" !in line)
+            val isPayment = PAYMENT.any { it in line }
+            if (!isTotal && !isPayment || NOT_TOTAL.any { it in line }) null else lastAmount(rows[index])
+        }
+
+    /** Amounts of the tax lines from row [from] on: VAT included, or tax to add. */
+    private fun taxAmounts(rows: List<ReceiptRow>, upper: List<String>, from: Int): List<Long> =
+        (from until rows.size).mapNotNull { index ->
+            if (TAX_LINE.any { it in upper[index] }) lastAmount(rows[index]) else null
+        }
+
+    /**
+     * The tax added on top of the items (US sales tax): a tax line, or the sum of
+     * several (state and city), that together with the items makes what was [paid].
+     * Where VAT is included (Italy "DI CUI IVA 0,84", Ecuador "IVA 15%") the items
+     * alone already make the total or the payment, so nothing is added. A subtotal
+     * equal to the items does not count as paid: "SUBTOTAL 10,00 / TAX 0,80 / TOTAL
+     * 10,80" has tax 0,80.
+     */
+    private fun addedTax(itemsTotal: Long, paid: List<Long>, taxes: List<Long>): Long? {
+        if (itemsTotal <= 0 || taxes.isEmpty() || itemsTotal in paid) return null
+        val options = if (taxes.size > 1) taxes + taxes.sum() else taxes
+        return options.firstOrNull { tax -> itemsTotal + tax in paid }
+    }
+
     /**
      * The printed total is cross-checked with the payment lines, since a large or
      * condensed total font is often misread ("1768", "19,9"). Preference: an amount
      * equal to the items' sum, then the most repeated one, then the total line.
      */
-    private fun chooseTotal(rows: List<ReceiptRow>, upper: List<String>, from: Int, itemsTotal: Long): Long? {
-        val candidates = (from until rows.size).mapNotNull { index ->
-            val line = upper[index]
-            val isTotal = "TOTAL" in line
-            val isPayment = PAYMENT.any { it in line }
-            if (!isTotal && !isPayment || NOT_TOTAL.any { it in line }) return@mapNotNull null
-            rows[index].words.asReversed()
-                .firstNotNullOfOrNull { word -> Amounts.parseCents(word.text)?.takeIf { it > 0 } }
-        }
+    private fun chooseTotal(candidates: List<Long>, itemsTotal: Long): Long? {
         if (candidates.isEmpty()) return null
         if (itemsTotal in candidates) return itemsTotal
         val counts = candidates.groupingBy { it }.eachCount()

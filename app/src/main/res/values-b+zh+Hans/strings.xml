@@ -39,6 +39,8 @@
     <string name="add_receipt_volume">容量（升）</string>
     <string name="add_receipt_quantity">数量</string>
     <string name="add_receipt_note">备注</string>
+    <string name="add_receipt_tax">税费</string>
+    <string name="add_receipt_total_with_tax">合计：%1$s</string>
     <string name="add_receipt_save">保存小票</string>
     <string name="add_receipt_select_date">选择日期</string>
     <string name="add_receipt_ok">确定</string>
@@ -166,6 +168,8 @@
     <string name="settings_language">语言</string>
     <string name="settings_language_system">跟随系统</string>
     <string name="settings_currency">货币</string>
+    <string name="settings_tax_included">价格已含税</string>
+    <string name="settings_tax_included_subtitle">如果标价不含税、小票在最后加上税费（例如美国的销售税），请关闭此项</string>
     <string name="settings_currency_custom">其他…</string>
     <string name="settings_currency_custom_hint">代码或符号（如 GBP、£）</string>
     <string name="settings_currency_scope_title">更改货币</string>
