@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.StoreSpending
@@ -53,7 +55,6 @@ import com.pepesantos.scontrino.ui.viewmodel.StatsViewModel
 import com.pepesantos.scontrino.ui.viewmodel.TimePeriod
 import com.pepesantos.scontrino.ui.viewmodel.TopMode
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 @Composable
 fun StatsScreen(
@@ -455,6 +456,9 @@ fun StoreSpendingCard(
     }
 }
 
+/** Minimum horizontal room per point in the evolution chart, so date labels never wrap. */
+private val MinChartSlotWidth = 48.dp
+
 @Composable
 fun SpendingEvolutionCard(
     dailySpendings: List<DailySpendingPoint>,
@@ -508,26 +512,37 @@ fun SpendingEvolutionCard(
                         }
                     }
 
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val count = dailySpendings.size
+                    // Cada punto tiene un hueco mínimo; si no caben todos, la gráfica se desplaza en horizontal
+                    val slotWidth = maxOf(maxWidth / count, MinChartSlotWidth)
+                    val chartScroll = rememberScrollState()
+                    // Mostrar primero los datos más recientes (a la derecha)
+                    LaunchedEffect(dailySpendings, chartScroll.maxValue) {
+                        chartScroll.scrollTo(chartScroll.maxValue)
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .horizontalScroll(chartScroll)
+                            .width(slotWidth * count)
+                    ) {
                     Canvas(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
                             .pointerInput(dailySpendings) {
                                 detectTapGestures { tap ->
-                                    val count = dailySpendings.size
-                                    val index = if (count == 1) 0 else
-                                        (tap.x / size.width * (count - 1)).roundToInt().coerceIn(0, count - 1)
+                                    val index = (tap.x / size.width * count).toInt().coerceIn(0, count - 1)
                                     selectedIndex = if (selectedIndex == index) null else index
                                 }
                             }
                     ) {
                         val maxAmount = dailySpendings.maxOf { it.amount }.coerceAtLeast(1.0)
+                        val slotPx = size.width / count
                         val points = dailySpendings.mapIndexed { index, point ->
-                            val x = if (dailySpendings.size > 1) {
-                                (index.toFloat() / (dailySpendings.size - 1)) * size.width
-                            } else {
-                                size.width / 2f
-                            }
+                            // Centro del hueco, para que coincida con su etiqueta
+                            val x = (index + 0.5f) * slotPx
                             val y = size.height - ((point.amount.toFloat() / maxAmount.toFloat()) * (size.height - 20.dp.toPx())) - 10.dp.toPx()
                             Offset(x, y)
                         }
@@ -595,20 +610,21 @@ fun SpendingEvolutionCard(
                         }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    Row(modifier = Modifier.padding(top = 8.dp)) {
                         dailySpendings.forEach { point ->
                             Text(
                                 text = point.label,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                softWrap = false,
+                                modifier = Modifier.width(slotWidth)
                             )
                         }
                     }
+                    } // Column desplazable
+                    } // BoxWithConstraints
                 }
             }
         }
