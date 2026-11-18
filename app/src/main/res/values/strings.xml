@@ -171,6 +171,8 @@
     <string name="settings_currency">Currency</string>
     <string name="settings_tax_included">Prices include taxes</string>
     <string name="settings_tax_included_subtitle">Turn off if prices are shown without taxes and the receipt adds them at the end (e.g. US sales tax)</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_dark_mode_subtitle">Highly recommended</string>
     <string name="settings_currency_custom">Other…</string>
     <string name="settings_currency_custom_hint">Code or symbol (e.g. GBP, £)</string>
     <string name="settings_currency_scope_title">Change currency</string>

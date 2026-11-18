@@ -163,6 +163,8 @@
     <string name="settings_currency">Devise</string>
     <string name="settings_tax_included">Prix taxes comprises</string>
     <string name="settings_tax_included_subtitle">Désactivez-le si les prix sont affichés hors taxes et que le ticket les ajoute à la fin (p. ex. la sales tax aux États-Unis)</string>
+    <string name="settings_dark_mode">Mode sombre</string>
+    <string name="settings_dark_mode_subtitle">Vivement recommandé</string>
     <string name="settings_currency_custom">Autre…</string>
     <string name="settings_currency_custom_hint">Code ou symbole (ex. GBP, £)</string>
     <string name="settings_currency_scope_title">Changer de devise</string>

@@ -162,6 +162,8 @@
     <string name="settings_currency">Währung</string>
     <string name="settings_tax_included">Preise inklusive Steuern</string>
     <string name="settings_tax_included_subtitle">Deaktivieren, wenn Preise ohne Steuern angegeben werden und der Kassenbon sie am Ende hinzufügt (z. B. Sales Tax in den USA)</string>
+    <string name="settings_dark_mode">Dunkler Modus</string>
+    <string name="settings_dark_mode_subtitle">Dringend empfohlen</string>
     <string name="settings_currency_custom">Andere…</string>
     <string name="settings_currency_custom_hint">Code oder Symbol (z. B. GBP, £)</string>
     <string name="settings_currency_scope_title">Währung ändern</string>

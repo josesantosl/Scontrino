@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +54,10 @@ import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 
 private const val SPLASH_MIN_MILLIS = 500L
 
+// Same scrims enableEdgeToEdge uses by default behind the 3-button navigation bar.
+private const val NAV_BAR_LIGHT_SCRIM = 0xE6FFFFFF.toInt()
+private const val NAV_BAR_DARK_SCRIM = 0x801B1B1B.toInt()
+
 class MainActivity : ComponentActivity() {
 
     // The language chosen in the settings, applied before any resource is read.
@@ -81,7 +87,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             val currency by settingsRepository.currency.collectAsState()
             val taxIncluded by settingsRepository.taxIncluded.collectAsState()
-            ScontrinoTheme {
+            val darkMode by settingsRepository.darkMode.collectAsState()
+            // System bar icons follow the app theme, not the system one.
+            LaunchedEffect(darkMode) {
+                if (darkMode) {
+                    enableEdgeToEdge(
+                        statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+                        navigationBarStyle = SystemBarStyle.dark(NAV_BAR_DARK_SCRIM),
+                    )
+                } else {
+                    enableEdgeToEdge(
+                        statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+                        navigationBarStyle = SystemBarStyle.light(NAV_BAR_LIGHT_SCRIM, NAV_BAR_DARK_SCRIM),
+                    )
+                }
+            }
+            ScontrinoTheme(darkTheme = darkMode) {
                 CompositionLocalProvider(
                     LocalCurrency provides currency,
                     LocalTaxIncluded provides taxIncluded,

@@ -163,6 +163,8 @@
     <string name="settings_currency">Valuta</string>
     <string name="settings_tax_included">Prezzi con imposte incluse</string>
     <string name="settings_tax_included_subtitle">Disattivalo se i prezzi sono senza imposte e lo scontrino le aggiunge alla fine (es. la sales tax degli USA)</string>
+    <string name="settings_dark_mode">Modalità scura</string>
+    <string name="settings_dark_mode_subtitle">Vivamente consigliata</string>
     <string name="settings_currency_custom">Altra…</string>
     <string name="settings_currency_custom_hint">Codice o simbolo (es. GBP, £)</string>
     <string name="settings_currency_scope_title">Cambia valuta</string>

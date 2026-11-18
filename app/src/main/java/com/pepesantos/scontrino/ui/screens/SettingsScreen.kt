@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
@@ -30,7 +31,7 @@ import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
- * App settings: language, currency, taxes and the product aliases screen.
+ * App settings: language, currency, taxes, theme and the product aliases screen.
  * [onLanguageChanged] must recreate the activity so that the new language is applied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +49,7 @@ fun SettingsScreen(
     val language by viewModel.language.collectAsState()
     val currency by viewModel.currency.collectAsState()
     val taxIncluded by viewModel.taxIncluded.collectAsState()
+    val darkMode by viewModel.darkMode.collectAsState()
     val scope = rememberCoroutineScope()
 
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -98,6 +100,22 @@ fun SettingsScreen(
                         value = taxIncluded,
                         role = Role.Switch,
                         onValueChange = viewModel::setTaxIncluded,
+                    )
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_dark_mode)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(R.string.settings_dark_mode_subtitle),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    },
+                    leadingContent = { Icon(Icons.Filled.DarkMode, contentDescription = null) },
+                    trailingContent = { Checkbox(checked = darkMode, onCheckedChange = null) },
+                    modifier = Modifier.toggleable(
+                        value = darkMode,
+                        role = Role.Checkbox,
+                        onValueChange = viewModel::setDarkMode,
                     )
                 )
                 HorizontalDivider()

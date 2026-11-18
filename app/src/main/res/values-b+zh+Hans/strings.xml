@@ -170,6 +170,8 @@
     <string name="settings_currency">货币</string>
     <string name="settings_tax_included">价格已含税</string>
     <string name="settings_tax_included_subtitle">如果标价不含税、小票在最后加上税费（例如美国的销售税），请关闭此项</string>
+    <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_dark_mode_subtitle">强烈推荐</string>
     <string name="settings_currency_custom">其他…</string>
     <string name="settings_currency_custom_hint">代码或符号（如 GBP、£）</string>
     <string name="settings_currency_scope_title">更改货币</string>

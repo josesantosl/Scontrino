@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * App preferences: language, currency and whether prices include taxes. Kept in SharedPreferences because the language
+ * App preferences: language, currency, theme and whether prices include taxes. Kept in SharedPreferences because the language
  * has to be read synchronously before the activity is created (see [AppLocale]).
  */
 class SettingsRepository(context: Context) {
@@ -33,6 +33,15 @@ class SettingsRepository(context: Context) {
     fun setTaxIncluded(included: Boolean) {
         prefs.edit { putBoolean(KEY_TAX_INCLUDED, included) }
         _taxIncluded.value = included
+    }
+
+    private val _darkMode = MutableStateFlow(prefs.getBoolean(KEY_DARK_MODE, true))
+    /** Dark theme (the default and the intended look) or light theme, regardless of the system setting. */
+    val darkMode: StateFlow<Boolean> = _darkMode.asStateFlow()
+
+    fun setDarkMode(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_DARK_MODE, enabled) }
+        _darkMode.value = enabled
     }
 
     private val _collapsedStatsCards = MutableStateFlow(
@@ -63,6 +72,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_LANGUAGE = "language"
         private const val KEY_CURRENCY = "currency"
         private const val KEY_TAX_INCLUDED = "tax_included"
+        private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
 
         private fun preferences(context: Context): SharedPreferences =
