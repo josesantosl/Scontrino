@@ -173,6 +173,11 @@
     <string name="settings_tax_included_subtitle">Turn off if prices are shown without taxes and the receipt adds them at the end (e.g. US sales tax)</string>
     <string name="settings_dark_mode">Dark mode</string>
     <string name="settings_dark_mode_subtitle">Highly recommended</string>
+    <string name="settings_icon_title">Change the app icon?</string>
+    <string name="settings_icon_message_light">The app icon is still dark. Switch to the light version to match the theme?\n\nIt may take a few seconds to update, and some launchers remove the home screen shortcut.</string>
+    <string name="settings_icon_message_dark">The app icon is still light. Switch back to the dark version to match the theme?\n\nIt may take a few seconds to update, and some launchers remove the home screen shortcut.</string>
+    <string name="settings_icon_change">Change icon</string>
+    <string name="settings_icon_keep">Keep it</string>
     <string name="settings_currency_custom">Other…</string>
     <string name="settings_currency_custom_hint">Code or symbol (e.g. GBP, £)</string>
     <string name="settings_currency_scope_title">Change currency</string>

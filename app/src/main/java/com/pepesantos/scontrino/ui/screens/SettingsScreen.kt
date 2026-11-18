@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,6 +26,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.data.settings.AppIcon
 import com.pepesantos.scontrino.data.settings.AppLocale
 import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
@@ -50,6 +52,9 @@ fun SettingsScreen(
     val currency by viewModel.currency.collectAsState()
     val taxIncluded by viewModel.taxIncluded.collectAsState()
     val darkMode by viewModel.darkMode.collectAsState()
+    val appContext = LocalContext.current.applicationContext
+    // After a theme change, whether to offer the launcher icon that matches it (true = light icon).
+    var offerLightIcon by remember { mutableStateOf<Boolean?>(null) }
     val scope = rememberCoroutineScope()
 
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -115,7 +120,11 @@ fun SettingsScreen(
                     modifier = Modifier.toggleable(
                         value = darkMode,
                         role = Role.Checkbox,
-                        onValueChange = viewModel::setDarkMode,
+                        onValueChange = { dark ->
+                            viewModel.setDarkMode(dark)
+                            // Light icon with the dark theme, or the other way round.
+                            if (AppIcon.isLight(appContext) == dark) offerLightIcon = !dark
+                        },
                     )
                 )
                 HorizontalDivider()
@@ -191,6 +200,31 @@ fun SettingsScreen(
                 }
             },
             onDismiss = { showCurrencyDialog = false },
+        )
+    }
+
+    offerLightIcon?.let { light ->
+        AlertDialog(
+            onDismissRequest = { offerLightIcon = null },
+            title = { Text(stringResource(R.string.settings_icon_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (light) R.string.settings_icon_message_light else R.string.settings_icon_message_dark
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    AppIcon.setLight(appContext, light)
+                    offerLightIcon = null
+                }) { Text(stringResource(R.string.settings_icon_change)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { offerLightIcon = null }) {
+                    Text(stringResource(R.string.settings_icon_keep))
+                }
+            },
         )
     }
 

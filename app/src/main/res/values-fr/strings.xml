@@ -165,6 +165,11 @@
     <string name="settings_tax_included_subtitle">Désactivez-le si les prix sont affichés hors taxes et que le ticket les ajoute à la fin (p. ex. la sales tax aux États-Unis)</string>
     <string name="settings_dark_mode">Mode sombre</string>
     <string name="settings_dark_mode_subtitle">Vivement recommandé</string>
+    <string name="settings_icon_title">Changer l\'icône de l\'app ?</string>
+    <string name="settings_icon_message_light">L\'icône de l\'app est toujours sombre. Passer à la version claire, assortie au thème ?\n\nLa mise à jour peut prendre quelques secondes et certains lanceurs suppriment le raccourci de l\'écran d\'accueil.</string>
+    <string name="settings_icon_message_dark">L\'icône de l\'app est toujours claire. Revenir à la version sombre, assortie au thème ?\n\nLa mise à jour peut prendre quelques secondes et certains lanceurs suppriment le raccourci de l\'écran d\'accueil.</string>
+    <string name="settings_icon_change">Changer l\'icône</string>
+    <string name="settings_icon_keep">La garder</string>
     <string name="settings_currency_custom">Autre…</string>
     <string name="settings_currency_custom_hint">Code ou symbole (ex. GBP, £)</string>
     <string name="settings_currency_scope_title">Changer de devise</string>

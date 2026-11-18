@@ -164,6 +164,11 @@
     <string name="settings_tax_included_subtitle">Deaktivieren, wenn Preise ohne Steuern angegeben werden und der Kassenbon sie am Ende hinzufügt (z. B. Sales Tax in den USA)</string>
     <string name="settings_dark_mode">Dunkler Modus</string>
     <string name="settings_dark_mode_subtitle">Dringend empfohlen</string>
+    <string name="settings_icon_title">App-Symbol ändern?</string>
+    <string name="settings_icon_message_light">Das App-Symbol ist noch dunkel. Zur hellen Version wechseln, passend zum Design?\n\nDie Aktualisierung kann einige Sekunden dauern, und manche Launcher entfernen die Verknüpfung vom Startbildschirm.</string>
+    <string name="settings_icon_message_dark">Das App-Symbol ist noch hell. Zur dunklen Version zurückkehren, passend zum Design?\n\nDie Aktualisierung kann einige Sekunden dauern, und manche Launcher entfernen die Verknüpfung vom Startbildschirm.</string>
+    <string name="settings_icon_change">Symbol ändern</string>
+    <string name="settings_icon_keep">Beibehalten</string>
     <string name="settings_currency_custom">Andere…</string>
     <string name="settings_currency_custom_hint">Code oder Symbol (z. B. GBP, £)</string>
     <string name="settings_currency_scope_title">Währung ändern</string>

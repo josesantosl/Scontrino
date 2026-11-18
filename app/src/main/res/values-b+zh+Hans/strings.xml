@@ -172,6 +172,11 @@
     <string name="settings_tax_included_subtitle">如果标价不含税、小票在最后加上税费（例如美国的销售税），请关闭此项</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_dark_mode_subtitle">强烈推荐</string>
+    <string name="settings_icon_title">更换应用图标？</string>
+    <string name="settings_icon_message_light">应用图标仍是深色的。要换成浅色版本以配合主题吗？\n\n更新可能需要几秒钟，部分启动器会移除主屏幕上的快捷方式。</string>
+    <string name="settings_icon_message_dark">应用图标仍是浅色的。要换回深色版本以配合主题吗？\n\n更新可能需要几秒钟，部分启动器会移除主屏幕上的快捷方式。</string>
+    <string name="settings_icon_change">更换图标</string>
+    <string name="settings_icon_keep">保持不变</string>
     <string name="settings_currency_custom">其他…</string>
     <string name="settings_currency_custom_hint">代码或符号（如 GBP、£）</string>
     <string name="settings_currency_scope_title">更改货币</string>
