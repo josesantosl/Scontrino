@@ -17,10 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.settings.AppLocale
@@ -112,16 +113,29 @@ fun SettingsScreen(
                 )
             }
 
-            // Same style as "Made in Turin" in the wallet.
-            Text(
-                text = "Developed by José Santos L.",
+            // Same style as "Made in Turin" in the wallet; tapping it opens the GitHub profile.
+            val uriHandler = LocalUriHandler.current
+            val creditColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable(role = Role.Button) { uriHandler.openUri(GITHUB_PROFILE_URL) }
                     .padding(vertical = 12.dp),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                textAlign = TextAlign.Center
-            )
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Developed by José Santos L.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = creditColor,
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_github),
+                    contentDescription = "GitHub",
+                    modifier = Modifier.size(14.dp),
+                    tint = creditColor,
+                )
+            }
         }
     }
 
@@ -279,3 +293,5 @@ private fun RadioRow(text: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 private const val CUSTOM = "\u0000custom"
+
+private const val GITHUB_PROFILE_URL = "https://github.com/josesantosl"
