@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
@@ -38,7 +39,8 @@ import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
- * App settings: language, currency, taxes, receipt languages, theme and the product aliases screen.
+ * App settings: language, currency, taxes, receipt languages, theme, the product aliases screen
+ * and the open source licenses.
  * [onLanguageChanged] must recreate the activity so that the new language is applied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +52,11 @@ fun SettingsScreen(
     var showAliases by rememberSaveable { mutableStateOf(false) }
     if (showAliases) {
         AliasesScreen(viewModel = viewModel, onNavigateBack = { showAliases = false })
+        return
+    }
+    var showLicenses by rememberSaveable { mutableStateOf(false) }
+    if (showLicenses) {
+        LicensesScreen(onNavigateBack = { showLicenses = false })
         return
     }
 
@@ -154,6 +161,13 @@ fun SettingsScreen(
                         viewModel.loadAliases()
                         showAliases = true
                     }
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_licenses)) },
+                    supportingContent = { Text(stringResource(R.string.settings_licenses_subtitle)) },
+                    leadingContent = { Icon(Icons.Filled.Gavel, contentDescription = null) },
+                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                    modifier = Modifier.clickable { showLicenses = true }
                 )
             }
 

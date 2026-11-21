@@ -201,6 +201,15 @@
     <string name="settings_currency_scope_new">Only new ones</string>
     <string name="settings_aliases">Product aliases</string>
     <string name="settings_aliases_subtitle">Group the same product from different brands or stores</string>
+    <string name="settings_licenses">Open source licenses</string>
+    <string name="settings_licenses_subtitle">Libraries used by the app</string>
+    <string name="licenses_title">Licenses</string>
+    <string name="licenses_purpose_tesseract">Reads the text on receipts</string>
+    <string name="licenses_purpose_opencv">Crops and straightens receipt photos before reading them</string>
+    <string name="licenses_purpose_zxing_cpp">Scans the barcodes of loyalty cards</string>
+    <string name="licenses_purpose_zxing">Draws loyalty card barcodes to show at the checkout</string>
+    <string name="licenses_purpose_jetpack">The app\'s interface, database and camera</string>
+    <string name="licenses_purpose_kotlin">The language the app is written in</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Aliases</string>

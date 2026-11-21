@@ -193,6 +193,15 @@
     <string name="settings_currency_scope_new">Solo los nuevos</string>
     <string name="settings_aliases">Alias de productos</string>
     <string name="settings_aliases_subtitle">Agrupa el mismo producto de distintas marcas o tiendas</string>
+    <string name="settings_licenses">Licencias de código abierto</string>
+    <string name="settings_licenses_subtitle">Librerías que usa la app</string>
+    <string name="licenses_title">Licencias</string>
+    <string name="licenses_purpose_tesseract">Lee el texto de los tickets</string>
+    <string name="licenses_purpose_opencv">Recorta y endereza la foto del ticket antes de leerla</string>
+    <string name="licenses_purpose_zxing_cpp">Escanea el código de barras de las tarjetas de fidelidad</string>
+    <string name="licenses_purpose_zxing">Dibuja el código de barras de las tarjetas para mostrarlo en caja</string>
+    <string name="licenses_purpose_jetpack">Interfaz, base de datos y cámara de la app</string>
+    <string name="licenses_purpose_kotlin">Lenguaje en el que está escrita la app</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Alias</string>

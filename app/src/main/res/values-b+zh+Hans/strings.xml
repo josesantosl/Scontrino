@@ -200,6 +200,15 @@
     <string name="settings_currency_scope_new">仅新小票</string>
     <string name="settings_aliases">商品别名</string>
     <string name="settings_aliases_subtitle">把不同品牌或商店的同一种商品归为一组</string>
+    <string name="settings_licenses">开源许可</string>
+    <string name="settings_licenses_subtitle">本应用使用的开源库</string>
+    <string name="licenses_title">许可</string>
+    <string name="licenses_purpose_tesseract">识别小票上的文字</string>
+    <string name="licenses_purpose_opencv">识别前裁剪并校正小票照片</string>
+    <string name="licenses_purpose_zxing_cpp">扫描会员卡的条形码</string>
+    <string name="licenses_purpose_zxing">生成会员卡条形码，方便在收银台出示</string>
+    <string name="licenses_purpose_jetpack">应用的界面、数据库和相机</string>
+    <string name="licenses_purpose_kotlin">编写本应用所用的编程语言</string>
 
     <!-- Aliases -->
     <string name="aliases_title">别名</string>

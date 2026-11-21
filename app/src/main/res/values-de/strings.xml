@@ -192,6 +192,15 @@
     <string name="settings_currency_scope_new">Nur neue</string>
     <string name="settings_aliases">Produkt-Aliasse</string>
     <string name="settings_aliases_subtitle">Gleiches Produkt verschiedener Marken oder Läden zusammenfassen</string>
+    <string name="settings_licenses">Open-Source-Lizenzen</string>
+    <string name="settings_licenses_subtitle">Von der App verwendete Bibliotheken</string>
+    <string name="licenses_title">Lizenzen</string>
+    <string name="licenses_purpose_tesseract">Liest den Text der Kassenbons</string>
+    <string name="licenses_purpose_opencv">Schneidet das Foto des Kassenbons zu und richtet es vor dem Lesen gerade</string>
+    <string name="licenses_purpose_zxing_cpp">Scannt den Barcode von Kundenkarten</string>
+    <string name="licenses_purpose_zxing">Erzeugt den Barcode der Kundenkarten zum Vorzeigen an der Kasse</string>
+    <string name="licenses_purpose_jetpack">Oberfläche, Datenbank und Kamera der App</string>
+    <string name="licenses_purpose_kotlin">Die Sprache, in der die App geschrieben ist</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Aliasse</string>

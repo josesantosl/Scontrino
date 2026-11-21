@@ -193,6 +193,15 @@
     <string name="settings_currency_scope_new">Seulement les nouveaux</string>
     <string name="settings_aliases">Alias des produits</string>
     <string name="settings_aliases_subtitle">Regroupe le même produit de marques ou magasins différents</string>
+    <string name="settings_licenses">Licences open source</string>
+    <string name="settings_licenses_subtitle">Bibliothèques utilisées par l\'application</string>
+    <string name="licenses_title">Licences</string>
+    <string name="licenses_purpose_tesseract">Lit le texte des tickets de caisse</string>
+    <string name="licenses_purpose_opencv">Recadre et redresse la photo du ticket avant de la lire</string>
+    <string name="licenses_purpose_zxing_cpp">Scanne le code-barres des cartes de fidélité</string>
+    <string name="licenses_purpose_zxing">Affiche le code-barres des cartes pour le montrer en caisse</string>
+    <string name="licenses_purpose_jetpack">Interface, base de données et appareil photo de l\'application</string>
+    <string name="licenses_purpose_kotlin">Le langage dans lequel l\'application est écrite</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Alias</string>

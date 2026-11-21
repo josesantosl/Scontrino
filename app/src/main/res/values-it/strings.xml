@@ -193,6 +193,15 @@
     <string name="settings_currency_scope_new">Solo i nuovi</string>
     <string name="settings_aliases">Alias dei prodotti</string>
     <string name="settings_aliases_subtitle">Raggruppa lo stesso prodotto di marche o negozi diversi</string>
+    <string name="settings_licenses">Licenze open source</string>
+    <string name="settings_licenses_subtitle">Librerie usate dall\'app</string>
+    <string name="licenses_title">Licenze</string>
+    <string name="licenses_purpose_tesseract">Legge il testo degli scontrini</string>
+    <string name="licenses_purpose_opencv">Ritaglia e raddrizza la foto dello scontrino prima di leggerla</string>
+    <string name="licenses_purpose_zxing_cpp">Scansiona il codice a barre delle carte fedeltà</string>
+    <string name="licenses_purpose_zxing">Disegna il codice a barre delle carte da mostrare alla cassa</string>
+    <string name="licenses_purpose_jetpack">Interfaccia, database e fotocamera dell\'app</string>
+    <string name="licenses_purpose_kotlin">Il linguaggio in cui è scritta l\'app</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Alias</string>

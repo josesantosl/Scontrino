@@ -202,6 +202,15 @@
     <string name="settings_currency_scope_new">Só os novos</string>
     <string name="settings_aliases">Apelidos de produtos</string>
     <string name="settings_aliases_subtitle">Agrupe o mesmo produto de marcas ou lojas diferentes</string>
+    <string name="settings_licenses">Licenças de código aberto</string>
+    <string name="settings_licenses_subtitle">Bibliotecas usadas pelo app</string>
+    <string name="licenses_title">Licenças</string>
+    <string name="licenses_purpose_tesseract">Lê o texto dos recibos</string>
+    <string name="licenses_purpose_opencv">Recorta e endireita a foto do recibo antes de lê-la</string>
+    <string name="licenses_purpose_zxing_cpp">Escaneia o código de barras dos cartões de fidelidade</string>
+    <string name="licenses_purpose_zxing">Desenha o código de barras dos cartões para mostrar no caixa</string>
+    <string name="licenses_purpose_jetpack">Interface, banco de dados e câmera do app</string>
+    <string name="licenses_purpose_kotlin">A linguagem em que o app foi escrito</string>
 
     <!-- Aliases -->
     <string name="aliases_title">Apelidos</string>
