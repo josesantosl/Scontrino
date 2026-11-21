@@ -19,6 +19,9 @@ import kotlin.math.abs
  * - a quantity line "2 x 0,79" belongs to the item whose price it multiplies to,
  *   the next one (Carrefour) or the previous one; "Cad 0,99 Pz. 2" (Lidl) always
  *   follows its item, so it is kept even if the unit price is one character off;
+ *   a quantity line that also prints the line total ("2 UN X 4,99  9,98", Brazil)
+ *   is the price of the name above it, and printed inside the item line
+ *   ("LEITE 2 UN X 4,99  9,98") it is taken out of the name;
  * - a negative amount, or a "Sconto" line, is a discount on the previous item;
  * - the total is cross-checked with the payment lines, and if the items do not add
  *   up, a single misread price (one digit off) is corrected;
@@ -31,19 +34,27 @@ object ReceiptParser {
 
     /**
      * Column header words, as whole words: "DESCR." (Ecuador), "DESCRIZIONE",
-     * "DESCRIPCION", "PREZZO". Whole words so that an item like "LECHE DESCREMADA"
-     * is not mistaken for the header.
+     * "DESCRIPCION", "DESCRIÇÃO", "PREZZO". Whole words so that an item like
+     * "LECHE DESCREMADA" is not mistaken for the header.
      */
-    private val COLUMN_HEADER = Regex("""\b(DESCR(\.|IZIONE\b|IPCI[OÓ]N\b|IPTION\b|\b)|PREZZO\b)""")
-    private val DISCOUNT = listOf("SCONT", "DESCUENTO", "RABATT", "REMISE")
+    private val COLUMN_HEADER =
+        Regex("""\b(DESCR(\.|IZIONE\b|IPCI[OÓ]N\b|IPTION\b|I[ÇC][ÃA]O\b|\b)|PREZZO\b)""")
+    private val DISCOUNT = listOf("SCONT", "DESCUENTO", "RABATT", "REMISE", "DESCONTO")
     private val PAYMENT = listOf(
         "PAGAMENTO", "PAGATO", "BANCOMAT", "CONTANTI", "IMPORTO",
         "EFECTIVO", "TARJETA", "VISA", "MASTERCARD",
+        // Portuguese: "VALOR A PAGAR", "VALOR PAGO", cash, card, Portuguese debit network.
+        "PAGAR", "PAGO", "DINHEIRO", "CARTÃO", "CARTAO", "MULTIBANCO", "NUMERÁRIO", "NUMERARIO",
     )
 
-    /** Lines with an amount that is not the total: VAT breakdown, taxes, change, savings. */
+    /**
+     * Lines with an amount that is not the total: VAT breakdown, taxes, change, savings,
+     * item count ("QTD. TOTAL DE ITENS"), and the Brazilian tax notice ("Tributos Totais
+     * Incidentes", included in the prices).
+     */
     private val NOT_TOTAL = listOf(
         "IVA", "TAX", "IMPUESTO", "RESTO", "CAMBIO", "VUELTO", "CHANGE", "SCONT", "RISPARMI",
+        "TROCO", "TRIBUTOS", "DESCONTO", "POUPAN", "ITENS",
     )
 
     /** Tax lines: VAT included in the prices ("DI CUI IVA") or sales tax added to them. */
@@ -60,7 +71,17 @@ object ReceiptParser {
      * the usual misreads of the thin print: a speck after the count ("2.") and a
      * doubled sign ("xX").
      */
-    private val QUANTITY = Regex("""^(\d{1,3})[.,]?\s*[X×*]{1,2}\s*(\S+)""")
+    private val QUANTITY = Regex("""^(\d{1,3})(?:[.,]0{0,3})?\s*(?:$UNITS)?\.?\s*[X×*]{1,2}\s*(\S+)""")
+
+    /** Unit words after a count: "2 UN", "1UN", "3 UND", "2 PÇ" (Brazil, Portugal). */
+    private const val UNITS = "UNID|UND|UN|PÇ|PC|PZ"
+
+    /**
+     * A quantity at the end of an item's name, before its price: "LEITE 2 UN X 4,99",
+     * "ARROZ 1UN X 22,90", "LEITE 2 UN 4,99" (Brazilian QTD / UN / VL UNIT columns).
+     */
+    private val INLINE_QUANTITY =
+        Regex("""\s(\d{1,3})(?:[.,]0{0,3})?\s*(?:(?:$UNITS)\.?\s*[X×*]?|[X×*])\s*(\S+)$""")
     /** "Cad 0,99 Pz. 2" (cadauno, pezzi), printed under the item it belongs to. */
     private val QUANTITY_EACH = Regex("""^CAD\.?\s+(\S+)\s+PZ\.?\s*(\d{1,3})(?!\d)""")
     /**
@@ -71,7 +92,18 @@ object ReceiptParser {
     private val TAX_IDS = listOf(
         Regex("""\bRUC\s*:\s*(\d{13})\b"""), // Ecuador, RUC
         Regex("""\b(?:CIF|NIF)\s*:?\s*([A-Z]\d{7}[A-Z0-9])\b"""), // Spain
+        // Brazil, CNPJ "12.345.678/0001-90" (the customer's is a CPF).
+        Regex("""\bCNPJ\s*[:.]?\s*(\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2})"""),
     )
+
+    /** Portugal: "NIF: 500 100 144", "Contribuinte n.º 500100144", "NIPC". */
+    private val PORTUGUESE_NIF = Regex("""\b(?:NIF|NIPC|CONTRIBUINTE)\b\D{0,12}?(\d{3}\s?\d{3}\s?\d{3})(?!\d)""")
+
+    /** Lines with the customer's tax id, printed on Portuguese receipts as well. */
+    private val CUSTOMER = listOf("CLIENTE", "ADQUIRENTE", "CONSUMIDOR")
+
+    /** NIF of the "final consumer" (no customer id given). */
+    private const val FINAL_CONSUMER_NIF = "999999990"
 
     fun parse(rows: List<ReceiptRow>): ParsedReceipt {
         val upper = rows.map { it.text.uppercase(Locale.ROOT) }
@@ -127,8 +159,15 @@ object ReceiptParser {
                 continue
             }
             readQuantity(row, columns, previousItem = items.lastIndex)?.let { quantity ->
-                pendingQuantity?.let(::settle)
-                pendingQuantity = quantity
+                val name = pendingName
+                if (name != null && quantity.lineCents != null) {
+                    // "LEITE INTEGRAL" / "2 UN X 4,99  9,98": the price of the name above.
+                    pendingName = null
+                    addItem(quantity.toItem(name, index))
+                } else {
+                    pendingQuantity?.let(::settle)
+                    pendingQuantity = quantity
+                }
                 continue
             }
             val line = readLine(row, index, vatLegend, columns)
@@ -178,7 +217,11 @@ object ReceiptParser {
             totalCents = total,
             date = ReceiptDateParser.find(rows.map { it.text }),
             vatNumber = upper.firstNotNullOfOrNull { line ->
-                ItalianVatNumber.find(line) ?: TAX_IDS.firstNotNullOfOrNull { it.find(line)?.groupValues?.get(1) }
+                ItalianVatNumber.find(line)
+                    ?: TAX_IDS.firstNotNullOfOrNull { regex ->
+                        regex.find(line)?.groupValues?.get(1)?.filter { it.isLetterOrDigit() }
+                    }
+                    ?: portugueseNif(line)
             },
             headerLines = rows.take(if (columnHeader >= 0) columnHeader else start)
                 .map { it.text }
@@ -199,11 +242,14 @@ object ReceiptParser {
         val vatRate: Double?,
         val isDiscount: Boolean,
         val rowIndex: Int,
+        /** Units printed inside the line ("2 UN X 4,99"), 1 if none. */
+        val quantity: Int = 1,
     ) {
         fun toItem(name: Name) = ParsedItem(
             name = name.text,
             code = name.code,
             priceCents = cents,
+            quantity = quantity,
             vatCode = vatCode,
             vatRate = vatRate,
             priceConfidence = priceWord.confidence,
@@ -231,7 +277,9 @@ object ReceiptParser {
 
         // The name is the first column, unless the price shares it (short rows).
         val firstSegment = row.segmentWords.first()
-        val nameWords = if (priceWord in firstSegment) words.subList(0, priceIndex) else firstSegment
+        val inline = inlineQuantity(words.subList(0, priceIndex), cents)
+        val nameWords = (if (priceWord in firstSegment) words.subList(0, priceIndex) else firstSegment)
+            .filterNot { word -> inline?.second?.any { it === word } == true }
         val name = cleanName(nameWords)
 
         val upperName = name.text.uppercase(Locale.ROOT)
@@ -245,7 +293,24 @@ object ReceiptParser {
             vatRate = vatRate,
             isDiscount = cents < 0 || DISCOUNT.any { it in upperName },
             rowIndex = index,
+            quantity = inline?.first ?: 1,
         )
+    }
+
+    /**
+     * A quantity at the end of [words] ("LEITE 2 UN X 4,99") whose units make the line
+     * price [cents]: the count and the words it takes, to leave them out of the name.
+     */
+    private fun inlineQuantity(words: List<OcrWord>, cents: Long): Pair<Int, List<OcrWord>>? {
+        if (words.size < 2 || cents <= 0) return null
+        val text = words.joinToString(" ") { it.text }.uppercase(Locale.ROOT)
+        val match = INLINE_QUANTITY.find(text) ?: return null
+        val count = match.groupValues[1].toInt().takeIf { it >= 1 } ?: return null
+        val unitCents = Amounts.parseCents(match.groupValues[2]) ?: return null
+        if (count * unitCents != cents) return null
+        val taken = match.value.trim().split(Regex("""\s+""")).size
+        if (taken >= words.size) return null
+        return count to words.takeLast(taken)
     }
 
     /** A line like "2 x 0,79": [count] units at [unitCents] each. */
@@ -256,7 +321,23 @@ object ReceiptParser {
         val text: String,
         /** Index of the item read just before this line, or -1. */
         val previousItem: Int,
+        /** The line total printed after the unit price ("2 UN X 4,99  9,98"), if any. */
+        val lineCents: Long? = null,
+        val lineConfidence: Float = 0f,
     ) {
+        /** The item of a name printed above this line, priced with [lineCents]. */
+        fun toItem(name: Name, rowIndex: Int) = ParsedItem(
+            name = name.text,
+            code = name.code,
+            priceCents = lineCents ?: (count * unitCents),
+            quantity = count,
+            vatRate = vatRate,
+            vatCode = vatRate?.let { "${it.toInt()}%" },
+            priceConfidence = lineConfidence,
+            nameConfidence = name.confidence,
+            rowIndex = rowIndex,
+        )
+
         fun fits(item: ParsedItem) = item.quantity == 1 && item.priceCents == count * unitCents
 
         /**
@@ -280,13 +361,19 @@ object ReceiptParser {
         val match = QUANTITY.find(text.uppercase(Locale.ROOT).trim()) ?: return null
         val count = match.groupValues[1].toInt()
         val unitCents = Amounts.parseCents(match.groupValues[2])?.takeIf { it > 0 } ?: return null
-        if (count < 2) return null
+        // "2 UN X 4,99  9,98": the last amount is the line total if the units make it.
+        val lineWord = row.words.lastOrNull { Amounts.parseCents(it.text) != null }
+            ?.takeIf { row.words.count { word -> Amounts.parseCents(word.text) != null } >= 2 }
+            ?.takeIf { Amounts.parseCents(it.text) == count * unitCents }
+        if (count < 2 && lineWord == null) return null
         return Quantity(
             count = count,
             unitCents = unitCents,
             vatRate = row.words.firstNotNullOfOrNull { columns.vatRate(it) },
             text = row.text,
             previousItem = previousItem,
+            lineCents = lineWord?.let { Amounts.parseCents(it.text) },
+            lineConfidence = lineWord?.confidence ?: 0f,
         )
     }
 
@@ -335,7 +422,9 @@ object ReceiptParser {
                 fun center(word: OcrWord?) = word?.let { (it.box.left + it.box.right) / 2.0 }
                 val upper = words.map { it.text.uppercase(Locale.ROOT) }
                 val description = words.indices.firstOrNull { upper[it].startsWith("DESCR") }
-                val price = words.indices.firstOrNull { "PREZZO" in upper[it] || "PRECIO" in upper[it] }
+                val price = words.indices.firstOrNull { index ->
+                    listOf("PREZZO", "PRECIO", "PREÇO", "PRECO").any { it in upper[index] }
+                }
                 val vat = words.indices.firstOrNull { VAT_HEADER.matches(upper[it]) }
                 return Columns(
                     descriptionLeft = description?.let { words[it].box.left },
@@ -357,19 +446,37 @@ object ReceiptParser {
             // Receipts print names in capitals; lone lowercase letters are specks.
             .filterNot { it.length == 1 && it[0].isLowerCase() }
             .filter { Amounts.parsePercent(it) == null }
-        // Some stores print an article code first: "353406 CONT.LEGGEREZZA G".
-        val hasCode = tokens.size > 1 && tokens.first().length >= 3 && tokens.first().all { it.isDigit() }
-        val nameTokens = if (hasCode) tokens.drop(1) else tokens
+        // Some stores print an article code first: "353406 CONT.LEGGEREZZA G"; Brazilian
+        // ones the item number and the barcode: "001 7891000100103 LEITE INTEGRAL".
+        val codes = tokens.takeWhile { token -> token.length >= 3 && token.all { it.isDigit() } }
+            .take(2)
+            .takeIf { it.size < tokens.size }
+            .orEmpty()
+        val hasCode = codes.isNotEmpty()
+        val nameTokens = tokens.drop(codes.size)
         // Confidence of the words that make the name itself, not of codes or specks.
         val nameWords = words.filter { word -> word.text.any { it.isLetter() } }
         return Name(
             text = nameTokens.joinToString(" ").trim { it in ".,;:|-_=" || it.isWhitespace() },
-            code = if (hasCode) tokens.first() else null,
+            code = if (hasCode) codes.last() else null,
             confidence = if (nameWords.isEmpty()) 0f else nameWords.map { it.confidence }.average().toFloat(),
         )
     }
 
     // endregion
+
+    /**
+     * The Portuguese NIF of the store, if [line] has one: not the customer's, nor the
+     * "final consumer" placeholder, and with a valid check digit (mod 11).
+     */
+    private fun portugueseNif(line: String): String? {
+        if (CUSTOMER.any { it in line }) return null
+        val nif = PORTUGUESE_NIF.find(line)?.groupValues?.get(1)?.filter { it.isDigit() } ?: return null
+        if (nif == FINAL_CONSUMER_NIF) return null
+        val sum = (0 until 8).sumOf { (nif[it] - '0') * (9 - it) }
+        val check = (11 - sum % 11).let { if (it >= 10) 0 else it }
+        return nif.takeIf { nif[8] - '0' == check }
+    }
 
     // region Total
 

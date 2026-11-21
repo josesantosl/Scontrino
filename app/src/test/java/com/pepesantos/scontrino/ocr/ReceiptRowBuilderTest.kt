@@ -160,6 +160,10 @@ class ReceiptRowBuilderTest {
         )
         assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.defaultFor(Locale.US))
         assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.defaultFor(Locale.JAPAN))
+        assertEquals(
+            listOf(OcrLanguage.PORTUGUESE, OcrLanguage.ENGLISH),
+            OcrLanguage.defaultFor(Locale.forLanguageTag("pt-BR"))
+        )
     }
 
     @Test

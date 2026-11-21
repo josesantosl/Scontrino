@@ -13,7 +13,7 @@ import java.util.Locale
 object AppLocale {
 
     /** Languages the app is translated to, as BCP 47 tags. Empty tag = system language. */
-    val supported = listOf("en", "es", "it", "fr", "de", "zh-Hans")
+    val supported = listOf("en", "es", "it", "fr", "de", "pt", "zh-Hans")
 
     fun wrap(base: Context): Context {
         val tag = SettingsRepository.storedLanguage(base)

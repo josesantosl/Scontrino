@@ -1,0 +1,222 @@
+<resources>
+    <string name="app_name">Scontrino</string>
+
+    <!-- Navigation -->
+    <string name="nav_receipts">Recibos</string>
+    <string name="nav_stats">Estatísticas</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Estatísticas</string>
+    <string name="stats_period_this_month">Este mês</string>
+    <string name="stats_period_three_months">3 meses</string>
+    <string name="stats_period_this_year">Ano</string>
+    <string name="stats_total_spending">Gasto total</string>
+    <string name="stats_card_expand">Expandir</string>
+    <string name="stats_card_collapse">Recolher</string>
+    <string name="stats_chart_tap_hint">Toque no gráfico para ver o valor</string>
+    <string name="stats_vs_prev_period">vs período anterior</string>
+    <string name="stats_no_prev_data">Sem dados anteriores</string>
+    <string name="stats_spending_by_store">Gasto por supermercado</string>
+    <string name="stats_spending_evolution">Evolução do gasto</string>
+    <string name="stats_top_products">Maiores gastos</string>
+    <string name="stats_top_by_product">Por produto</string>
+    <string name="stats_top_by_category">Por categoria</string>
+    <string name="stats_no_data">Não há recibos neste período</string>
+
+    <!-- AddReceiptScreen -->
+    <string name="add_receipt_title">Novo recibo</string>
+    <string name="add_receipt_back">Voltar</string>
+    <string name="unsaved_changes_title">Alterações não salvas</string>
+    <string name="unsaved_changes_message">Tem certeza de que deseja sair sem salvar?</string>
+    <string name="unsaved_changes_leave">Sair</string>
+    <string name="add_receipt_store">Loja</string>
+    <string name="add_receipt_date">Data</string>
+    <string name="add_receipt_items">Produtos</string>
+    <string name="add_receipt_item_name">Nome do produto</string>
+    <string name="add_receipt_price">Preço</string>
+    <string name="add_receipt_weight">Peso (g)</string>
+    <string name="add_receipt_volume">Volume (L)</string>
+    <string name="add_receipt_quantity">Qtd.</string>
+    <string name="add_receipt_note">Notas</string>
+    <string name="add_receipt_tax">Imposto</string>
+    <string name="add_receipt_total_with_tax">Total: %1$s</string>
+    <string name="add_receipt_save">Salvar recibo</string>
+    <string name="add_receipt_select_date">Selecionar data</string>
+    <string name="add_receipt_ok">OK</string>
+
+    <!-- ReceiptsScreen -->
+    <string name="add_receipt_fab">Adicionar recibo</string>
+    <string name="nav_wallet">Carteira</string>
+    <string name="wallet_edit" >Editar</string>
+    <string name="wallet_add_card">" Adicionar um cartão"</string>
+    <string name="edit_receipt_title">Editar recibo</string>
+    <string name="delete_receipt_title">Excluir recibo</string>
+    <string name="delete_receipt_message">Tem certeza de que deseja excluir este recibo?</string>
+    <string name="delete_confirm">Excluir</string>
+    <string name="delete_cancel">Cancelar</string>
+
+    <!-- Wallet -->
+    <string name="delete_card_title">Excluir cartão</string>
+    <string name="delete_card_message">Tem certeza de que deseja excluir este cartão?</string>
+    <string name="wallet_add_card_title">Novo cartão</string>
+    <string name="wallet_card_name">Nome</string>
+    <string name="wallet_card_number">Número do cartão</string>
+    <string name="wallet_select_color">Selecionar cor</string>
+    <string name="wallet_save">Salvar</string>
+    <string name="wallet_cancel">Cancelar</string>
+    <string name="wallet_scan">Escanear código de barras</string>
+
+    <!-- Categories -->
+    <string name="category_select_title">Selecionar categoria</string>
+    <string name="category_label">Categoria</string>
+    <string name="category_other">Outros</string>
+    <string name="category_vegetables_fruit">Frutas e verduras</string>
+    <string name="category_meat">Carne</string>
+    <string name="category_seafood">Frutos do mar e peixe</string>
+    <string name="category_dairy">Laticínios</string>
+    <string name="category_eggs">Ovos</string>
+    <string name="category_legumes">Leguminosas</string>
+    <string name="category_bakery">Padaria</string>
+    <string name="category_pasta_rice">Massas e arroz</string>
+    <string name="category_condiments">Condimentos</string>
+    <string name="category_snacks_sweets">Petiscos e doces</string>
+    <string name="category_ready_meals">Pratos prontos</string>
+    <string name="category_beverages">Bebidas</string>
+    <string name="category_alcohol">Álcool</string>
+    <string name="category_household">Casa</string>
+    <string name="category_personal_hygiene">Higiene pessoal</string>
+    <string name="category_baby">Bebê</string>
+    <string name="category_pets">Animais de estimação</string>
+    <string name="category_health">Saúde</string>
+    <string name="category_transport">Transporte</string>
+    <string name="category_eating_out">Comer fora</string>
+
+    <!-- Price comparison -->
+    <string name="stats_compare_title">Comparar preços</string>
+    <string name="stats_compare_subtitle">Descubra em qual supermercado um produto é mais barato</string>
+    <string name="compare_title">Comparação de preços</string>
+    <string name="compare_search_hint">Buscar um produto</string>
+    <string name="compare_clear">Limpar</string>
+    <string name="compare_empty_hint">Busque um produto para comparar seu último preço em cada supermercado.</string>
+    <string name="compare_no_data">Ainda não há compras deste produto.</string>
+    <string name="compare_single_store">Comprado em um só supermercado. Compre em outro para comparar.</string>
+    <string name="compare_paid">Pago %1$s</string>
+    <string name="compare_source_weight">peso</string>
+    <string name="compare_source_volume">volume</string>
+    <string name="compare_source_estimated">≈ estimado</string>
+    <string name="compare_source_unit">por unidade</string>
+    <string name="compare_savings">Comprando em %1$s você economiza %2$d%% em relação a %3$s (%4$s).</string>
+    <string name="compare_same_price">Mesmo preço em todos os supermercados.</string>
+    <plurals name="compare_store_count">
+        <item quantity="one">%d loja</item>
+        <item quantity="many">%d lojas</item>
+        <item quantity="other">%d lojas</item>
+    </plurals>
+
+    <!-- Receipt OCR (debug) -->
+    <string name="ocr_debug_open">Laboratório OCR</string>
+    <string name="receipt_scan">Escanear recibo</string>
+    <string name="receipt_add_manually">Adicionar manualmente</string>
+    <string name="scan_title">Escanear recibo</string>
+    <string name="scan_reading">Lendo o recibo…</string>
+    <string name="scan_nothing_found_title">Nenhum produto encontrado</string>
+    <string name="scan_nothing_found_message">Não foi possível ler nenhum produto nesta foto. Tente de novo com o recibo plano, inteiro e bem iluminado, ou adicione-o manualmente.</string>
+    <string name="scan_failed_title">Não foi possível ler o recibo</string>
+    <string name="scan_no_camera_title">Sem acesso à câmera</string>
+    <string name="scan_no_camera_message">Permita o uso da câmera para fotografar recibos, ou escolha uma foto da galeria.</string>
+    <string name="scan_retake">Tirar outra foto</string>
+    <string name="scan_languages">Lendo em: %1$s</string>
+    <string name="scan_languages_change">Alterar</string>
+    <string name="scan_replace_message">Escanear um recibo substitui o que você inseriu aqui.</string>
+    <string name="ocr_debug_title">OCR de recibos (beta)</string>
+    <string name="ocr_pick_image">Escolher foto</string>
+    <string name="ocr_take_photo">Tirar foto</string>
+    <string name="ocr_camera_hint">Coloque o recibo plano, inteiro dentro do quadro, sem dedos por cima</string>
+    <string name="ocr_camera_capture">Tirar a foto</string>
+    <string name="ocr_camera_torch">Lanterna</string>
+    <string name="ocr_camera_close">Fechar câmera</string>
+    <string name="ocr_camera_permission_denied">É necessária a permissão da câmera para tirar a foto</string>
+    <string name="ocr_run">Reconhecer texto</string>
+    <string name="ocr_languages">Idiomas do recibo</string>
+    <string name="ocr_detect_document">Detectar e endireitar o recibo</string>
+    <string name="ocr_binarize">Preto e branco (binarizar)</string>
+    <string name="ocr_page_mode">Modo de layout</string>
+    <string name="ocr_psm_auto">Automático</string>
+    <string name="ocr_psm_single_column">Coluna única</string>
+    <string name="ocr_psm_single_block">Bloco único</string>
+    <string name="ocr_psm_sparse">Texto disperso</string>
+    <string name="ocr_no_image">Escolha uma foto de um recibo para começar.</string>
+    <string name="ocr_summary">%1$d palavras · %2$d linhas · confiança %3$d%% · %4$d ms</string>
+    <string name="ocr_document_detected">Bordas do recibo detectadas e endireitadas.</string>
+    <string name="ocr_document_not_detected">Bordas do recibo não detectadas: usando a foto inteira.</string>
+    <string name="ocr_document_region">Cantos não visíveis: recibo localizado como área clara e recortado.</string>
+    <string name="ocr_deskew">Endireitar linhas de texto</string>
+    <string name="ocr_remove_lines">Apagar linhas e dobras</string>
+    <string name="ocr_try_other_modes">Se não bater, tentar os outros modos de layout</string>
+    <string name="ocr_mode_used">Modo de layout usado: %1$s</string>
+    <string name="ocr_mode_attempt">%1$s: %2$d produtos · %3$s · nomes %4$d%% · %5$d conhecidos</string>
+    <string name="ocr_attempt_adds_up">bate</string>
+    <string name="ocr_attempt_does_not_add_up">não bate</string>
+    <string name="ocr_skew_corrected">Rotação corrigida: %1$s°</string>
+    <string name="ocr_rows">Linhas reconstruídas</string>
+    <string name="ocr_copy_json">Copiar JSON</string>
+    <string name="ocr_copy_text">Copiar texto</string>
+    <string name="ocr_copied">Copiado para a área de transferência</string>
+    <string name="ocr_error">Erro: %1$s</string>
+    <string name="ocr_parsed_title">Recibo interpretado</string>
+    <string name="ocr_use_receipt">Usar este recibo</string>
+    <string name="scan_review_notice">Lido de uma foto: confira a loja, a data e cada produto antes de salvar.</string>
+    <string name="scan_totals">Total do recibo %1$s · soma dos produtos %2$s</string>
+    <string name="scan_totals_mismatch">Os produtos não somam o total do recibo: confira os preços.</string>
+    <string name="ocr_parsed_date">Data: %1$s</string>
+    <string name="ocr_parsed_total">Total %1$s · produtos %2$s</string>
+    <string name="ocr_parsed_consistent">Os produtos somam o total.</string>
+    <string name="ocr_parsed_inconsistent">Os produtos não somam o total.</string>
+    <string name="ocr_parsed_no_total">Total não encontrado.</string>
+    <string name="ocr_parsed_discount">desconto %1$s</string>
+    <string name="ocr_parsed_corrected">corrigido, lido como %1$s</string>
+    <string name="ocr_parsed_unparsed">Linhas não interpretadas na lista de produtos: %1$d</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Idioma do sistema</string>
+    <string name="settings_currency">Moeda</string>
+    <string name="settings_tax_included">Preços com impostos incluídos</string>
+    <string name="settings_tax_included_subtitle">Desative se os preços aparecem sem impostos e o recibo os soma no final (ex.: sales tax dos EUA)</string>
+    <string name="settings_receipt_languages">Idiomas dos recibos</string>
+    <string name="settings_receipt_languages_hint">Idiomas em que seus recibos estão impressos, para lê-los ao escanear. O primeiro marcado é o principal. Com menos idiomas, a leitura é mais rápida.</string>
+    <string name="settings_dark_mode">Modo escuro</string>
+    <string name="settings_dark_mode_subtitle">Altamente recomendado</string>
+    <string name="settings_icon_title">Mudar o ícone do app?</string>
+    <string name="settings_icon_message_light">O ícone do app ainda é escuro. Mudar para a versão clara para combinar com o tema?\n\nPode levar alguns segundos para atualizar, e alguns launchers removem o atalho da tela inicial.</string>
+    <string name="settings_icon_message_dark">O ícone do app ainda é claro. Voltar para a versão escura para combinar com o tema?\n\nPode levar alguns segundos para atualizar, e alguns launchers removem o atalho da tela inicial.</string>
+    <string name="settings_icon_change">Mudar ícone</string>
+    <string name="settings_icon_keep">Manter</string>
+    <string name="settings_currency_custom">Outra…</string>
+    <string name="settings_currency_custom_hint">Código ou símbolo (ex.: GBP, £)</string>
+    <string name="settings_currency_scope_title">Mudar moeda</string>
+    <string name="settings_currency_scope_message">Usar %1$s também nos recibos já salvos, ou só nos novos? Os valores não são convertidos.</string>
+    <string name="settings_currency_scope_all">Todos os recibos</string>
+    <string name="settings_currency_scope_new">Só os novos</string>
+    <string name="settings_aliases">Apelidos de produtos</string>
+    <string name="settings_aliases_subtitle">Agrupe o mesmo produto de marcas ou lojas diferentes</string>
+
+    <!-- Aliases -->
+    <string name="aliases_title">Apelidos</string>
+    <string name="aliases_search_hint">Buscar produto ou apelido</string>
+    <string name="aliases_empty">Ainda não há produtos: eles aparecem aqui conforme você salva recibos.</string>
+    <string name="aliases_no_match">Nenhum produto corresponde à busca.</string>
+    <string name="aliases_section_without">Sem apelido (%1$d)</string>
+    <string name="aliases_section_with">Com apelido (%1$d)</string>
+    <string name="alias_dialog_title">Apelido</string>
+    <string name="alias_field">Apelido</string>
+    <string name="alias_placeholder">ex.: leite de soja</string>
+    <string name="alias_suggestions">Sugestões</string>
+    <string name="alias_suggestion_alias">Apelido existente</string>
+    <string name="alias_suggestion_product">Produto</string>
+    <string name="alias_save">Salvar</string>
+    <string name="alias_remove">Remover</string>
+    <string name="alias_edit">Editar apelido</string>
+</resources>

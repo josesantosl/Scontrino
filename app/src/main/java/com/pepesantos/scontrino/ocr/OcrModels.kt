@@ -45,13 +45,27 @@ data class OcrResult(
         get() = if (words.isEmpty()) 0 else words.map { it.confidence }.average().toInt()
 }
 
-/** Languages bundled in assets/tessdata (tessdata_fast). */
+/**
+ * Languages bundled in assets/tessdata (tessdata_fast).
+ *
+ * TODO(chinese-ocr): Chinese receipts (chi_sim) are deliberately not supported yet,
+ *  waiting for real receipts to build fixtures from. Besides bundling
+ *  chi_sim.traineddata and adding CHINESE_SIMPLIFIED("chi_sim", "zh"):
+ *  - ReceiptParser joins name words with spaces ("牛 奶"): join CJK characters without one;
+ *  - StoreMatcher.tokens splits on [^A-Z0-9]+, which drops Chinese store names entirely;
+ *  - parser keywords: totals 合计/总计/应付/实付, change 找零, payments 现金/微信/支付宝,
+ *    header 商品名称/数量/单价/金额, discounts 优惠/折扣, tax id 统一社会信用代码/税号 (18 chars);
+ *  - dates like "2026年11月21日" in ReceiptDateParser;
+ *  - Chinese keywords in CategoryMatcher;
+ *  - expect slower and weaker recognition than Latin scripts on small thermal print.
+ */
 enum class OcrLanguage(val tesseractCode: String, val isoCode: String) {
     ENGLISH("eng", "en"),
     ITALIAN("ita", "it"),
     SPANISH("spa", "es"),
     FRENCH("fra", "fr"),
-    GERMAN("deu", "de");
+    GERMAN("deu", "de"),
+    PORTUGUESE("por", "pt");
 
     companion object {
         /**

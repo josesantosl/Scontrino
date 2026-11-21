@@ -34,6 +34,28 @@ class CategoryMatcherTest {
     }
 
     @Test
+    fun `typical portuguese receipt lines`() {
+        assertCategory("dairy", "LEITE MEIO GORDO")
+        assertCategory("dairy", "QUEIJO FLAMENGO")
+        assertCategory("bakery", "PÃO DE FORMA")
+        assertCategory("meat", "PEITO DE FRANGO")
+        assertCategory("seafood", "BACALHAU DEMOLHADO")
+        assertCategory("condiments", "AZEITE VIRGEM EXTRA")
+        assertCategory("condiments", "PIMENTA PRETA")
+        assertCategory("vegetables_fruit", "PIMENTÃO VERMELHO") // not "pimenta"
+        assertCategory("pasta_rice", "MACARRÃO ESPAGUETE")
+        assertCategory("legumes", "FEIJÃO CARIOCA")
+        assertCategory("eggs", "OVOS CLASSE M")
+        assertCategory("alcohol", "CERVEJA SAGRES")
+        assertCategory("beverages", "SUCO DE LARANJA")
+        assertCategory("snacks_sweets", "BOLACHA MARIA")
+        assertCategory("vegetables_fruit", "MAÇÃ GALA")
+        assertCategory("pets", "RAÇÃO CÃO FRANGO")
+        assertCategory("household", "DETERGENTE LAVA LOIÇA")
+        assertCategory("personal_hygiene", "SABONETE LÍQUIDO")
+    }
+
+    @Test
     fun `used-for wins over made-of`() {
         assertCategory("dairy", "Latte di soia")
         assertCategory("dairy", "Bebida de soja")

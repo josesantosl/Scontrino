@@ -19,8 +19,8 @@ object CategoryMatcher {
      * seafood, "salsa di soia" is a condiment, "latte di soia" is dairy, "pasta de dientes" is
      * personal care, "succo di mela" is a drink).
      *
-     * Keywords are matched lowercase and without accents (Italian, Spanish, English, French
-     * and German). A keyword matches as a substring, so stems like "spaghett" cover plurals;
+     * Keywords are matched lowercase and without accents (Italian, Spanish, English, French,
+     * German and Portuguese). A keyword matches as a substring, so stems like "spaghett" cover plurals;
      * keywords prefixed with `=` (and any keyword of up to 2 letters) only match whole words,
      * for short words that hide inside others ("sal" in "salmone", "pan" in "panna").
      */
@@ -28,15 +28,16 @@ object CategoryMatcher {
         "pets" to listOf(
             "mascota", "=pet", "=pets", "perro", "=dog", "=dogs", "per cani", "gatt", "gato", "=cat", "=cats",
             "=chat", "=chien", "hund", "katze", "felix", "whiskas", "purina", "almo nature", "friskies",
-            "sheba", "pedigree", "lettiera",
+            "sheba", "pedigree", "lettiera", "=cao", "=caes", "racao",
         ),
         "baby" to listOf(
             "panal", "pannolin", "diaper", "=couches", "windel", "potito", "omogeneizzat", "plasmon",
             "mellin", "=hipp", "nidina", "biberon", "pampers", "huggies", "dodot", "neonat",
+            "fralda", "papinha",
         ),
         "health" to listOf(
             "farma", "pharma", "medic", "=pill", "pastilla", "aspirin", "tachipirin", "ibuprofen",
-            "paracetamol", "cerott", "tirita", "apothek",
+            "paracetamol", "cerott", "tirita", "apothek", "comprimido", "curativo",
         ),
         "household" to listOf(
             "limpieza", "cleaning", "detergent", "detersiv", "lavavajill", "lavastovigl", "lavapiatti",
@@ -45,18 +46,22 @@ object CategoryMatcher {
             "toilet paper", "carta cucina", "papel de cocina", "rotolon", "scottex", "tovagliol",
             "servillet", "napkin", "alluminio", "aluminio", "pellicola", "sacchett", "=bolsa", "=bolsas",
             "=pila", "=pilas", "batteri", "bateria", "lampadin", "bombilla", "insetticid", "sgrassat",
-            "anticalcare", "ammoniaca", "dixan", "svelto",
+            "anticalcare", "ammoniaca", "dixan", "svelto", "limpeza", "lava loica", "lava louca",
+            "lixivia", "amaciador", "guardanapo", "papel de cozinha", "=saco", "=sacos", "=pilha",
+            "=pilhas", "lampada", "inseticida", "desengordurante",
         ),
         "personal_hygiene" to listOf(
             "shampoo", "champu", "=gel", "bagnoschiuma", "doccia", "dentifric", "pasta de dientes",
             "toothpaste", "dental", "diente", "spazzolin", "cepillo", "toothbrush", "deodor", "desodor",
             "hygiene", "higiene", "igiene", "sapone", "jabon", "=soap", "savon", "seife", "assorbent",
             "compresa", "tampon", "rasoi", "maquinilla", "razor", "balsamo", "acondicionador",
-            "colluttorio", "enjuague",
+            "colluttorio", "enjuague", "sabonete", "pasta de dente", "escova de dente", "absorvente",
+            "condicionador", "barbear", "enxaguante",
         ),
         "transport" to listOf(
             "=bus", "=train", "treno", "metro", "biglietto", "billete", "ticket", "transport",
             "benzina", "gasolina", "diesel", "carburante", "=fuel", "parcheggio", "parking",
+            "bilhete", "combustivel", "gasoleo", "estacionamento", "portagem", "pedagio",
         ),
         "eating_out" to listOf(
             "ristorante", "restaurant", "trattoria", "pizzeria", "coperto", "=bar", "=menu",
@@ -64,7 +69,8 @@ object CategoryMatcher {
         "ready_meals" to listOf(
             "piatto pronto", "piatti pronti", "plato preparado", "platos preparados", "ready meal",
             "plat prepare", "fertiggericht", "lasagn", "pizza", "sushi", "zuppa", "minestron", "=sopa",
-            "=soup", "empanad", "nugget", "croquet", "kebab", "burrito", "tramezzin",
+            "=soup", "empanad", "nugget", "croquet", "kebab", "burrito", "tramezzin", "prato pronto",
+            "pratos prontos", "lasanha", "coxinha", "=empada",
         ),
         "seafood" to listOf(
             "pescado", "pesce", "=fish", "poisson", "fisch", "salmon", "=atun", "tonno", "=tuna", "=thon",
@@ -72,7 +78,9 @@ object CategoryMatcher {
             "crevette", "calamar", "pulpo", "polpo", "mejillon", "cozze", "mussel", "vongol", "almeja",
             "sardin", "acciug", "anchoa", "anchov", "=orata", "dorada", "branzino", "lubina", "spigola",
             "surimi", "marisco", "frutti di mare", "seafood", "fruits de mer", "trucha", "trota",
-            "sgombro", "caballa", "mackerel", "=cod",
+            "sgombro", "caballa", "mackerel", "=cod", "peixe", "=atum", "bacalhau", "camarao", "=lula",
+            "mexilhao", "ameijoa", "pescada", "dourada", "robalo", "truta", "cavala", "tilapia",
+            "salmao", "frutos do mar",
         ),
         "condiments" to listOf(
             "aceite", "olio", "=oil", "huile", "vinagre", "vinegar", "aceto", "essig", "=sal", "=salt",
@@ -80,14 +88,15 @@ object CategoryMatcher {
             "=poivre", "especia", "spezie", "spice", "epice", "gewurz", "salsa", "sauce", "sugo", "pesto",
             "ragu", "passata", "pelati", "tomate frito", "tomate triturado", "polpa di pomodoro",
             "ketchup", "mayonesa", "maionese", "mayonnaise", "=mayo", "mostaza", "senape", "mustard",
-            "moutarde", "=senf", "=dado", "brodo", "margarin",
+            "moutarde", "=senf", "=dado", "brodo", "margarin", "azeite", "=oleo", "=pimenta", "molho",
+            "mostarda", "tempero", "=caldo", "polpa de tomate", "extrato de tomate",
         ),
         // After condiments: "aceto di vino" is vinegar.
         "alcohol" to listOf(
             "birra", "=beer", "cerveza", "biere", "=bier", "=vino", "=vini", "=wine", "prosecco",
             "spumante", "lambrusco", "chianti", "rioja", "cava brut", "champagne", "whisky", "vodka",
             "=gin", "=rum", "=rhum", "tequila", "liquor", "licor", "aperol", "spritz", "sidra", "cidre",
-            "=cider", "grappa", "limoncello",
+            "=cider", "grappa", "limoncello", "cerveja", "=vinho", "cachaca",
         ),
         "dairy" to listOf(
             "leche", "latte", "=milk", "=lait", "milch", "yogur", "joghurt", "yaourt", "queso", "formagg",
@@ -96,12 +105,13 @@ object CategoryMatcher {
             "=brie", "=feta", "=skyr", "kefir", "burro", "mantequilla", "butter", "beurre", "=nata",
             "=panna", "lacteo", "latticin", "dairy", "bebida de soja", "bebida de avena",
             "bebida de almendra", "bevanda di soia", "bevanda di avena", "bevanda di mandorla",
+            "leite", "iogurte", "queijo", "manteiga", "=natas", "requeijao", "bebida de aveia",
         ),
         "legumes" to listOf(
             "tofu", "seitan", "tempeh", "soja", "soya", "=soia", "legumbre", "legumi", "legumin",
             "lenteja", "lenticch", "lentil", "lentille", "linse", "garbanzo", "=ceci", "chickpea",
             "pois chiche", "kichererbse", "fagiol", "frijol", "alubia", "=beans", "haricot", "bohne",
-            "hummus", "edamame",
+            "hummus", "edamame", "feijao", "grao de bico", "ervilha",
         ),
         "meat" to listOf(
             "pollo", "chicken", "poulet", "=huhn", "hahnchen", "carne", "=meat", "viande", "fleisch",
@@ -110,22 +120,25 @@ object CategoryMatcher {
             "salami", "salsiccia", "salchicha", "sausage", "saucisse", "wurst", "bacon", "pancetta",
             "speck", "mortadella", "bresaola", "chorizo", "=lomo", "tacchino", "=pavo", "turkey",
             "dinde", "=pute", "cordero", "agnello", "=lamb", "hamburg", "macinato", "picada", "polpett",
-            "albondig", "=coppa", "embutido",
+            "albondig", "=coppa", "embutido", "frango", "=porco", "=boi", "=peru", "presunto",
+            "fiambre", "linguica", "salsicha", "chourico", "picanha", "alcatra", "costela", "borrego",
+            "cordeiro", "mortadela", "almondega",
         ),
         "bakery" to listOf(
             "=pan", "=pane", "=pain", "=brot", "bread", "panin", "baguette", "focaccia", "piadin",
             "tostad", "fette biscottate", "croissant", "cornett", "brioche", "bolleria", "=bollo",
-            "bauletto", "grissin", "magdalena", "muffin",
+            "bauletto", "grissin", "magdalena", "muffin", "=pao", "=paes", "broa", "torrada",
         ),
         "pasta_rice" to listOf(
             "pasta", "spaghett", "maccheron", "=penne", "fusill", "rigaton", "tagliatell", "farfalle",
             "linguine", "gnocchi", "tortellin", "ravioli", "noodle", "fideo", "nudel", "=pates",
             "arroz", "riso", "=rice", "=riz", "=reis", "cereal", "avena", "=oats", "fiocchi", "muesli",
             "granola", "harina", "farina", "flour", "farine", "=mehl", "cuscus", "couscous", "quinoa",
-            "polenta", "semola",
+            "polenta", "semola", "=massa", "esparguete", "macarrao", "aveia", "farinha", "flocos",
+            "cuscuz", "=fuba",
         ),
         "eggs" to listOf(
-            "huevo", "=uova", "=uovo", "=egg", "=eggs", "oeuf", "œuf", "=eier",
+            "huevo", "=uova", "=uovo", "=egg", "=eggs", "oeuf", "œuf", "=eier", "=ovo", "=ovos",
         ),
         "snacks_sweets" to listOf(
             "galleta", "biscott", "cookie", "biscuit", "=keks", "chocolate", "ciocco", "cioccolat",
@@ -134,13 +147,15 @@ object CategoryMatcher {
             "gelato", "helado", "ice cream", "mermelada", "marmellat", "confettur", "=jam", "confiture",
             "=miel", "miele", "honey", "honig", "azucar", "zucchero", "sugar", "=sucre", "zucker",
             "=torta", "=tarta", "=cake", "dolce", "dulce", "turron", "panettone", "pandoro", "wafer",
-            "kinder", "haribo", "barrett",
+            "kinder", "haribo", "barrett", "bolacha", "biscoito", "salgadinho", "batata frita",
+            "batatas fritas", "gelado", "sorvete", "geleia", "compota", "=mel", "acucar", "=bolo",
+            "bombom", "pipoca", "rebucado",
         ),
         "beverages" to listOf(
             "agua", "acqua", "=water", "=eau", "wasser", "jugo", "juice", "zumo", "succo", "=jus", "=saft",
             "=soda", "refresco", "bibita", "=cola", "coca cola", "aranciata", "gassosa", "limonata",
             "tonica", "tonic", "=te", "=tea", "infusion", "infuso", "tisana", "coffee", "cafe", "caffe",
-            "kaffee", "espresso", "capsul", "nescafe",
+            "kaffee", "espresso", "capsul", "nescafe", "=sumo", "suco", "refrigerante", "=cha",
         ),
         "vegetables_fruit" to listOf(
             "frutta", "fruta", "fruit", "=obst", "verdura", "verdure", "vegetable", "ortaggi", "gemuse",
@@ -157,7 +172,10 @@ object CategoryMatcher {
             "ciliegi", "cerez", "cherr", "ananas", "=pina", "mango", "papaya", "frutos rojos",
             "frutti di bosco", "mirtill", "arandano", "blueberr", "rucola", "rucula", "carciof",
             "alcachof", "finocch", "sedano", "=apio", "cetriol", "pepino", "cucumber", "porro",
-            "puerro", "=leek",
+            "puerro", "=leek", "=maca", "=macas", "laranja", "limao", "morango", "alface", "batata",
+            "cebola", "cenoura", "=alho", "abobrinha", "beringela", "pimentao", "=pimento",
+            "espinafre", "couve", "repolho", "cogumelo", "abacate", "melao", "melancia", "pessego",
+            "damasco", "cereja", "abacaxi", "=manga", "mamao", "mirtilo", "funcho", "=aipo",
         ),
     )
 

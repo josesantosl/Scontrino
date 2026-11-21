@@ -22,6 +22,14 @@ class AmountsAndDatesTest {
     }
 
     @Test
+    fun `a currency glued to the amount is ignored`() {
+        assertEquals(712L, Amounts.parseCents("R$7,12"))
+        assertEquals(199L, Amounts.parseCents("€1,99"))
+        assertEquals(199L, Amounts.parseCents("1,99€"))
+        assertEquals(402L, Amounts.parseCents("$4.02"))
+    }
+
+    @Test
     fun `a tilde is a misread minus`() {
         assertEquals(-90L, Amounts.parseCents("~0,90"))
     }

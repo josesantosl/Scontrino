@@ -15,6 +15,9 @@ object Amounts {
     /** Stray marks the OCR glues to numbers: quotes, underscores, bars... */
     private const val JUNK = "‘’'`“”\"_|>«»*/"
 
+    /** Currency glued to the amount: "R$15,47" (Brazil), "€1,99", "1,99€". */
+    private val CURRENCY = Regex("""^(R\$|US\$|\$|€)|€$""")
+
     /** Amount in cents (negative for discounts), or null if the word is not an amount. */
     fun parseCents(word: String): Long? {
         val match = AMOUNT.matchEntire(clean(word)) ?: return null
@@ -36,5 +39,5 @@ object Amounts {
     }
 
     private fun clean(word: String) =
-        word.trim().trimStart { it in JUNK }.trimEnd { it in JUNK || it == '.' }
+        word.trim().replace(CURRENCY, "").trimStart { it in JUNK }.trimEnd { it in JUNK || it == '.' }
 }

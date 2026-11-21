@@ -267,6 +267,93 @@ class ReceiptParserTest {
     }
 
     @Test
+    fun `brazilian NFC-e - codes, quantity lines with the line total, tax notice and change`() {
+        // Made-up store and values, in the usual NFC-e layout (no real receipt yet).
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("SUPERMERCADO EXEMPLO LTDA"),
+                row("CNPJ: 11.222.333/0001-81"),
+                row("CÓDIGO DESCRIÇÃO QTDE UN VL.UNIT VL.TOTAL"),
+                row("001 7891000100103 LEITE INTEGRAL 1L"),
+                row("2 UN X 4,99", "9,98"),
+                row("002 7896000000017 ARROZ TIPO 1 5KG 1UN X 22,90", "22,90"),
+                row("003 7890000000024 BANANA PRATA", "3,49"),
+                row("QTD. TOTAL DE ITENS", "4"),
+                row("VALOR TOTAL R$", "36,37"),
+                row("FORMA DE PAGAMENTO VALOR PAGO R$"),
+                row("Dinheiro", "50,00"),
+                row("TROCO R$", "13,63"),
+                row("Tributos Totais Incidentes (Lei Federal 12.741/2012)", "R$7,12"),
+                row("CONSUMIDOR - CPF 123.456.789-00"),
+                row("Emissão: 21/11/2026 10:15:32"),
+            )
+        )
+        assertEquals(listOf("LEITE INTEGRAL 1L", "ARROZ TIPO 1 5KG", "BANANA PRATA"), parsed.items.map { it.name })
+        assertEquals(listOf("7891000100103", "7896000000017", "7890000000024"), parsed.items.map { it.code })
+        assertEquals(listOf(998L, 2290L, 349L), parsed.items.map { it.priceCents })
+        assertEquals(listOf(2, 1, 1), parsed.items.map { it.quantity })
+        assertEquals(3637L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        assertNull(parsed.taxCents)
+        assertEquals(ReceiptDate(2026, 11, 21, 10, 15), parsed.date)
+        assertEquals("11222333000181", parsed.vatNumber)
+    }
+
+    @Test
+    fun `quantity inside a brazilian item line is taken out of the name`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("DESCRIÇÃO", "VL.TOTAL"),
+                row("LEITE INTEGRAL 3 UN 4,50", "13,50"),
+                row("VALOR TOTAL R$", "13,50"),
+            )
+        )
+        val item = parsed.items.single()
+        assertEquals("LEITE INTEGRAL", item.name)
+        assertEquals(3, item.quantity)
+        assertEquals(1350L, item.priceCents)
+    }
+
+    @Test
+    fun `portuguese receipt - store NIF, discount, Multibanco, IVA included`() {
+        // Made-up store and values.
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("MERCADO EXEMPLO, S.A."),
+                row("NIF: 500 100 144"),
+                row("Descrição", "IVA Valor"),
+                row("LEITE MEIO GORDO", "C 0,79"),
+                row("2 X 0,79"),
+                row("PÃO DE FORMA", "1,58 C"),
+                row("Desconto Imediato", "-0,30"),
+                row("TOTAL A PAGAR", "2,07"),
+                row("Multibanco", "2,07"),
+                row("Troco", "0,00"),
+                row("C 6% 1,95 0,12"),
+                row("Contribuinte n.º: 999999990"),
+                row("2026-11-21 18:40"),
+            )
+        )
+        assertEquals(listOf("LEITE MEIO GORDO", "PÃO DE FORMA"), parsed.items.map { it.name })
+        assertEquals(listOf(1, 2), parsed.items.map { it.quantity })
+        assertEquals(30L, parsed.items[1].discountCents)
+        assertEquals(207L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        assertNull(parsed.taxCents)
+        assertEquals("500100144", parsed.vatNumber)
+        assertEquals(ReceiptDate(2026, 11, 21, 18, 40), parsed.date)
+    }
+
+    @Test
+    fun `portuguese NIF of the customer or with a wrong check digit is not the store's`() {
+        fun vat(line: String) = ReceiptParser.parse(listOf(row(line), row("PAO", "1,00"), row("TOTAL", "1,00"))).vatNumber
+        assertEquals("500100144", vat("Contribuinte 500100144"))
+        assertNull(vat("NIF Cliente: 500100144"))
+        assertNull(vat("NIF: 500100145"))
+        assertNull(vat("Contribuinte: 999999990"))
+    }
+
+    @Test
     fun `noise rows in the item list are reported, not turned into items`() {
         val parsed = ReceiptParser.parse(
             listOf(
