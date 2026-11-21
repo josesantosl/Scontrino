@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,12 +79,15 @@ private const val GUIDE_HEIGHT_FRACTION = 0.72f
  *
  * The photo goes to the app's cache ([captureDir]); the previous one is deleted on each
  * capture, so at most one is kept.
+ *
+ * @param onPickFromGallery if set, a button next to the shutter to use a gallery photo instead.
  */
 @Composable
 fun ReceiptCamera(
     onCaptured: (Uri) -> Unit,
     onError: (String) -> Unit,
     onDismiss: () -> Unit,
+    onPickFromGallery: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -151,6 +155,23 @@ fun ReceiptCamera(
                 contentDescription = stringResource(R.string.ocr_camera_torch),
                 tint = Color.White,
             )
+        }
+
+        if (onPickFromGallery != null) {
+            IconButton(
+                onClick = onPickFromGallery,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                    .padding(start = 32.dp, bottom = 36.dp)
+                    .size(48.dp),
+            ) {
+                Icon(
+                    Icons.Default.PhotoLibrary,
+                    contentDescription = stringResource(R.string.ocr_pick_image),
+                    tint = Color.White,
+                )
+            }
         }
 
         val captureLabel = stringResource(R.string.ocr_camera_capture)

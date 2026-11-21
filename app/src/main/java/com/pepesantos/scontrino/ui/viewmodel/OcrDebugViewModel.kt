@@ -6,44 +6,36 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.pepesantos.scontrino.data.AppDatabase
 import com.pepesantos.scontrino.ocr.LayoutAttempt
-import com.pepesantos.scontrino.ocr.draft.ProductNames
-import com.pepesantos.scontrino.ocr.LayoutChoice
 import com.pepesantos.scontrino.ocr.OcrJson
 import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.OcrPageSegMode
 import com.pepesantos.scontrino.ocr.OcrResult
-import com.pepesantos.scontrino.ocr.ReceiptImageLoader
 import com.pepesantos.scontrino.ocr.ReceiptImagePreprocessor
 import com.pepesantos.scontrino.ocr.ReceiptRow
-import com.pepesantos.scontrino.ocr.ReceiptTextRecognizer
-import com.pepesantos.scontrino.ocr.TesseractTextRecognizer
+import com.pepesantos.scontrino.ocr.ReceiptScanner
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
+
+private val DEFAULTS = ReceiptScanner.Options()
 
 data class OcrDebugUiState(
     val sourceUri: Uri? = null,
     /** Ordered: the first language is Tesseract's primary one. */
-    val languages: List<OcrLanguage> = OcrLanguage.defaultFor(Locale.getDefault()),
-    val detectDocument: Boolean = true,
-    val deskew: Boolean = true,
-    val removeLines: Boolean = false,
-    val binarize: Boolean = true,
-    // AUTO's column analysis read Bennet's price column as vertical text, even with
-    // vertical detection disabled; a single column is what a receipt is.
-    val pageSegMode: OcrPageSegMode = OcrPageSegMode.SINGLE_COLUMN,
+    val languages: List<OcrLanguage> = DEFAULTS.languages,
+    val detectDocument: Boolean = DEFAULTS.preprocessing.detectDocument,
+    val deskew: Boolean = DEFAULTS.preprocessing.deskew,
+    val removeLines: Boolean = DEFAULTS.preprocessing.removeLines,
+    val binarize: Boolean = DEFAULTS.preprocessing.binarize,
+    val pageSegMode: OcrPageSegMode = DEFAULTS.pageSegMode,
     /** If the chosen mode's reading does not add up, try the other modes too. */
-    val tryOtherModes: Boolean = true,
+    val tryOtherModes: Boolean = DEFAULTS.tryOtherModes,
     val isProcessing: Boolean = false,
     val processedImage: Bitmap? = null,
     val detection: ReceiptImagePreprocessor.Detection? = null,
@@ -59,19 +51,34 @@ data class OcrDebugUiState(
     val error: String? = null,
 ) {
     val canRun: Boolean get() = sourceUri != null && languages.isNotEmpty() && !isProcessing
+
+    fun toScanOptions() = ReceiptScanner.Options(
+        languages = languages,
+        preprocessing = ReceiptImagePreprocessor.Options(
+            detectDocument = detectDocument,
+            deskew = deskew,
+            removeLines = removeLines,
+            binarize = binarize,
+        ),
+        pageSegMode = pageSegMode,
+        tryOtherModes = tryOtherModes,
+    )
 }
 
 /**
- * Lab screen state for phase 1 of receipt scanning: photo → preprocessed image →
- * OCR words → reconstructed rows. No data is persisted.
+ * Lab screen state for receipt scanning: the same pipeline as the scan feature
+ * ([ReceiptScanner]), with every knob exposed and every intermediate step shown.
+ * No data is persisted.
  */
 class OcrDebugViewModel @JvmOverloads constructor(
     application: Application,
-    private val recognizer: ReceiptTextRecognizer = TesseractTextRecognizer(application),
-    private val preprocessor: ReceiptImagePreprocessor = ReceiptImagePreprocessor(),
+    private val scanner: ReceiptScanner = ReceiptScanner(application),
 ) : AndroidViewModel(application) {
 
-    private val _uiState = MutableStateFlow(OcrDebugUiState())
+    // Starts from the receipt languages in the settings, like the real scan.
+    private val _uiState = MutableStateFlow(
+        OcrDebugUiState(languages = ReceiptScanner.languagesFromSettings(application))
+    )
     val uiState: StateFlow<OcrDebugUiState> = _uiState.asStateFlow()
 
     private var runJob: Job? = null
@@ -108,51 +115,23 @@ class OcrDebugViewModel @JvmOverloads constructor(
         runJob = viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true, error = null) }
             try {
-                val processed = withContext(Dispatchers.Default) {
-                    val original = ReceiptImageLoader.load(getApplication(), uri)
-                    preprocessor.process(
-                        original,
-                        ReceiptImagePreprocessor.Options(
-                            detectDocument = state.detectDocument,
-                            deskew = state.deskew,
-                            removeLines = state.removeLines,
-                            binarize = state.binarize,
+                val scan = scanner.scan(uri, state.toScanOptions()) { processed ->
+                    _uiState.update {
+                        it.copy(
+                            processedImage = processed.bitmap,
+                            detection = processed.detection,
+                            skewAngle = processed.skewAngle,
                         )
-                    ).also { original.recycle() }
-                }
-                _uiState.update {
-                    it.copy(
-                        processedImage = processed.bitmap,
-                        detection = processed.detection,
-                        skewAngle = processed.skewAngle,
-                    )
-                }
-
-                suspend fun attempt(mode: OcrPageSegMode): LayoutAttempt {
-                    val result = recognizer.recognize(processed.bitmap, state.languages, mode)
-                    return withContext(Dispatchers.Default) { LayoutAttempt.of(mode, result) }
-                }
-
-                // The chosen mode first; the others only if its reading does not add up,
-                // so a receipt that is read well costs a single OCR pass.
-                val attempts = mutableListOf(attempt(state.pageSegMode))
-                if (state.tryOtherModes && !LayoutChoice.isGoodEnough(attempts.first())) {
-                    for (mode in LayoutChoice.fallbacksAfter(state.pageSegMode)) {
-                        attempts += attempt(mode)
                     }
                 }
-                // Only needed to choose among several readings.
-                val knownNames = if (attempts.size > 1) loadKnownNames() else emptySet()
-                val best = LayoutChoice.best(attempts, knownNames)
-
                 _uiState.update {
                     it.copy(
-                        result = best.result,
-                        rows = best.rows,
-                        parsed = best.parsed,
-                        attempts = attempts,
-                        usedMode = best.mode,
-                        knownNames = knownNames,
+                        result = scan.best.result,
+                        rows = scan.best.rows,
+                        parsed = scan.best.parsed,
+                        attempts = scan.attempts,
+                        usedMode = scan.best.mode,
+                        knownNames = scan.knownNames,
                         isProcessing = false,
                     )
                 }
@@ -163,12 +142,6 @@ class OcrDebugViewModel @JvmOverloads constructor(
                 _uiState.update { it.copy(isProcessing = false, error = e.message ?: e.javaClass.simpleName) }
             }
         }
-    }
-
-    private suspend fun loadKnownNames(): Set<String> = withContext(Dispatchers.IO) {
-        AppDatabase.getDatabase(getApplication()).productDao().getAll()
-            .map { ProductNames.normalize(it.name) }
-            .toSet()
     }
 
     fun exportJson(): String? {

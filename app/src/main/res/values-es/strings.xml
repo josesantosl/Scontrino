@@ -106,7 +106,20 @@
     </plurals>
 
     <!-- Receipt OCR (debug) -->
-    <string name="ocr_debug_open">Escanear ticket (beta)</string>
+    <string name="ocr_debug_open">Laboratorio OCR</string>
+    <string name="receipt_scan">Escanear ticket</string>
+    <string name="receipt_add_manually">Añadir a mano</string>
+    <string name="scan_title">Escanear ticket</string>
+    <string name="scan_reading">Leyendo el ticket…</string>
+    <string name="scan_nothing_found_title">No se encontraron artículos</string>
+    <string name="scan_nothing_found_message">No se pudo leer ningún artículo en esta foto. Prueba otra vez con el ticket plano, entero y bien iluminado, o añádelo a mano.</string>
+    <string name="scan_failed_title">No se pudo leer el ticket</string>
+    <string name="scan_no_camera_title">Sin acceso a la cámara</string>
+    <string name="scan_no_camera_message">Permite la cámara para fotografiar tickets, o elige una foto de la galería.</string>
+    <string name="scan_retake">Hacer otra foto</string>
+    <string name="scan_languages">Leyendo en: %1$s</string>
+    <string name="scan_languages_change">Cambiar</string>
+    <string name="scan_replace_message">Al escanear un ticket se sustituye lo que has introducido aquí.</string>
     <string name="ocr_debug_title">OCR de tickets (beta)</string>
     <string name="ocr_pick_image">Elegir foto</string>
     <string name="ocr_take_photo">Hacer foto</string>
@@ -163,6 +176,8 @@
     <string name="settings_currency">Moneda</string>
     <string name="settings_tax_included">Precios con impuestos incluidos</string>
     <string name="settings_tax_included_subtitle">Desactívalo si los precios van sin impuestos y el ticket los suma al final (p. ej. el sales tax de EE. UU.)</string>
+    <string name="settings_receipt_languages">Idiomas de los tickets</string>
+    <string name="settings_receipt_languages_hint">Idiomas en los que están impresos tus tickets, para leerlos al escanear. El primero marcado es el principal. Con menos idiomas se lee más rápido.</string>
     <string name="settings_dark_mode">Modo oscuro</string>
     <string name="settings_dark_mode_subtitle">Muy recomendado</string>
     <string name="settings_icon_title">¿Cambiar el icono de la app?</string>

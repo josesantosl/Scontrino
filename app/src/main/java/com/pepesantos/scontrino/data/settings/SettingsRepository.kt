@@ -8,10 +8,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * App preferences: language, currency, theme and whether prices include taxes. Kept in SharedPreferences because the language
+ * App preferences: language, currency, theme, whether prices include taxes and the languages
+ * receipts are printed in. Kept in SharedPreferences because the language
  * has to be read synchronously before the activity is created (see [AppLocale]).
  */
-class SettingsRepository(context: Context) {
+class SettingsRepository private constructor(context: Context) {
 
     private val prefs: SharedPreferences = preferences(context)
 
@@ -66,6 +67,18 @@ class SettingsRepository(context: Context) {
         _currency.value = currency
     }
 
+    private val _receiptLanguages = MutableStateFlow(storedReceiptLanguages(prefs))
+    /**
+     * Tesseract codes of the languages receipts are printed in, the main one first.
+     * Empty until the user picks them: the scanner then guesses from the locales.
+     */
+    val receiptLanguages: StateFlow<List<String>> = _receiptLanguages.asStateFlow()
+
+    fun setReceiptLanguages(codes: List<String>) {
+        prefs.edit { putString(KEY_RECEIPT_LANGUAGES, codes.joinToString(",")) }
+        _receiptLanguages.value = codes
+    }
+
     companion object {
         const val DEFAULT_CURRENCY = "EUR"
         private const val FILE = "settings"
@@ -74,6 +87,19 @@ class SettingsRepository(context: Context) {
         private const val KEY_TAX_INCLUDED = "tax_included"
         private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
+        private const val KEY_RECEIPT_LANGUAGES = "receipt_languages"
+
+        @Volatile
+        private var instance: SettingsRepository? = null
+
+        /**
+         * The single instance, so that every screen sees a change at once (each instance
+         * keeps its own copy of the values).
+         */
+        fun getInstance(context: Context): SettingsRepository =
+            instance ?: synchronized(this) {
+                instance ?: SettingsRepository(context.applicationContext).also { instance = it }
+            }
 
         private fun preferences(context: Context): SharedPreferences =
             context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
@@ -81,5 +107,11 @@ class SettingsRepository(context: Context) {
         /** Language tag stored, readable before any repository exists. */
         fun storedLanguage(context: Context): String =
             context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY_LANGUAGE, null).orEmpty()
+
+        /** Receipt languages stored (see [receiptLanguages]), read fresh at each scan. */
+        fun storedReceiptLanguages(context: Context): List<String> = storedReceiptLanguages(preferences(context))
+
+        private fun storedReceiptLanguages(prefs: SharedPreferences): List<String> =
+            prefs.getString(KEY_RECEIPT_LANGUAGES, null).orEmpty().split(',').filter { it.isNotBlank() }
     }
 }

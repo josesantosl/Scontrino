@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -75,6 +76,11 @@ fun AddReceiptScreen(
     /** Past purchases in the store being typed, requested through [onStoreNameChange]. */
     purchaseHistory: PurchaseHistory = PurchaseHistory.EMPTY,
     onStoreNameChange: (String) -> Unit = {},
+    /**
+     * Fill this new receipt from a photo instead (top bar button); null hides it. What was
+     * already typed is replaced, so it asks first if there is anything.
+     */
+    onScan: (() -> Unit)? = null,
 ) {
     val receiptId = existingReceipt?.receipt?.id ?: -1
     val isEditMode = existingReceipt != null
@@ -145,6 +151,7 @@ fun AddReceiptScreen(
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showScanReplaceDialog by remember { mutableStateOf(false) }
 
     val datePickerState = key(receiptId) {
         rememberDatePickerState(
@@ -273,6 +280,27 @@ fun AddReceiptScreen(
         )
     }
 
+    if (showScanReplaceDialog && onScan != null) {
+        AlertDialog(
+            onDismissRequest = { showScanReplaceDialog = false },
+            title = { Text(stringResource(R.string.unsaved_changes_title)) },
+            text = { Text(stringResource(R.string.scan_replace_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showScanReplaceDialog = false
+                    onScan()
+                }) {
+                    Text(stringResource(R.string.receipt_scan))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showScanReplaceDialog = false }) {
+                    Text(stringResource(R.string.delete_cancel))
+                }
+            }
+        )
+    }
+
     if (showDiscardDialog) {
         AlertDialog(
             onDismissRequest = { showDiscardDialog = false },
@@ -313,6 +341,16 @@ fun AddReceiptScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.add_receipt_back)
                         )
+                    }
+                },
+                actions = {
+                    if (onScan != null) {
+                        IconButton(onClick = { if (hasChanges) showScanReplaceDialog = true else onScan() }) {
+                            Icon(
+                                imageVector = Icons.Filled.DocumentScanner,
+                                contentDescription = stringResource(R.string.receipt_scan)
+                            )
+                        }
                     }
                 }
             )

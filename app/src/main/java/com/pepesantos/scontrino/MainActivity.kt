@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val database = AppDatabase.getDatabase(applicationContext)
-        val settingsRepository = SettingsRepository(applicationContext)
+        val settingsRepository = SettingsRepository.getInstance(applicationContext)
         val factory = ViewModelFactory(
             receiptRepository = ReceiptRepository(database.receiptDao(), database.itemDao()),
             storeRepository = StoreRepository(database.storeDao()),

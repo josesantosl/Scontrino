@@ -35,6 +35,11 @@ class SettingsViewModel(
 
     fun setDarkMode(enabled: Boolean) = settingsRepository.setDarkMode(enabled)
 
+    /** Tesseract codes of the receipt languages; empty = not chosen yet (guessed when scanning). */
+    val receiptLanguages: StateFlow<List<String>> = settingsRepository.receiptLanguages
+
+    fun setReceiptLanguages(codes: List<String>) = settingsRepository.setReceiptLanguages(codes)
+
     private val _aliasRows = MutableStateFlow<List<ProductUsage>>(emptyList())
     /** Products bought so far, in the order of the aliases screen: see [sortForAliases]. */
     val aliasRows: StateFlow<List<ProductUsage>> = _aliasRows.asStateFlow()

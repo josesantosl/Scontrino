@@ -113,7 +113,20 @@
     </plurals>
 
     <!-- Receipt OCR (debug) -->
-    <string name="ocr_debug_open">扫描小票（测试版）</string>
+    <string name="ocr_debug_open">OCR 实验室</string>
+    <string name="receipt_scan">扫描小票</string>
+    <string name="receipt_add_manually">手动添加</string>
+    <string name="scan_title">扫描小票</string>
+    <string name="scan_reading">正在读取小票…</string>
+    <string name="scan_nothing_found_title">未找到商品</string>
+    <string name="scan_nothing_found_message">这张照片中无法读取任何商品。请将小票平放、完整拍入并保证光线充足后重试，或手动添加。</string>
+    <string name="scan_failed_title">无法读取小票</string>
+    <string name="scan_no_camera_title">无法使用相机</string>
+    <string name="scan_no_camera_message">允许使用相机来拍摄小票，或从相册中选择照片。</string>
+    <string name="scan_retake">重新拍照</string>
+    <string name="scan_languages">识别语言：%1$s</string>
+    <string name="scan_languages_change">更改</string>
+    <string name="scan_replace_message">扫描小票将替换你在此处输入的内容。</string>
     <string name="ocr_debug_title">小票识别（测试版）</string>
     <string name="ocr_pick_image">选择照片</string>
     <string name="ocr_take_photo">拍照</string>
@@ -170,6 +183,8 @@
     <string name="settings_currency">货币</string>
     <string name="settings_tax_included">价格已含税</string>
     <string name="settings_tax_included_subtitle">如果标价不含税、小票在最后加上税费（例如美国的销售税），请关闭此项</string>
+    <string name="settings_receipt_languages">小票语言</string>
+    <string name="settings_receipt_languages_hint">小票上印刷的语言，用于扫描时识别。第一个勾选的为主要语言。语言越少，识别越快。</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_dark_mode_subtitle">强烈推荐</string>
     <string name="settings_icon_title">更换应用图标？</string>

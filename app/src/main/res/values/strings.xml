@@ -114,7 +114,20 @@
     </plurals>
 
     <!-- Receipt OCR (debug) -->
-    <string name="ocr_debug_open">Scan receipt (beta)</string>
+    <string name="ocr_debug_open">OCR lab</string>
+    <string name="receipt_scan">Scan receipt</string>
+    <string name="receipt_add_manually">Add manually</string>
+    <string name="scan_title">Scan receipt</string>
+    <string name="scan_reading">Reading the receipt…</string>
+    <string name="scan_nothing_found_title">No items found</string>
+    <string name="scan_nothing_found_message">No item could be read on this photo. Try again with the receipt flat, whole and well lit, or add it manually.</string>
+    <string name="scan_failed_title">The receipt could not be read</string>
+    <string name="scan_no_camera_title">No camera access</string>
+    <string name="scan_no_camera_message">Allow the camera to photograph receipts, or choose a photo from the gallery.</string>
+    <string name="scan_retake">Take another photo</string>
+    <string name="scan_languages">Reading in: %1$s</string>
+    <string name="scan_languages_change">Change</string>
+    <string name="scan_replace_message">Scanning a receipt replaces what you have entered here.</string>
     <string name="ocr_debug_title">Receipt OCR (beta)</string>
     <string name="ocr_pick_image">Choose photo</string>
     <string name="ocr_take_photo">Take photo</string>
@@ -171,6 +184,8 @@
     <string name="settings_currency">Currency</string>
     <string name="settings_tax_included">Prices include taxes</string>
     <string name="settings_tax_included_subtitle">Turn off if prices are shown without taxes and the receipt adds them at the end (e.g. US sales tax)</string>
+    <string name="settings_receipt_languages">Receipt languages</string>
+    <string name="settings_receipt_languages_hint">Languages your receipts are printed in, to read them when scanning. The first one ticked is the main one. Fewer languages read faster.</string>
     <string name="settings_dark_mode">Dark mode</string>
     <string name="settings_dark_mode_subtitle">Highly recommended</string>
     <string name="settings_icon_title">Change the app icon?</string>

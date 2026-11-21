@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -34,9 +34,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     var editingReceipt by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var receiptToDelete by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var showOcrDebug by remember { mutableStateOf(false) }
+    // Opened from the new receipt screen (top bar button); leaving it goes back there.
+    var showScan by remember { mutableStateOf(false) }
     // A receipt read from a photo, being reviewed in the new receipt screen.
     var scanDraft by remember { mutableStateOf<ReceiptDraft?>(null) }
-    // The OCR lab screen is only reachable in debug builds while it is being developed.
+    // The OCR lab screen (every knob and intermediate step) is only for debug builds.
     val context = LocalContext.current
     val isDebuggable = remember {
         context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
@@ -55,13 +57,33 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     }
 
     // Fresh stores and products for autocomplete and for recognising scanned receipts.
-    LaunchedEffect(showAddReceipt, editingReceipt, showOcrDebug) {
-        if (showAddReceipt || editingReceipt != null || showOcrDebug) {
+    LaunchedEffect(showAddReceipt, editingReceipt, showOcrDebug, showScan) {
+        if (showAddReceipt || editingReceipt != null || showOcrDebug || showScan) {
             viewModel.loadStoresAndProducts()
         }
     }
 
     when {
+        showScan -> {
+            ScanReceiptScreen(
+                onNavigateBack = {
+                    showScan = false
+                    showAddReceipt = true
+                },
+                onScanned = { parsed ->
+                    // Short database read (the store's past weights), then the review screen.
+                    scope.launch {
+                        scanDraft = viewModel.createDraft(parsed)
+                        showScan = false
+                        showAddReceipt = false
+                    }
+                },
+                onAddManually = {
+                    showScan = false
+                    showAddReceipt = true
+                },
+            )
+        }
         showOcrDebug -> {
             OcrDebugScreen(
                 onNavigateBack = { showOcrDebug = false },
@@ -88,6 +110,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 draft = draft,
                 purchaseHistory = purchaseHistory,
                 onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
+                // Another photo replaces this reading.
+                onScan = {
+                    scanDraft = null
+                    showScan = true
+                },
             )
         }
         showAddReceipt -> {
@@ -102,6 +129,10 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 availableProducts = products,
                 purchaseHistory = purchaseHistory,
                 onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
+                onScan = {
+                    showAddReceipt = false
+                    showScan = true
+                },
             )
         }
         editingReceipt != null -> {
@@ -154,7 +185,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                         if (isDebuggable) {
                             SmallFloatingActionButton(onClick = { showOcrDebug = true }) {
                                 Icon(
-                                    imageVector = Icons.Filled.DocumentScanner,
+                                    imageVector = Icons.Filled.Science,
                                     contentDescription = stringResource(R.string.ocr_debug_open)
                                 )
                             }

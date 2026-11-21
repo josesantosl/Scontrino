@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
@@ -28,12 +29,16 @@ import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.settings.AppIcon
 import com.pepesantos.scontrino.data.settings.AppLocale
+import com.pepesantos.scontrino.ocr.OcrLanguage
+import com.pepesantos.scontrino.ocr.ReceiptScanner
 import com.pepesantos.scontrino.ui.components.Money
+import com.pepesantos.scontrino.ui.components.ReceiptLanguagesDialog
+import com.pepesantos.scontrino.ui.components.displayName
 import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 /**
- * App settings: language, currency, taxes, theme and the product aliases screen.
+ * App settings: language, currency, taxes, receipt languages, theme and the product aliases screen.
  * [onLanguageChanged] must recreate the activity so that the new language is applied.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +57,12 @@ fun SettingsScreen(
     val currency by viewModel.currency.collectAsState()
     val taxIncluded by viewModel.taxIncluded.collectAsState()
     val darkMode by viewModel.darkMode.collectAsState()
+    val receiptLanguageCodes by viewModel.receiptLanguages.collectAsState()
+    // What the scanner will use: the chosen languages, or its guess while none is chosen.
+    val receiptLanguages = remember(receiptLanguageCodes) {
+        OcrLanguage.fromCodes(receiptLanguageCodes, ReceiptScanner::defaultLanguages)
+    }
+    var showReceiptLanguagesDialog by remember { mutableStateOf(false) }
     val appContext = LocalContext.current.applicationContext
     // After a theme change, whether to offer the launcher icon that matches it (true = light icon).
     var offerLightIcon by remember { mutableStateOf<Boolean?>(null) }
@@ -106,6 +117,12 @@ fun SettingsScreen(
                         role = Role.Switch,
                         onValueChange = viewModel::setTaxIncluded,
                     )
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_receipt_languages)) },
+                    supportingContent = { Text(receiptLanguages.joinToString(", ") { it.displayName() }) },
+                    leadingContent = { Icon(Icons.Filled.DocumentScanner, contentDescription = null) },
+                    modifier = Modifier.clickable { showReceiptLanguagesDialog = true }
                 )
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_dark_mode)) },
@@ -181,6 +198,17 @@ fun SettingsScreen(
                 }
             },
             onDismiss = { showLanguageDialog = false },
+        )
+    }
+
+    if (showReceiptLanguagesDialog) {
+        ReceiptLanguagesDialog(
+            current = receiptLanguages,
+            onConfirm = { chosen ->
+                showReceiptLanguagesDialog = false
+                viewModel.setReceiptLanguages(chosen.map { it.tesseractCode })
+            },
+            onDismiss = { showReceiptLanguagesDialog = false },
         )
     }
 

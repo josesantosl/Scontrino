@@ -161,4 +161,29 @@ class ReceiptRowBuilderTest {
         assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.defaultFor(Locale.US))
         assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.defaultFor(Locale.JAPAN))
     }
+
+    @Test
+    fun `default languages are the app language then the system language, never the region`() {
+        // App in Spanish, system in Italian.
+        assertEquals(
+            listOf(OcrLanguage.SPANISH, OcrLanguage.ITALIAN, OcrLanguage.ENGLISH),
+            OcrLanguage.defaultFor(Locale.forLanguageTag("es"), Locale.forLanguageTag("it-IT"))
+        )
+        // Spanish system with the region set to Italy: still only Spanish.
+        assertEquals(
+            listOf(OcrLanguage.SPANISH, OcrLanguage.ENGLISH),
+            OcrLanguage.defaultFor(Locale.forLanguageTag("es-IT"), Locale.forLanguageTag("es-IT"))
+        )
+    }
+
+    @Test
+    fun `languages from the settings keep their order and fall back when none is valid`() {
+        val fallback = { listOf(OcrLanguage.ENGLISH) }
+        assertEquals(
+            listOf(OcrLanguage.SPANISH, OcrLanguage.ITALIAN),
+            OcrLanguage.fromCodes(listOf("spa", "xxx", "ita", "spa"), fallback)
+        )
+        assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.fromCodes(emptyList(), fallback))
+        assertEquals(listOf(OcrLanguage.ENGLISH), OcrLanguage.fromCodes(listOf("xxx"), fallback))
+    }
 }

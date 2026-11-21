@@ -55,13 +55,24 @@ enum class OcrLanguage(val tesseractCode: String, val isoCode: String) {
 
     companion object {
         /**
-         * The device language first (if bundled), then English as a fallback,
-         * since receipts often mix in English words and units.
+         * The language of each locale (e.g. the app's, then the system's), if bundled, then
+         * English as a fallback, since receipts often mix in English words and units.
+         * Only languages: the region is deliberately ignored, the user picks the receipt
+         * languages in the settings if they shop in another one.
          */
-        fun defaultFor(locale: Locale): List<OcrLanguage> {
-            val primary = entries.firstOrNull { it.isoCode == locale.language }
-            return listOfNotNull(primary, ENGLISH).distinct()
+        fun defaultFor(vararg locales: Locale): List<OcrLanguage> {
+            val fromLanguage = locales.mapNotNull { locale -> entries.firstOrNull { it.isoCode == locale.language } }
+            return (fromLanguage + ENGLISH).distinct()
         }
+
+        /**
+         * Languages from their Tesseract codes, in order, skipping unknown ones; [fallback]
+         * if none is left (nothing chosen yet).
+         */
+        fun fromCodes(codes: List<String>, fallback: () -> List<OcrLanguage>): List<OcrLanguage> =
+            codes.mapNotNull { code -> entries.firstOrNull { it.tesseractCode == code } }
+                .distinct()
+                .ifEmpty(fallback)
     }
 }
 

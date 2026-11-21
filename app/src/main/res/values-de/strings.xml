@@ -105,7 +105,20 @@
     </plurals>
 
     <!-- Receipt OCR (debug) -->
-    <string name="ocr_debug_open">Kassenbon scannen (Beta)</string>
+    <string name="ocr_debug_open">OCR-Labor</string>
+    <string name="receipt_scan">Kassenbon scannen</string>
+    <string name="receipt_add_manually">Manuell hinzufügen</string>
+    <string name="scan_title">Kassenbon scannen</string>
+    <string name="scan_reading">Kassenbon wird gelesen…</string>
+    <string name="scan_nothing_found_title">Keine Artikel gefunden</string>
+    <string name="scan_nothing_found_message">Auf diesem Foto konnte kein Artikel gelesen werden. Versuche es erneut mit flach liegendem, vollständigem und gut beleuchtetem Kassenbon, oder füge ihn manuell hinzu.</string>
+    <string name="scan_failed_title">Der Kassenbon konnte nicht gelesen werden</string>
+    <string name="scan_no_camera_title">Kein Kamerazugriff</string>
+    <string name="scan_no_camera_message">Erlaube die Kamera, um Kassenbons zu fotografieren, oder wähle ein Foto aus der Galerie.</string>
+    <string name="scan_retake">Neues Foto aufnehmen</string>
+    <string name="scan_languages">Lesen in: %1$s</string>
+    <string name="scan_languages_change">Ändern</string>
+    <string name="scan_replace_message">Das Scannen eines Kassenbons ersetzt, was du hier eingegeben hast.</string>
     <string name="ocr_debug_title">Kassenbon-OCR (Beta)</string>
     <string name="ocr_pick_image">Foto auswählen</string>
     <string name="ocr_take_photo">Foto aufnehmen</string>
@@ -162,6 +175,8 @@
     <string name="settings_currency">Währung</string>
     <string name="settings_tax_included">Preise inklusive Steuern</string>
     <string name="settings_tax_included_subtitle">Deaktivieren, wenn Preise ohne Steuern angegeben werden und der Kassenbon sie am Ende hinzufügt (z. B. Sales Tax in den USA)</string>
+    <string name="settings_receipt_languages">Sprachen der Kassenbons</string>
+    <string name="settings_receipt_languages_hint">Sprachen, in denen deine Kassenbons gedruckt sind, um sie beim Scannen zu lesen. Die erste ausgewählte ist die Hauptsprache. Mit weniger Sprachen geht das Lesen schneller.</string>
     <string name="settings_dark_mode">Dunkler Modus</string>
     <string name="settings_dark_mode_subtitle">Dringend empfohlen</string>
     <string name="settings_icon_title">App-Symbol ändern?</string>
