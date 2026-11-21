@@ -22,14 +22,15 @@ object ReceiptDateParser {
 
                 val day = readNumber(rawDay, 1..31) ?: continue
                 val month = readNumber(rawMonth, 1..12) ?: continue
-                val year = readNumber(rawYear, 0..9999)
-                    ?.let { if (rawYear.length == 2) 2000 + it else it }
-                    ?.takeIf { it in 2000..2100 }
-                    ?: continue
+                val year = if (rawYear.length == 2) {
+                    readNumber(rawYear, 0..99)?.plus(2000)
+                } else {
+                    readNumber(rawYear, 2000..2100)
+                } ?: continue
 
                 val time = TIME.find(line, match.range.last + 1)
-                val hour = time?.groupValues?.get(1)?.toInt()?.takeIf { it in 0..23 }
-                val minute = time?.groupValues?.get(2)?.toInt()?.takeIf { it in 0..59 }
+                val hour = time?.groupValues?.get(1)?.let { readNumber(it, 0..23) }
+                val minute = time?.groupValues?.get(2)?.let { readNumber(it, 0..59) }
                 return if (hour != null && minute != null) {
                     ReceiptDate(year, month, day, hour, minute)
                 } else {
@@ -42,12 +43,15 @@ object ReceiptDateParser {
 
     /**
      * Many receipt printers use a slashed zero, which the OCR reads as "9" or "@":
-     * "17-98-2026" is really "17-08-2026". When the plain number is out of range,
-     * retry with those characters as zeros.
+     * "17-98-2026" is really "17-08-2026", "2926" is 2026 and "15:99" is 15:09. When
+     * the plain number is out of range, retry with one "9" as a zero (leftmost first),
+     * then with all of them.
      */
     private fun readNumber(raw: String, range: IntRange): Int? {
         val plain = raw.replace('@', '0')
-        plain.toIntOrNull()?.takeIf { it in range }?.let { return it }
-        return plain.replace('9', '0').toIntOrNull()?.takeIf { it in range }
+        val candidates = listOf(plain) +
+            plain.indices.filter { plain[it] == '9' }.map { plain.replaceRange(it, it + 1, "0") } +
+            plain.replace('9', '0')
+        return candidates.firstNotNullOfOrNull { candidate -> candidate.toIntOrNull()?.takeIf { it in range } }
     }
 }

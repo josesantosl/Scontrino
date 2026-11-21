@@ -39,6 +39,42 @@ class ReceiptParserFixtureTest {
         assertTrue(receipt.isConsistent)
         assertEquals(ReceiptDate(2026, 8, 17, 17, 24), receipt.date)
         assertEquals(22.0, receipt.items.first().vatRate!!, 0.0)
+        // Printed "PI02275030233", read "PIQ2275030233".
+        assertEquals("02275030233", receipt.vatNumber)
+    }
+
+    @Test
+    fun `lidl 2026-11-20 - Cad Pz quantity lines after the item, slashed zeros`() {
+        val receipt = parse("lidl-torino-2026-11-20")
+
+        assertEquals(
+            listOf(
+                Triple("BEV.SOIA CALCIO VITA", "1,98", 2),
+                Triple("CONTORNO DI VERDURE", "3,98", 2),
+                Triple("SALSA A BASE DI SOIA", "0,89", 1),
+                Triple("TOFU BIO NATURALE", "1,78", 2),
+                Triple("NEO BISC.V.CACAO VAN", "0,89", 1),
+                Triple("HUMMUS CAROTE ZENZER", "1,49", 1),
+                Triple("WHISKAS TEMPTAT POLL", "1,59", 1),
+                Triple("RUCOLA", "0,99", 1),
+                Triple("SNACK PATATE PAPRICA", "1,59", 1),
+            ),
+            receipt.items.map { Triple(it.name, Amounts.format(it.priceCents), it.quantity) }
+        )
+        // "Cad 9,99 Pz. 2" and "Cad 09,89 Pz. 2": unit price one character off, still
+        // the quantity of the item above. The speck "se" goes with its line.
+        assertTrue(receipt.unparsedRows.isEmpty())
+        // Printed 0,99, read 8,99.
+        assertEquals(899L, receipt.items.single { it.name == "RUCOLA" }.correctedFromCents)
+        assertTrue(receipt.items.filter { it.name != "RUCOLA" }.all { it.correctedFromCents == null })
+
+        assertEquals(1518L, receipt.totalCents)
+        assertTrue(receipt.isConsistent)
+        assertNull(receipt.taxCents)
+        // "20-11-2926 15:99".
+        assertEquals(ReceiptDate(2026, 11, 20, 15, 9), receipt.date)
+        // "PIG22 75030233", fixed through the check digit.
+        assertEquals("02275030233", receipt.vatNumber)
     }
 
     @Test

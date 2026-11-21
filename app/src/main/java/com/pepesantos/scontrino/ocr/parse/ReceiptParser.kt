@@ -17,7 +17,8 @@ import kotlin.math.abs
  * - words left of the header's description column are not part of the receipt
  *   (whatever lies next to it in the photo);
  * - a quantity line "2 x 0,79" belongs to the item whose price it multiplies to,
- *   the next one (Carrefour) or the previous one;
+ *   the next one (Carrefour) or the previous one; "Cad 0,99 Pz. 2" (Lidl) always
+ *   follows its item, so it is kept even if the unit price is one character off;
  * - a negative amount, or a "Sconto" line, is a discount on the previous item;
  * - the total is cross-checked with the payment lines, and if the items do not add
  *   up, a single misread price (one digit off) is corrected;
@@ -60,13 +61,14 @@ object ReceiptParser {
      * doubled sign ("xX").
      */
     private val QUANTITY = Regex("""^(\d{1,3})[.,]?\s*[X×*]{1,2}\s*(\S+)""")
+    /** "Cad 0,99 Pz. 2" (cadauno, pezzi), printed under the item it belongs to. */
+    private val QUANTITY_EACH = Regex("""^CAD\.?\s+(\S+)\s+PZ\.?\s*(\d{1,3})(?!\d)""")
     /**
      * The store's tax id, by country. Only labels that identify the store: on
      * Ecuadorian receipts "RUC/CED/PAS" is the customer and "RUC Proveedor" the
      * e-invoicing provider, so "RUC" must be followed directly by the colon.
      */
     private val TAX_IDS = listOf(
-        Regex("""P\.?\s*I\.?\s*V\.?\s*A\.?\s*:?\s*(\d{11})"""), // Italy, P.IVA
         Regex("""\bRUC\s*:\s*(\d{13})\b"""), // Ecuador, RUC
         Regex("""\b(?:CIF|NIF)\s*:?\s*([A-Z]\d{7}[A-Z0-9])\b"""), // Spain
     )
@@ -115,6 +117,15 @@ object ReceiptParser {
 
         for (index in start until end) {
             val row = columns.trim(rows[index]) ?: continue
+            readQuantityEach(row, previousItem = items.lastIndex)?.let { quantity ->
+                val previous = items.getOrNull(quantity.previousItem)
+                if (previous != null && quantity.nearlyFits(previous)) {
+                    items[quantity.previousItem] = quantity.applyTo(previous)
+                } else {
+                    unparsed += quantity.text
+                }
+                continue
+            }
             readQuantity(row, columns, previousItem = items.lastIndex)?.let { quantity ->
                 pendingQuantity?.let(::settle)
                 pendingQuantity = quantity
@@ -167,7 +178,7 @@ object ReceiptParser {
             totalCents = total,
             date = ReceiptDateParser.find(rows.map { it.text }),
             vatNumber = upper.firstNotNullOfOrNull { line ->
-                TAX_IDS.firstNotNullOfOrNull { it.find(line)?.groupValues?.get(1) }
+                ItalianVatNumber.find(line) ?: TAX_IDS.firstNotNullOfOrNull { it.find(line)?.groupValues?.get(1) }
             },
             headerLines = rows.take(if (columnHeader >= 0) columnHeader else start)
                 .map { it.text }
@@ -248,6 +259,14 @@ object ReceiptParser {
     ) {
         fun fits(item: ParsedItem) = item.quantity == 1 && item.priceCents == count * unitCents
 
+        /**
+         * [fits], or the unit price is one character away from the item's price
+         * divided by [count] ("Cad 9,99 Pz. 2" under 1,98: a slashed zero read as 9).
+         */
+        fun nearlyFits(item: ParsedItem) = fits(item) || item.quantity == 1 &&
+            item.priceCents > 0 && item.priceCents % count == 0L &&
+            editDistance(Amounts.format(unitCents), Amounts.format(item.priceCents / count)) == 1
+
         fun applyTo(item: ParsedItem) = item.copy(
             quantity = count,
             // Carrefour prints the rate on the quantity line when it does not fit the item's.
@@ -269,6 +288,14 @@ object ReceiptParser {
             text = row.text,
             previousItem = previousItem,
         )
+    }
+
+    private fun readQuantityEach(row: ReceiptRow, previousItem: Int): Quantity? {
+        val text = row.words.joinToString(" ") { it.text }
+        val match = QUANTITY_EACH.find(text.uppercase(Locale.ROOT).trim()) ?: return null
+        val unitCents = Amounts.parseCents(match.groupValues[1])?.takeIf { it > 0 } ?: return null
+        val count = match.groupValues[2].toInt().takeIf { it >= 2 } ?: return null
+        return Quantity(count, unitCents, vatRate = null, text = row.text, previousItem = previousItem)
     }
 
     /**

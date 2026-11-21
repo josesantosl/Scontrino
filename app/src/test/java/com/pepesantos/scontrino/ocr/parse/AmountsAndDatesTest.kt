@@ -66,6 +66,9 @@ class AmountsAndDatesTest {
     fun `slashed zeros read as 9 or at sign are fixed when the date is impossible`() {
         assertEquals(ReceiptDate(2026, 8, 17, 17, 24), ReceiptDateParser.find(listOf("17-98-2026 17:24")))
         assertEquals(ReceiptDate(2026, 8, 17, 17, 24), ReceiptDateParser.find(listOf("17-@8-2026 17:24")))
+        // Year and minutes too; one "9" at a time, so "99" minutes are 09, not 00.
+        assertEquals(ReceiptDate(2026, 11, 20, 15, 9), ReceiptDateParser.find(listOf("20-11-2926 15:99")))
+        assertEquals(ReceiptDate(2019, 5, 3), ReceiptDateParser.find(listOf("03-05-2019")))
     }
 
     @Test
