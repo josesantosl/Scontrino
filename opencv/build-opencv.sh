@@ -10,19 +10,29 @@
 #
 # Usage: opencv/build-opencv.sh [work-dir]
 # Needs git, cmake, ninja, python3, a JDK and NDK $NDK_VERSION in the Android SDK.
+#
+# Optional environment (used by the F-Droid recipe, see fdroid/README.md):
+#   OPENCV_SOURCE_DIR    existing OpenCV $OPENCV_VERSION checkout (default: git clone)
+#   KLEIDICV_SOURCE_DIR  existing KleidiCV $KLEIDICV_VERSION checkout (default: git clone)
+#   ABIS                 space-separated ABIs (default: arm64-v8a armeabi-v7a x86_64)
+#   ANDROID_NDK / ANDROID_NDK_HOME  NDK location
+# With both source dirs set nothing is downloaded.
 set -euo pipefail
 
 OPENCV_VERSION=4.14.0
+# Must match KLEIDICV_SRC_COMMIT in OpenCV's hal/kleidicv/kleidicv.cmake.
+KLEIDICV_VERSION=26.03
 NDK_VERSION=29.0.14206865
 MIN_SDK=24
-ABIS=(arm64-v8a armeabi-v7a x86_64)
+read -r -a ABIS <<< "${ABIS:-arm64-v8a armeabi-v7a x86_64}"
 MODULES=core,imgproc,java
 
 MODULE_DIR=$(cd "$(dirname "$0")" && pwd)
 SDK_DIR=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}}
-NDK_DIR=${ANDROID_NDK:-$SDK_DIR/ndk/$NDK_VERSION}
+NDK_DIR=${ANDROID_NDK:-${ANDROID_NDK_HOME:-$SDK_DIR/ndk/$NDK_VERSION}}
 WORK_DIR=$(mkdir -p "${1:-${TMPDIR:-/tmp}/opencv-slim-build}" && cd "${1:-${TMPDIR:-/tmp}/opencv-slim-build}" && pwd)
-SRC_DIR=$WORK_DIR/opencv-$OPENCV_VERSION
+SRC_DIR=${OPENCV_SOURCE_DIR:-$WORK_DIR/opencv-$OPENCV_VERSION}
+KLEIDICV_DIR=${KLEIDICV_SOURCE_DIR:-$WORK_DIR/kleidicv-$KLEIDICV_VERSION}
 STRIP=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
 
 [ -d "$NDK_DIR" ] || { echo "NDK not found: $NDK_DIR (android sdk install ndk/$NDK_VERSION)" >&2; exit 1; }
@@ -30,14 +40,27 @@ STRIP=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
 if [ ! -d "$SRC_DIR" ]; then
   git clone --depth 1 --branch "$OPENCV_VERSION" https://github.com/opencv/opencv.git "$SRC_DIR"
 fi
+# Cloned here instead of letting CMake download it, so a build can run fully offline from
+# prepared sources (F-Droid srclibs).
+if [ ! -d "$KLEIDICV_DIR" ]; then
+  git clone --depth 1 --branch "$KLEIDICV_VERSION" https://gitlab.arm.com/kleidi/kleidicv.git "$KLEIDICV_DIR"
+fi
+grep -q "KLEIDICV_SRC_COMMIT \"$KLEIDICV_VERSION\"" "$SRC_DIR/hal/kleidicv/kleidicv.cmake" ||
+  { echo "OpenCV $OPENCV_VERSION expects another KleidiCV: update KLEIDICV_VERSION" >&2; exit 1; }
 
 for abi in "${ABIS[@]}"; do
   build=$WORK_DIR/build-$abi
   echo "===== $abi"
+  # Assert messages embed source paths (__FILE__): map them to fixed names so the library is
+  # byte-identical wherever it's built (F-Droid checkouts live elsewhere).
+  prefix_maps="-ffile-prefix-map=$SRC_DIR=opencv -ffile-prefix-map=$KLEIDICV_DIR=kleidicv"
+  prefix_maps+=" -ffile-prefix-map=$build=build -ffile-prefix-map=$NDK_DIR=ndk"
   cmake -S "$SRC_DIR" -B "$build" -G Ninja \
+    -DOPENCV_EXTRA_FLAGS="$prefix_maps" \
     -DCMAKE_TOOLCHAIN_FILE="$NDK_DIR/build/cmake/android.toolchain.cmake" \
     -DANDROID_ABI="$abi" \
     -DANDROID_PLATFORM="android-$MIN_SDK" \
+    -DKLEIDICV_SOURCE_PATH="$KLEIDICV_DIR" \
     -DANDROID_STL=c++_static \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_LIST="$MODULES" \
@@ -57,6 +80,19 @@ for abi in "${ABIS[@]}"; do
     -DWITH_ITT=OFF \
     -DWITH_JPEG=OFF -DWITH_PNG=OFF -DWITH_TIFF=OFF -DWITH_WEBP=OFF -DWITH_OPENJPEG=OFF \
     -DWITH_JASPER=OFF -DWITH_OPENEXR=OFF -DWITH_IMGCODEC_GIF=OFF -DWITH_PROTOBUF=OFF
+  # cv::getBuildInformation() embeds the whole CMake summary (build dir, flags, host, date):
+  # replace it with a fixed text so it doesn't depend on the machine. CMake rewrites the file
+  # on every configure, so this runs after it each time.
+  printf '"\\nOpenCV %s for Scontrino (%s, NDK %s, API %s): %s. See opencv/build-opencv.sh\\n"\n' \
+    "$OPENCV_VERSION" "$abi" "$NDK_VERSION" "$MIN_SDK" "$MODULES" > "$build/modules/core/version_string.inc"
+  # Same for the build/install dirs that findDataFile() would search (samples data on a PC,
+  # never used on Android).
+  data_config=$build/opencv_data_config.hpp
+  sed -i -e "s|\"$build/install\"|\"/opencv-install\"|" -e "s|\"$build\"|\"/opencv-build\"|" \
+    -e 's|^    ".*/"$|    "../opencv/"|' "$data_config"
+  if grep -qE "$WORK_DIR|$SRC_DIR|$build" "$data_config"; then
+    echo "$data_config still has local paths: update build-opencv.sh" >&2; exit 1
+  fi
   # ANDROID_PROJECTS_BUILD_TYPE=GRADLE only enables the Java bindings: we build the native
   # library and the generated sources, never OpenCV's own (outdated) Gradle project.
   ninja -C "$build" opencv_java opencv_java_android_source_copy
@@ -65,7 +101,7 @@ done
 echo "===== copying into $MODULE_DIR"
 java_src=$WORK_DIR/build-${ABIS[0]}/opencv_android/opencv/src/org/opencv
 java_dst=$MODULE_DIR/src/main/java/org/opencv
-rm -rf "$java_dst" "$MODULE_DIR/src/main/jniLibs"
+rm -rf "$java_dst"
 mkdir -p "$java_dst/android"
 cp -r "$java_src/core" "$java_src/imgproc" "$java_src/utils" "$java_dst/"
 # Kotlin extensions (Mat.at, Mat * Mat) aren't used.
@@ -87,7 +123,9 @@ if n != 1 or "Imgcodecs" in src:
 open(path, "w").write(src)
 EOF
 
+# Only the ABIs built now are replaced, so a partial ABIS run keeps the others.
 for abi in "${ABIS[@]}"; do
+  rm -rf "$MODULE_DIR/src/main/jniLibs/$abi"
   mkdir -p "$MODULE_DIR/src/main/jniLibs/$abi"
   "$STRIP" --strip-unneeded -o "$MODULE_DIR/src/main/jniLibs/$abi/libopencv_java4.so" \
     "$WORK_DIR/build-$abi/jni/$abi/libopencv_java4.so"
