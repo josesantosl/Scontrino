@@ -54,28 +54,35 @@ object ReceiptDraftBuilder {
 
     /**
      * One entry per product, with the price after discounts. Identical lines (the
-     * same product bought twice) become one entry with quantity 2.
+     * same product bought twice) become one entry with quantity 2. A name that is the
+     * user's product, or one or two misread letters away from it, takes that product's
+     * name and category.
      */
     private fun items(parsed: ParsedReceipt, products: List<Product>, categories: List<Category>): List<ItemEntry> {
-        val productsByName = products.associateBy { ProductNames.normalize(it.name) }
+        val matcher = ProductNameMatcher.Index(products)
         val categoryIdByLabel = categories.associate { it.label to it.id }
 
+        // Keyed by the product's name when matched, so two readings of the same
+        // product (one misread) still group together.
+        val existingByName = mutableMapOf<String, Product>()
         val grouped = linkedMapOf<Pair<String, Long>, Int>()
         for (item in parsed.items) {
+            val existing = matcher.match(item.name)
+            val name = existing?.name ?: item.name
+            if (existing != null) existingByName[name] = existing
             // ItemEntry holds the unit price; a line "2 x 0,79 = 1,58" becomes 2 × 0,79,
             // unless a discount makes the units differ in price.
             val perUnit = item.quantity > 1 && item.netCents % item.quantity == 0L
             val unitCents = if (perUnit) item.netCents / item.quantity else item.netCents
             val units = if (perUnit) item.quantity else 1
-            val key = item.name to unitCents
+            val key = name to unitCents
             grouped[key] = (grouped[key] ?: 0) + units
         }
         return grouped.map { (key, quantity) ->
             val (name, netCents) = key
-            // Reuse the user's own product (name and category) when it matches.
-            val existing = productsByName[ProductNames.normalize(name)]
+            val existing = existingByName[name]
             ItemEntry(
-                name = existing?.name ?: name,
+                name = name,
                 price = netCents / 100.0,
                 quantity = quantity,
                 categoryId = existing?.categoryId

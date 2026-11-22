@@ -7,6 +7,8 @@ import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.ocr.OcrFixtures
 import com.pepesantos.scontrino.ocr.ReceiptRowBuilder
+import com.pepesantos.scontrino.ocr.parse.ParsedItem
+import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ocr.parse.ReceiptParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -85,6 +87,27 @@ class ReceiptDraftBuilderTest {
         val item = draft.items.single { it.name == "Farinata" }
         assertEquals(6, item.categoryId)
         assertEquals(2.35, item.price, 1e-9)
+    }
+
+    @Test
+    fun `a misread name takes the existing product and groups with its correct reading`() {
+        val soya = Product(id = 3, name = "SOYADRINK CLASSICO", categoryId = 4)
+        fun line(name: String) = ParsedItem(name = name, code = null, priceCents = 189, priceConfidence = 90f, rowIndex = 0)
+        val parsed = ParsedReceipt(
+            items = listOf(line("SOVADRINK CLASSICO"), line("SOYADRINK CLASSICO"), line("SOVADRLNK CLASSLCO")),
+            totalCents = 567,
+            date = null,
+            vatNumber = null,
+            headerLines = emptyList(),
+            unparsedRows = emptyList(),
+        )
+
+        val items = ReceiptDraftBuilder.build(parsed, stores, listOf(soya), categories = emptyList()).items
+
+        // The first two lines are one product bought twice; the third is three letters off.
+        assertEquals(2, items.size)
+        assertEquals(ItemEntry(name = "SOYADRINK CLASSICO", price = 1.89, quantity = 2, categoryId = 4), items[0])
+        assertEquals("SOVADRLNK CLASSLCO", items[1].name)
     }
 
     @Test
