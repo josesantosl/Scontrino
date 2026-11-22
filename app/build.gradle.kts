@@ -38,7 +38,8 @@ android {
             // Local testing only: the debug key lets release install over debug, keeping the data.
             // Replace with a real keystore before publishing.
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
