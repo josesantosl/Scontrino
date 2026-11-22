@@ -128,7 +128,8 @@ private enum class License(val title: String, @param:RawRes val textRes: Int) {
     LIBYUV("BSD 3-Clause (libyuv)", R.raw.license_libyuv),
     LEPTONICA("Leptonica (BSD 2-Clause)", R.raw.license_leptonica),
     IJG("Independent JPEG Group", R.raw.license_ijg),
-    LIBPNG("libpng License v2", R.raw.license_libpng);
+    LIBPNG("libpng License v2", R.raw.license_libpng),
+    CAROTENE("BSD 3-Clause (Carotene)", R.raw.license_carotene);
 
     fun read(context: Context): String =
         context.resources.openRawResource(textRes).bufferedReader().use { it.readText() }
@@ -157,9 +158,10 @@ private val LIBRARIES = listOf(
     OpenSourceLibrary(
         name = "OpenCV",
         purpose = R.string.licenses_purpose_opencv,
-        includes = null,
+        // Built from source by opencv/build-opencv.sh (core + imgproc): these ARM helpers ship inside.
+        includes = "KleidiCV · Carotene · cpufeatures",
         website = "https://opencv.org",
-        licenses = listOf(License.APACHE_2_0),
+        licenses = listOf(License.APACHE_2_0, License.CAROTENE),
     ),
     OpenSourceLibrary(
         name = "zxing-cpp",

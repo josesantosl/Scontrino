@@ -21,8 +21,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // OpenCV/Tesseract/zxing-cpp ship native libs; OpenCV alone is ~24 MB (arm64)
-        // to ~58 MB (x86_64) per ABI. Real devices only need ARM.
+        // OpenCV/Tesseract/zxing-cpp ship native libs. Real devices only need ARM.
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
         }
@@ -74,7 +73,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.zxing.cpp)
-    implementation(libs.opencv)
+    implementation(project(":opencv"))
     implementation(libs.tesseract4android)
     implementation(libs.androidx.exifinterface)
     testImplementation(libs.junit)

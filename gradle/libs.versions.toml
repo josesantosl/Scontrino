@@ -11,7 +11,6 @@ mockito-kotlin = "5.4.0"
 kotlinx-coroutines-test = "1.9.0"
 camerax = "1.4.1"
 zxing-cpp = "3.1.1"
-opencv = "4.14.0"
 tesseract4android = "4.9.0"
 exifinterface = "1.4.2"
 json = "20260814"
@@ -36,7 +35,6 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 zxing-cpp = { group = "io.github.zxing-cpp", name = "android", version.ref = "zxing-cpp" }
-opencv = { group = "org.opencv", name = "opencv", version.ref = "opencv" }
 tesseract4android = { group = "cz.adaptech.tesseract4android", name = "tesseract4android", version.ref = "tesseract4android" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 # Real org.json for JVM unit tests (android.jar only ships stubs); used to read OCR fixtures.
@@ -44,5 +42,6 @@ json = { group = "org.json", name = "json", version.ref = "json" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 

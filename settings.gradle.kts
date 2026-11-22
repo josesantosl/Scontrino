@@ -29,3 +29,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Scontrino"
 include(":app")
+// Slim OpenCV built from source (see opencv/build-opencv.sh).
+include(":opencv")
