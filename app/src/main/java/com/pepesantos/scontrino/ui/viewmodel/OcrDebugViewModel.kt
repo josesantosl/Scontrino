@@ -14,8 +14,11 @@ import com.pepesantos.scontrino.ocr.OcrResult
 import com.pepesantos.scontrino.ocr.ReceiptImagePreprocessor
 import com.pepesantos.scontrino.ocr.ReceiptRow
 import com.pepesantos.scontrino.ocr.ReceiptScanner
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +46,8 @@ data class OcrDebugUiState(
     val result: OcrResult? = null,
     val rows: List<ReceiptRow> = emptyList(),
     val parsed: ParsedReceipt? = null,
+    /** The image and rows of [parsed], for the review screen. */
+    val scanImage: ScannedReceiptImage? = null,
     /** Every mode tried on the last run, in order; the chosen one is [usedMode]. */
     val attempts: List<LayoutAttempt> = emptyList(),
     val usedMode: OcrPageSegMode? = null,
@@ -89,7 +94,7 @@ class OcrDebugViewModel @JvmOverloads constructor(
             it.copy(
                 sourceUri = uri, isProcessing = false, processedImage = null,
                 detection = null, skewAngle = null, result = null, rows = emptyList(), parsed = null,
-                attempts = emptyList(), usedMode = null, error = null,
+                scanImage = null, attempts = emptyList(), usedMode = null, error = null,
             )
         }
         run()
@@ -124,8 +129,10 @@ class OcrDebugViewModel @JvmOverloads constructor(
                         )
                     }
                 }
+                val scanImage = withContext(Dispatchers.Default) { ScannedReceiptImage.of(scan) }
                 _uiState.update {
                     it.copy(
+                        scanImage = scanImage,
                         result = scan.best.result,
                         rows = scan.best.rows,
                         parsed = scan.best.parsed,

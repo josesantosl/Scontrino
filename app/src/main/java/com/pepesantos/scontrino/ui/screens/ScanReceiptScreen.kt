@@ -62,6 +62,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ocr.OcrLanguage
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
 import com.pepesantos.scontrino.ui.components.ReceiptCamera
 import com.pepesantos.scontrino.ui.components.ReceiptLanguagesDialog
 import com.pepesantos.scontrino.ui.components.displayName
@@ -77,7 +78,7 @@ import com.pepesantos.scontrino.ui.viewmodel.ScanState
 @Composable
 fun ScanReceiptScreen(
     onNavigateBack: () -> Unit,
-    onScanned: (ParsedReceipt) -> Unit,
+    onScanned: (ParsedReceipt, ScannedReceiptImage) -> Unit,
     onAddManually: () -> Unit,
     viewModel: ScanReceiptViewModel = viewModel(),
 ) {
@@ -96,7 +97,7 @@ fun ScanReceiptScreen(
     LaunchedEffect(state) {
         (state as? ScanState.Done)?.let { done ->
             viewModel.reset()
-            onScanned(done.parsed)
+            onScanned(done.parsed, done.image)
         }
     }
 

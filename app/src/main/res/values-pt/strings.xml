@@ -167,6 +167,10 @@
     <string name="ocr_parsed_title">Recibo interpretado</string>
     <string name="ocr_use_receipt">Usar este recibo</string>
     <string name="scan_review_notice">Lido de uma foto: confira a loja, a data e cada produto antes de salvar.</string>
+    <string name="scan_photo_title">Foto do recibo</string>
+    <string name="scan_photo_show">Ver foto do recibo</string>
+    <string name="scan_photo_close">Fechar</string>
+    <string name="scan_photo_rescan">Escanear de novo</string>
     <string name="scan_totals">Total do recibo %1$s · soma dos produtos %2$s</string>
     <string name="scan_totals_mismatch">Os produtos não somam o total do recibo: confira os preços.</string>
     <string name="ocr_parsed_date">Data: %1$s</string>

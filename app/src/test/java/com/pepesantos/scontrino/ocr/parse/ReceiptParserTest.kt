@@ -64,6 +64,8 @@ class ReceiptParserTest {
         assertEquals(listOf(145L, 178L, 434L, 120L), parsed.items.map { it.priceCents })
         // Under a name without price, or under an item with that price.
         assertEquals(listOf(null, null, 1378.0, 512.0), parsed.items.map { it.weightGrams })
+        // A weight line belongs to its item, to show it from the photo.
+        assertEquals(listOf(listOf(1), listOf(2), listOf(3, 4), listOf(5, 6)), parsed.items.map { it.rows })
         assertTrue(parsed.unparsedRows.isEmpty())
         assertTrue(parsed.isConsistent)
     }
@@ -215,7 +217,24 @@ class ReceiptParserTest {
         assertEquals("353406", item.code)
         assertEquals("B", item.vatCode)
         assertEquals(90L, item.discountCents)
+        assertEquals(listOf(1, 2), item.rows)
         assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `a quantity line belongs to the item it multiplies, before or after it`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("DESCRIZIONE", "PREZZO"),
+                row("2 x 0,79"),
+                row("YOGURT", "1,58"),
+                row("PANE", "1,98"),
+                row("Cad 0,99 Pz. 2"),
+                row("TOTALE", "3,56"),
+            )
+        )
+        assertEquals(listOf(2, 2), parsed.items.map { it.quantity })
+        assertEquals(listOf(listOf(1, 2), listOf(3, 4)), parsed.items.map { it.rows })
     }
 
     @Test
@@ -253,6 +272,7 @@ class ReceiptParserTest {
         )
         assertEquals("COLA", parsed.items.single().name)
         assertEquals(55L, parsed.items.single().priceCents)
+        assertEquals(listOf(0, 1), parsed.items.single().rows)
     }
 
     @Test

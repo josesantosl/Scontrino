@@ -180,12 +180,15 @@ object ReceiptParser {
                         addItem(weight.toItem(name))
                     }
                     previous != null && previous.weightGrams == null && previous.priceCents == weight.lineCents ->
-                        items[items.lastIndex] = previous.copy(weightGrams = weight.grams)
+                        items[items.lastIndex] = previous.copy(
+                            weightGrams = weight.grams,
+                            extraRows = previous.extraRows + index,
+                        )
                     else -> unparsed += row.text
                 }
                 continue
             }
-            readQuantityEach(row, previousItem = items.lastIndex)?.let { quantity ->
+            readQuantityEach(row, index, previousItem = items.lastIndex)?.let { quantity ->
                 val previous = items.getOrNull(quantity.previousItem)
                 if (previous != null && quantity.nearlyFits(previous)) {
                     items[quantity.previousItem] = quantity.applyTo(previous)
@@ -194,7 +197,7 @@ object ReceiptParser {
                 }
                 continue
             }
-            readQuantity(row, columns, previousItem = items.lastIndex)?.let { quantity ->
+            readQuantity(row, index, columns, previousItem = items.lastIndex)?.let { quantity ->
                 val name = pendingName
                 if (name != null && quantity.lineCents != null) {
                     // "LEITE INTEGRAL" / "2 UN X 4,99  9,98": the price of the name above.
@@ -210,14 +213,16 @@ object ReceiptParser {
             when {
                 line == null -> {
                     pendingName?.let { unparsed += it.text }
-                    pendingName = cleanName(row.words).takeIf { it.isValid }
+                    pendingName = cleanName(row.words, rowIndex = index).takeIf { it.isValid }
                     if (pendingName == null && row.text.isNotBlank()) unparsed += row.text
                 }
 
                 line.isDiscount -> {
                     val last = items.lastIndex
                     if (last >= 0) {
-                        items[last] = items[last].let { it.copy(discountCents = it.discountCents + abs(line.cents)) }
+                        items[last] = items[last].let {
+                            it.copy(discountCents = it.discountCents + abs(line.cents), extraRows = it.extraRows + index)
+                        }
                     } else {
                         unparsed += row.text
                     }
@@ -293,6 +298,7 @@ object ReceiptParser {
             priceConfidence = priceWord.confidence,
             nameConfidence = name.confidence,
             rowIndex = rowIndex,
+            extraRows = listOfNotNull(name.rowIndex),
         )
     }
 
@@ -386,6 +392,7 @@ object ReceiptParser {
             priceConfidence = confidence,
             nameConfidence = name.confidence,
             rowIndex = rowIndex,
+            extraRows = listOfNotNull(name.rowIndex),
         )
     }
 
@@ -422,6 +429,8 @@ object ReceiptParser {
         val unitCents: Long,
         val vatRate: Double?,
         val text: String,
+        /** Row of this line. */
+        val rowIndex: Int,
         /** Index of the item read just before this line, or -1. */
         val previousItem: Int,
         /** The line total printed after the unit price ("2 UN X 4,99  9,98"), if any. */
@@ -439,6 +448,7 @@ object ReceiptParser {
             priceConfidence = lineConfidence,
             nameConfidence = name.confidence,
             rowIndex = rowIndex,
+            extraRows = listOfNotNull(name.rowIndex),
         )
 
         fun fits(item: ParsedItem) = item.quantity == 1 && item.priceCents == count * unitCents
@@ -456,10 +466,11 @@ object ReceiptParser {
             // Carrefour prints the rate on the quantity line when it does not fit the item's.
             vatRate = item.vatRate ?: vatRate,
             vatCode = item.vatCode ?: vatRate?.let { "${it.toInt()}%" },
+            extraRows = item.extraRows + rowIndex,
         )
     }
 
-    private fun readQuantity(row: ReceiptRow, columns: Columns, previousItem: Int): Quantity? {
+    private fun readQuantity(row: ReceiptRow, index: Int, columns: Columns, previousItem: Int): Quantity? {
         val text = row.words.joinToString(" ") { it.text }
         val match = QUANTITY.find(text.uppercase(Locale.ROOT).trim()) ?: return null
         val count = match.groupValues[1].toInt()
@@ -474,18 +485,19 @@ object ReceiptParser {
             unitCents = unitCents,
             vatRate = row.words.firstNotNullOfOrNull { columns.vatRate(it) },
             text = row.text,
+            rowIndex = index,
             previousItem = previousItem,
             lineCents = lineWord?.let { Amounts.parseCents(it.text) },
             lineConfidence = lineWord?.confidence ?: 0f,
         )
     }
 
-    private fun readQuantityEach(row: ReceiptRow, previousItem: Int): Quantity? {
+    private fun readQuantityEach(row: ReceiptRow, index: Int, previousItem: Int): Quantity? {
         val text = row.words.joinToString(" ") { it.text }
         val match = QUANTITY_EACH.find(text.uppercase(Locale.ROOT).trim()) ?: return null
         val unitCents = Amounts.parseCents(match.groupValues[1])?.takeIf { it > 0 } ?: return null
         val count = match.groupValues[2].toInt().takeIf { it >= 2 } ?: return null
-        return Quantity(count, unitCents, vatRate = null, text = row.text, previousItem = previousItem)
+        return Quantity(count, unitCents, vatRate = null, text = row.text, rowIndex = index, previousItem = previousItem)
     }
 
     /**
@@ -538,12 +550,13 @@ object ReceiptParser {
         }
     }
 
-    private class Name(val text: String, val code: String?, val confidence: Float) {
+    /** [rowIndex]: the row of a name printed apart from its price, null if on the same row. */
+    private class Name(val text: String, val code: String?, val confidence: Float, val rowIndex: Int? = null) {
         /** A product name needs some letters; "." or "00" is OCR noise. */
         val isValid: Boolean get() = text.count { it.isLetter() } >= 2
     }
 
-    private fun cleanName(words: List<OcrWord>): Name {
+    private fun cleanName(words: List<OcrWord>, rowIndex: Int? = null): Name {
         val tokens = words.map { it.text }
             .filter { token -> token.any { it.isLetterOrDigit() } }
             // Receipts print names in capitals; lone lowercase letters are specks.
@@ -563,6 +576,7 @@ object ReceiptParser {
             text = nameTokens.joinToString(" ").trim { it in ".,;:|-_=" || it.isWhitespace() },
             code = if (hasCode) codes.last() else null,
             confidence = if (nameWords.isEmpty()) 0f else nameWords.map { it.confidence }.average().toFloat(),
+            rowIndex = rowIndex,
         )
     }
 

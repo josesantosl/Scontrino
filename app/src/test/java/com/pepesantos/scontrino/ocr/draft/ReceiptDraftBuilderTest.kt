@@ -61,6 +61,13 @@ class ReceiptDraftBuilderTest {
         val natu = draft.items.single { it.name == "NATU' GATTO POLLO GR" }
         assertEquals(2, natu.quantity)
 
+        // Each entry keeps the rows of every line grouped into it (item + discount, twice);
+        // printed one after the other, they show as a single crop.
+        assertEquals(draft.items.size, draft.itemRows.size)
+        val contRows = draft.itemRows[draft.items.indexOf(cont)]
+        assertEquals(4, contRows.size)
+        assertEquals(1, ReceiptLineCrops.runs(contRows).size)
+
         // The items still add up to the total paid.
         assertEquals(17.68, draft.items.sumOf { it.price * it.quantity }, 1e-9)
     }

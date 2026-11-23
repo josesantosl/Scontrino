@@ -1,7 +1,10 @@
 package com.pepesantos.scontrino.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +29,10 @@ import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -40,7 +47,10 @@ import com.pepesantos.scontrino.data.model.ItemEntry
 import com.pepesantos.scontrino.data.model.Product
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
 import com.pepesantos.scontrino.data.model.Store
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
+import com.pepesantos.scontrino.ui.components.ReceiptLines
+import com.pepesantos.scontrino.ui.components.ReceiptPhotoViewer
 import com.pepesantos.scontrino.ui.components.LocalCurrency
 import com.pepesantos.scontrino.ui.components.LocalTaxIncluded
 import com.pepesantos.scontrino.ui.components.Money
@@ -73,6 +83,11 @@ fun AddReceiptScreen(
     availableProducts: List<Product> = emptyList(),
     /** Data read from a receipt photo, to prefill a new receipt for review. */
     draft: ReceiptDraft? = null,
+    /**
+     * The photo [draft] was read from: each scanned card shows its lines, and the top bar
+     * button opens the whole photo (where scanning again moves to).
+     */
+    scanImage: ScannedReceiptImage? = null,
     /** Past purchases in the store being typed, requested through [onStoreNameChange]. */
     purchaseHistory: PurchaseHistory = PurchaseHistory.EMPTY,
     onStoreNameChange: (String) -> Unit = {},
@@ -152,6 +167,8 @@ fun AddReceiptScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showScanReplaceDialog by remember { mutableStateOf(false) }
+    var showPhoto by remember { mutableStateOf(false) }
+    val receiptBitmap = remember(scanImage) { scanImage?.bitmap?.asImageBitmap() }
 
     val datePickerState = key(receiptId) {
         rememberDatePickerState(
@@ -280,6 +297,19 @@ fun AddReceiptScreen(
         )
     }
 
+    if (showPhoto && receiptBitmap != null) {
+        ReceiptPhotoViewer(
+            image = receiptBitmap,
+            onDismiss = { showPhoto = false },
+            onRescan = onScan?.let { scan ->
+                {
+                    showPhoto = false
+                    if (hasChanges) showScanReplaceDialog = true else scan()
+                }
+            },
+        )
+    }
+
     if (showScanReplaceDialog && onScan != null) {
         AlertDialog(
             onDismissRequest = { showScanReplaceDialog = false },
@@ -344,7 +374,23 @@ fun AddReceiptScreen(
                     }
                 },
                 actions = {
-                    if (onScan != null) {
+                    if (receiptBitmap != null) {
+                        // A thumbnail of the receipt's top: the same image the crops use,
+                        // drawn small, so it costs no extra memory.
+                        IconButton(onClick = { showPhoto = true }) {
+                            Image(
+                                bitmap = receiptBitmap,
+                                contentDescription = stringResource(R.string.scan_photo_show),
+                                contentScale = ContentScale.Crop,
+                                alignment = Alignment.TopCenter,
+                                filterQuality = FilterQuality.High,
+                                modifier = Modifier
+                                    .size(width = 30.dp, height = 36.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                            )
+                        }
+                    } else if (onScan != null) {
                         IconButton(onClick = { if (hasChanges) showScanReplaceDialog = true else onScan() }) {
                             Icon(
                                 imageVector = Icons.Filled.DocumentScanner,
@@ -489,8 +535,16 @@ fun AddReceiptScreen(
                 )
             }
             itemsIndexed(items) { index, item ->
+                // Rows read from the photo come first, in the draft's order.
+                val lineCrops = remember(scanImage, draft, index) {
+                    if (scanImage == null || index >= scannedRowCount) emptyList()
+                    else draft?.itemRows?.getOrNull(index)?.let(scanImage::crops).orEmpty()
+                }
                 ItemRow(
                     item = item,
+                    receiptLines = if (receiptBitmap != null && lineCrops.isNotEmpty()) {
+                        { ReceiptLines(receiptBitmap, lineCrops) }
+                    } else null,
                     categories = categories,
                     availableProducts = availableProducts,
                     onNameChange = { name ->
@@ -677,6 +731,8 @@ fun ItemRow(
     onCategoryChange: (Int) -> Unit,
     /** Long press on the card, or tap on the alias: add or change the product's alias. */
     onEditAlias: () -> Unit = {},
+    /** The receipt lines this row was read from, shown at the top of the card. */
+    receiptLines: (@Composable () -> Unit)? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
@@ -731,6 +787,7 @@ fun ItemRow(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            receiptLines?.invoke()
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

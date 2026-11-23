@@ -67,6 +67,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepesantos.scontrino.R
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
 import com.pepesantos.scontrino.ui.components.ReceiptCamera
 import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.OcrPageSegMode
@@ -86,7 +87,7 @@ private const val LOW_CONFIDENCE = 60f
 fun OcrDebugScreen(
     onNavigateBack: () -> Unit,
     /** Opens the new receipt screen prefilled with what was read. */
-    onUseReceipt: (ParsedReceipt) -> Unit,
+    onUseReceipt: (ParsedReceipt, ScannedReceiptImage?) -> Unit,
     viewModel: OcrDebugViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -267,7 +268,7 @@ fun OcrDebugScreen(
                     }
                 }
                 state.parsed?.let { parsed ->
-                    item { ParsedReceiptSection(parsed, onUse = { onUseReceipt(parsed) }) }
+                    item { ParsedReceiptSection(parsed, onUse = { onUseReceipt(parsed, state.scanImage) }) }
                 }
                 item {
                     Text(stringResource(R.string.ocr_rows), style = MaterialTheme.typography.titleMedium)

@@ -63,10 +63,18 @@ data class ParsedItem(
     val nameConfidence: Float = 0f,
     /** Original price if it was auto-corrected so that the receipt adds up. */
     val correctedFromCents: Long? = null,
-    /** Index of the source row, to point back at the photo. */
+    /** Index of the row with the price, to point back at the photo. */
     val rowIndex: Int,
+    /**
+     * Other rows read into this item: a name printed above its price, a quantity,
+     * weight or discount line.
+     */
+    val extraRows: List<Int> = emptyList(),
 ) {
     val netCents: Long get() = priceCents - discountCents
+
+    /** Every row this item was read from, top to bottom. */
+    val rows: List<Int> get() = (extraRows + rowIndex).distinct().sorted()
 }
 
 data class ReceiptDate(

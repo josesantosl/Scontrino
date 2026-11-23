@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.model.ReceiptWithStoreName
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
 import com.pepesantos.scontrino.ocr.draft.ReceiptDraft
 import com.pepesantos.scontrino.ui.components.Money
 import com.pepesantos.scontrino.ui.viewmodel.ReceiptViewModel
@@ -38,6 +39,12 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     var showScan by remember { mutableStateOf(false) }
     // A receipt read from a photo, being reviewed in the new receipt screen.
     var scanDraft by remember { mutableStateOf<ReceiptDraft?>(null) }
+    // The photo it was read from, only while reviewing (never saved).
+    var scanImage by remember { mutableStateOf<ScannedReceiptImage?>(null) }
+    fun closeScanReview() {
+        scanDraft = null
+        scanImage = null
+    }
     // The OCR lab screen (every knob and intermediate step) is only for debug builds.
     val context = LocalContext.current
     val isDebuggable = remember {
@@ -70,10 +77,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                     showScan = false
                     showAddReceipt = true
                 },
-                onScanned = { parsed ->
+                onScanned = { parsed, image ->
                     // Short database read (the store's past weights), then the review screen.
                     scope.launch {
                         scanDraft = viewModel.createDraft(parsed)
+                        scanImage = image
                         showScan = false
                         showAddReceipt = false
                     }
@@ -87,10 +95,11 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
         showOcrDebug -> {
             OcrDebugScreen(
                 onNavigateBack = { showOcrDebug = false },
-                onUseReceipt = { parsed ->
+                onUseReceipt = { parsed, image ->
                     // Short database read (the store's past weights), then the review screen.
                     scope.launch {
                         scanDraft = viewModel.createDraft(parsed)
+                        scanImage = image
                         showOcrDebug = false
                     }
                 },
@@ -99,20 +108,21 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
         scanDraft != null -> {
             val draft = scanDraft!!
             AddReceiptScreen(
-                onNavigateBack = { scanDraft = null },
+                onNavigateBack = ::closeScanReview,
                 onSave = { storeName, date, note, items, tax ->
                     viewModel.saveReceipt(storeName, date, note, items, tax, storeVatNumber = draft.storeVatNumber)
-                    scanDraft = null
+                    closeScanReview()
                 },
                 categories = categories,
                 availableStores = stores,
                 availableProducts = products,
                 draft = draft,
+                scanImage = scanImage,
                 purchaseHistory = purchaseHistory,
                 onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
                 // Another photo replaces this reading.
                 onScan = {
-                    scanDraft = null
+                    closeScanReview()
                     showScan = true
                 },
             )

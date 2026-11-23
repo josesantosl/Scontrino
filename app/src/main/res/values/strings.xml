@@ -166,6 +166,10 @@
     <string name="ocr_parsed_title">Interpreted receipt</string>
     <string name="ocr_use_receipt">Use this receipt</string>
     <string name="scan_review_notice">Read from a photo: check the store, date and every item before saving.</string>
+    <string name="scan_photo_title">Receipt photo</string>
+    <string name="scan_photo_show">Show receipt photo</string>
+    <string name="scan_photo_close">Close</string>
+    <string name="scan_photo_rescan">Scan again</string>
     <string name="scan_totals">Receipt total %1$s · items total %2$s</string>
     <string name="scan_totals_mismatch">The items don\'t add up to the receipt total: check the prices.</string>
     <string name="ocr_parsed_date">Date: %1$s</string>

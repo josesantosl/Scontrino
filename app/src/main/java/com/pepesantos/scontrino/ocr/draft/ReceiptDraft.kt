@@ -28,6 +28,11 @@ data class ReceiptDraft(
     val addsUp: Boolean,
     /** Tax added on top of the items (US sales tax), 0 if prices include it. */
     val tax: Double = 0.0,
+    /**
+     * For each of [items], the receipt rows it was read from (several parsed lines when
+     * grouped), to show them from the photo. Empty if unknown.
+     */
+    val itemRows: List<List<Int>> = emptyList(),
 )
 
 object ReceiptDraftBuilder {
@@ -41,14 +46,16 @@ object ReceiptDraftBuilder {
         categories: List<Category>,
     ): ReceiptDraft {
         val store = StoreMatcher.match(stores, parsed.nonItemLines, parsed.vatNumber)?.store
+        val (items, itemRows) = items(parsed, products, categories)
         return ReceiptDraft(
             storeName = store?.name.orEmpty(),
             storeVatNumber = parsed.vatNumber,
             dateMillis = parsed.date?.let { utcMidnight(it.year, it.month, it.day) },
-            items = items(parsed, products, categories),
+            items = items,
             receiptTotal = parsed.totalCents?.let { it / 100.0 },
             addsUp = parsed.isConsistent,
             tax = (parsed.taxCents ?: 0L) / 100.0,
+            itemRows = itemRows,
         )
     }
 
@@ -56,9 +63,13 @@ object ReceiptDraftBuilder {
      * One entry per product, with the price after discounts. Identical lines (the
      * same product bought twice) become one entry with quantity 2. A name that is the
      * user's product, or one or two misread letters away from it, takes that product's
-     * name and category.
+     * name and category. Each entry comes with the rows it was read from.
      */
-    private fun items(parsed: ParsedReceipt, products: List<Product>, categories: List<Category>): List<ItemEntry> {
+    private fun items(
+        parsed: ParsedReceipt,
+        products: List<Product>,
+        categories: List<Category>,
+    ): Pair<List<ItemEntry>, List<List<Int>>> {
         val matcher = ProductNameMatcher.Index(products)
         val categoryIdByLabel = categories.associate { it.label to it.id }
 
@@ -67,6 +78,7 @@ object ReceiptDraftBuilder {
         val existingByName = mutableMapOf<String, Product>()
         // Items sold by weight only group when they weigh the same.
         val grouped = linkedMapOf<Triple<String, Long, Double?>, Int>()
+        val rows = mutableMapOf<Triple<String, Long, Double?>, List<Int>>()
         for (item in parsed.items) {
             val existing = matcher.match(item.name)
             val name = existing?.name ?: item.name
@@ -78,8 +90,9 @@ object ReceiptDraftBuilder {
             val units = if (perUnit) item.quantity else 1
             val key = Triple(name, unitCents, item.weightGrams)
             grouped[key] = (grouped[key] ?: 0) + units
+            rows[key] = rows[key].orEmpty() + item.rows
         }
-        return grouped.map { (key, quantity) ->
+        val entries = grouped.map { (key, quantity) ->
             val (name, netCents, weightGrams) = key
             val existing = existingByName[name]
             ItemEntry(
@@ -92,6 +105,7 @@ object ReceiptDraftBuilder {
                     ?: OTHER_CATEGORY_ID,
             )
         }
+        return entries to grouped.keys.map { rows[it].orEmpty().distinct().sorted() }
     }
 
     /**

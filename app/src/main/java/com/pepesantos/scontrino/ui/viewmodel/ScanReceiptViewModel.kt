@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.pepesantos.scontrino.data.settings.SettingsRepository
 import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.ReceiptScanner
+import com.pepesantos.scontrino.ocr.ScannedReceiptImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +31,8 @@ sealed interface ScanState {
     /** Reading the photo; [preview] is the cleaned-up receipt once ready. */
     data class Processing(val preview: Bitmap? = null) : ScanState
 
-    /** Read, with items: to be reviewed. */
-    data class Done(val parsed: ParsedReceipt) : ScanState
+    /** Read, with items: to be reviewed, with the image it was read from. */
+    data class Done(val parsed: ParsedReceipt, val image: ScannedReceiptImage) : ScanState
 
     /** Read, but no item was found on it: usually a bad photo, or the wrong languages. */
     data object NothingFound : ScanState
@@ -71,7 +74,11 @@ class ScanReceiptViewModel @JvmOverloads constructor(
                 val result = scanner.scan(uri, options) { processed ->
                     _state.value = ScanState.Processing(preview = processed.bitmap)
                 }
-                _state.value = if (result.parsed.items.isEmpty()) ScanState.NothingFound else ScanState.Done(result.parsed)
+                _state.value = if (result.parsed.items.isEmpty()) {
+                    ScanState.NothingFound
+                } else {
+                    ScanState.Done(result.parsed, withContext(Dispatchers.Default) { ScannedReceiptImage.of(result) })
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

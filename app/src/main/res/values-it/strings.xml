@@ -158,6 +158,10 @@
     <string name="ocr_parsed_title">Scontrino interpretato</string>
     <string name="ocr_use_receipt">Usa questo scontrino</string>
     <string name="scan_review_notice">Letto da una foto: controlla negozio, data e ogni articolo prima di salvare.</string>
+    <string name="scan_photo_title">Foto dello scontrino</string>
+    <string name="scan_photo_show">Mostra la foto dello scontrino</string>
+    <string name="scan_photo_close">Chiudi</string>
+    <string name="scan_photo_rescan">Scansiona di nuovo</string>
     <string name="scan_totals">Totale scontrino %1$s · somma articoli %2$s</string>
     <string name="scan_totals_mismatch">Gli articoli non corrispondono al totale dello scontrino: controlla i prezzi.</string>
     <string name="ocr_parsed_date">Data: %1$s</string>

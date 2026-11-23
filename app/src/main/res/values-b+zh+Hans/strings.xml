@@ -165,6 +165,10 @@
     <string name="ocr_parsed_title">解析结果</string>
     <string name="ocr_use_receipt">使用这张小票</string>
     <string name="scan_review_notice">从照片读取：保存前请核对商店、日期和每件商品。</string>
+    <string name="scan_photo_title">小票照片</string>
+    <string name="scan_photo_show">查看小票照片</string>
+    <string name="scan_photo_close">关闭</string>
+    <string name="scan_photo_rescan">重新扫描</string>
     <string name="scan_totals">小票总额 %1$s · 商品合计 %2$s</string>
     <string name="scan_totals_mismatch">商品合计与小票总额不符：请核对价格。</string>
     <string name="ocr_parsed_date">日期：%1$s</string>
