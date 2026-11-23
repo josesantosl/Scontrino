@@ -162,6 +162,8 @@
     <string name="scan_photo_show">Mostra la foto dello scontrino</string>
     <string name="scan_photo_close">Chiudi</string>
     <string name="scan_photo_rescan">Scansiona di nuovo</string>
+    <string name="scan_read_name">Letto: %1$s</string>
+    <string name="scan_read_price">Letto %1$s · corretto perché il totale torni</string>
     <string name="scan_totals">Totale scontrino %1$s · somma articoli %2$s</string>
     <string name="scan_totals_mismatch">Gli articoli non corrispondono al totale dello scontrino: controlla i prezzi.</string>
     <string name="ocr_parsed_date">Data: %1$s</string>

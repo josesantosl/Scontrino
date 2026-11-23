@@ -540,11 +540,19 @@ fun AddReceiptScreen(
                     if (scanImage == null || index >= scannedRowCount) emptyList()
                     else draft?.itemRows?.getOrNull(index)?.let(scanImage::crops).orEmpty()
                 }
+                // What the scan corrected, shown while the field keeps the corrected value:
+                // once the user edits it, it is theirs.
+                val scanned = draft?.items?.getOrNull(index)?.takeIf { index < scannedRowCount }
+                val correction = draft?.itemCorrections?.getOrNull(index)?.takeIf { scanned != null }
                 ItemRow(
                     item = item,
                     receiptLines = if (receiptBitmap != null && lineCrops.isNotEmpty()) {
                         { ReceiptLines(receiptBitmap, lineCrops) }
                     } else null,
+                    readName = correction?.readName?.takeIf { item.name == scanned?.name },
+                    readPrice = correction?.readPriceCents
+                        ?.takeIf { item.price == scanned?.price }
+                        ?.let { Money.format(it / 100.0, currency) },
                     categories = categories,
                     availableProducts = availableProducts,
                     onNameChange = { name ->
@@ -713,6 +721,17 @@ private fun ScanReviewBanner(draft: ReceiptDraft, currentItemsTotal: Double) {
     }
 }
 
+/** A value changed by the scan, as it was read: "Read: SOVADRINK". */
+@Composable
+private fun CorrectionNote(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.tertiary,
+        modifier = modifier,
+    )
+}
+
 /**
  * Individual row for a product entry.
  * Includes category selector, product name with autocomplete, price input, and quantity counter.
@@ -733,6 +752,10 @@ fun ItemRow(
     onEditAlias: () -> Unit = {},
     /** The receipt lines this row was read from, shown at the top of the card. */
     receiptLines: (@Composable () -> Unit)? = null,
+    /** Name as read on the receipt, when the scan replaced it with a known product's. */
+    readName: String? = null,
+    /** Price as read on the receipt, when the scan corrected it so the total adds up. */
+    readPrice: String? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
@@ -887,6 +910,13 @@ fun ItemRow(
                 }
             }
 
+            if (readName != null) {
+                CorrectionNote(
+                    stringResource(R.string.scan_read_name, readName),
+                    modifier = Modifier.padding(start = 56.dp)
+                )
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -948,6 +978,10 @@ fun ItemRow(
                         Icon(Icons.Default.Add, contentDescription = "Increase")
                     }
                 }
+            }
+
+            if (readPrice != null) {
+                CorrectionNote(stringResource(R.string.scan_read_price, readPrice))
             }
         }
     }

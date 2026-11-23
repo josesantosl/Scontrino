@@ -162,6 +162,8 @@
     <string name="scan_photo_show">Voir la photo du ticket</string>
     <string name="scan_photo_close">Fermer</string>
     <string name="scan_photo_rescan">Scanner à nouveau</string>
+    <string name="scan_read_name">Lu : %1$s</string>
+    <string name="scan_read_price">Lu %1$s · ajusté pour que le total corresponde</string>
     <string name="scan_totals">Total du ticket %1$s · somme des articles %2$s</string>
     <string name="scan_totals_mismatch">La somme des articles ne correspond pas au total du ticket : vérifiez les prix.</string>
     <string name="ocr_parsed_date">Date : %1$s</string>

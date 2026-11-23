@@ -11,6 +11,7 @@ import com.pepesantos.scontrino.ocr.parse.ParsedItem
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ocr.parse.ReceiptParser
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -41,6 +42,12 @@ class ReceiptDraftBuilderTest {
         assertEquals(utcMidnight(2026, 8, 17), draft.dateMillis)
         assertEquals(9, draft.items.size)
         assertEquals(ItemEntry(name = "FALAFEL PICCANTE", price = 1.99, categoryId = 1), draft.items[3])
+        // The price as read is kept, to show the correction while reviewing; nothing else changed.
+        assertEquals(draft.items.size, draft.itemCorrections.size)
+        val corrected = draft.itemCorrections.withIndex().filter { it.value != ItemCorrection.NONE }
+        assertEquals(listOf(3), corrected.map { it.index })
+        assertNotEquals(199L, corrected.single().value.readPriceCents)
+        assertNull(corrected.single().value.readName)
         assertEquals(16.67, draft.receiptTotal!!, 0.0)
         assertTrue(draft.addsUp)
     }
@@ -109,12 +116,18 @@ class ReceiptDraftBuilderTest {
             unparsedRows = emptyList(),
         )
 
-        val items = ReceiptDraftBuilder.build(parsed, stores, listOf(soya), categories = emptyList()).items
+        val draft = ReceiptDraftBuilder.build(parsed, stores, listOf(soya), categories = emptyList())
+        val items = draft.items
 
         // The first two lines are one product bought twice; the third is three letters off.
         assertEquals(2, items.size)
         assertEquals(ItemEntry(name = "SOYADRINK CLASSICO", price = 1.89, quantity = 2, categoryId = 4), items[0])
         assertEquals("SOVADRLNK CLASSLCO", items[1].name)
+        // The misread is shown even though the other line was read right.
+        assertEquals(
+            listOf(ItemCorrection(readName = "SOVADRINK CLASSICO"), ItemCorrection.NONE),
+            draft.itemCorrections,
+        )
     }
 
     @Test

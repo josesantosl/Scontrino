@@ -33,7 +33,21 @@ data class ReceiptDraft(
      * grouped), to show them from the photo. Empty if unknown.
      */
     val itemRows: List<List<Int>> = emptyList(),
+    /** For each of [items], what was read before being corrected. Empty if unknown. */
+    val itemCorrections: List<ItemCorrection> = emptyList(),
 )
+
+/** What the OCR read for an item, where the draft changed it. */
+data class ItemCorrection(
+    /** Name as read, if replaced by one of the user's products (one or two letters off). */
+    val readName: String? = null,
+    /** Price as printed, if changed so that the receipt adds up. */
+    val readPriceCents: Long? = null,
+) {
+    companion object {
+        val NONE = ItemCorrection()
+    }
+}
 
 object ReceiptDraftBuilder {
 
@@ -46,7 +60,7 @@ object ReceiptDraftBuilder {
         categories: List<Category>,
     ): ReceiptDraft {
         val store = StoreMatcher.match(stores, parsed.nonItemLines, parsed.vatNumber)?.store
-        val (items, itemRows) = items(parsed, products, categories)
+        val (items, itemRows, corrections) = items(parsed, products, categories)
         return ReceiptDraft(
             storeName = store?.name.orEmpty(),
             storeVatNumber = parsed.vatNumber,
@@ -56,20 +70,28 @@ object ReceiptDraftBuilder {
             addsUp = parsed.isConsistent,
             tax = (parsed.taxCents ?: 0L) / 100.0,
             itemRows = itemRows,
+            itemCorrections = corrections,
         )
     }
+
+    private data class Items(
+        val entries: List<ItemEntry>,
+        val rows: List<List<Int>>,
+        val corrections: List<ItemCorrection>,
+    )
 
     /**
      * One entry per product, with the price after discounts. Identical lines (the
      * same product bought twice) become one entry with quantity 2. A name that is the
      * user's product, or one or two misread letters away from it, takes that product's
-     * name and category. Each entry comes with the rows it was read from.
+     * name and category. Each entry comes with the rows it was read from and what was
+     * read before any correction.
      */
     private fun items(
         parsed: ParsedReceipt,
         products: List<Product>,
         categories: List<Category>,
-    ): Pair<List<ItemEntry>, List<List<Int>>> {
+    ): Items {
         val matcher = ProductNameMatcher.Index(products)
         val categoryIdByLabel = categories.associate { it.label to it.id }
 
@@ -79,6 +101,7 @@ object ReceiptDraftBuilder {
         // Items sold by weight only group when they weigh the same.
         val grouped = linkedMapOf<Triple<String, Long, Double?>, Int>()
         val rows = mutableMapOf<Triple<String, Long, Double?>, List<Int>>()
+        val corrections = mutableMapOf<Triple<String, Long, Double?>, ItemCorrection>()
         for (item in parsed.items) {
             val existing = matcher.match(item.name)
             val name = existing?.name ?: item.name
@@ -91,6 +114,13 @@ object ReceiptDraftBuilder {
             val key = Triple(name, unitCents, item.weightGrams)
             grouped[key] = (grouped[key] ?: 0) + units
             rows[key] = rows[key].orEmpty() + item.rows
+            // A misread grouped with a correct reading still shows what was misread.
+            val misreadName = item.name.takeIf { ProductNames.normalize(it) != ProductNames.normalize(name) }
+            val correction = corrections[key] ?: ItemCorrection.NONE
+            corrections[key] = correction.copy(
+                readName = correction.readName ?: misreadName,
+                readPriceCents = correction.readPriceCents ?: item.correctedFromCents,
+            )
         }
         val entries = grouped.map { (key, quantity) ->
             val (name, netCents, weightGrams) = key
@@ -105,7 +135,11 @@ object ReceiptDraftBuilder {
                     ?: OTHER_CATEGORY_ID,
             )
         }
-        return entries to grouped.keys.map { rows[it].orEmpty().distinct().sorted() }
+        return Items(
+            entries = entries,
+            rows = grouped.keys.map { rows[it].orEmpty().distinct().sorted() },
+            corrections = grouped.keys.map { corrections[it] ?: ItemCorrection.NONE },
+        )
     }
 
     /**

@@ -169,6 +169,8 @@
     <string name="scan_photo_show">查看小票照片</string>
     <string name="scan_photo_close">关闭</string>
     <string name="scan_photo_rescan">重新扫描</string>
+    <string name="scan_read_name">识别为：%1$s</string>
+    <string name="scan_read_price">识别为 %1$s · 已调整以使总额一致</string>
     <string name="scan_totals">小票总额 %1$s · 商品合计 %2$s</string>
     <string name="scan_totals_mismatch">商品合计与小票总额不符：请核对价格。</string>
     <string name="ocr_parsed_date">日期：%1$s</string>

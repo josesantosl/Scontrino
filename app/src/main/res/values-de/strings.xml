@@ -161,6 +161,8 @@
     <string name="scan_photo_show">Foto des Kassenbons anzeigen</string>
     <string name="scan_photo_close">Schließen</string>
     <string name="scan_photo_rescan">Erneut scannen</string>
+    <string name="scan_read_name">Gelesen: %1$s</string>
+    <string name="scan_read_price">Gelesen %1$s · angepasst, damit die Summe stimmt</string>
     <string name="scan_totals">Summe Kassenbon %1$s · Summe Artikel %2$s</string>
     <string name="scan_totals_mismatch">Die Artikel ergeben nicht die Summe des Kassenbons: Prüfe die Preise.</string>
     <string name="ocr_parsed_date">Datum: %1$s</string>
