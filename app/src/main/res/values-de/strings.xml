@@ -203,7 +203,7 @@
     <string name="settings_payment_app">Bezahl-App</string>
     <string name="settings_payment_app_subtitle">Verknüpfung oben in der Brieftasche, um direkt nach dem Vorzeigen der Karte zu bezahlen</string>
     <string name="settings_payment_app_none">Keine</string>
-    <string name="payment_app_section_contactless">Kontaktlos bezahlen</string>
+    <string name="payment_app_section_payment">Bezahl-Apps</string>
     <string name="payment_app_section_other">Andere Apps</string>
     <string name="payment_app_system_default">Systemstandard</string>
     <string name="wallet_open_payment_app">Zum Bezahlen öffnen</string>

@@ -204,7 +204,7 @@
     <string name="settings_payment_app">Application de paiement</string>
     <string name="settings_payment_app_subtitle">Raccourci en haut du portefeuille, pour payer juste après avoir montré votre carte</string>
     <string name="settings_payment_app_none">Aucune</string>
-    <string name="payment_app_section_contactless">Paiement sans contact</string>
+    <string name="payment_app_section_payment">Applications de paiement</string>
     <string name="payment_app_section_other">Autres applications</string>
     <string name="payment_app_system_default">Par défaut du système</string>
     <string name="wallet_open_payment_app">Ouvrir pour payer</string>

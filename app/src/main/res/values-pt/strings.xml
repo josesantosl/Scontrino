@@ -213,7 +213,7 @@
     <string name="settings_payment_app">App de pagamento</string>
     <string name="settings_payment_app_subtitle">Atalho no topo da carteira, para pagar logo depois de mostrar o cartão</string>
     <string name="settings_payment_app_none">Nenhum</string>
-    <string name="payment_app_section_contactless">Pagamento por aproximação</string>
+    <string name="payment_app_section_payment">Apps de pagamento</string>
     <string name="payment_app_section_other">Outros apps</string>
     <string name="payment_app_system_default">Padrão do sistema</string>
     <string name="wallet_open_payment_app">Abrir para pagar</string>

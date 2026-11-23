@@ -204,7 +204,7 @@
     <string name="settings_payment_app">App di pagamento</string>
     <string name="settings_payment_app_subtitle">Scorciatoia in cima al portafoglio, per pagare subito dopo aver mostrato la carta</string>
     <string name="settings_payment_app_none">Nessuna</string>
-    <string name="payment_app_section_contactless">Pagamento contactless</string>
+    <string name="payment_app_section_payment">App di pagamento</string>
     <string name="payment_app_section_other">Altre app</string>
     <string name="payment_app_system_default">Predefinita di sistema</string>
     <string name="wallet_open_payment_app">Apri per pagare</string>

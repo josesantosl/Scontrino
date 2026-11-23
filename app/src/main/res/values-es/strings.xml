@@ -204,7 +204,7 @@
     <string name="settings_payment_app">App de pago</string>
     <string name="settings_payment_app_subtitle">Acceso directo arriba en la cartera, para pagar justo después de enseñar la tarjeta</string>
     <string name="settings_payment_app_none">Ninguna</string>
-    <string name="payment_app_section_contactless">Pago sin contacto</string>
+    <string name="payment_app_section_payment">Apps de pago</string>
     <string name="payment_app_section_other">Otras apps</string>
     <string name="payment_app_system_default">Predeterminada del sistema</string>
     <string name="wallet_open_payment_app">Abrir para pagar</string>

@@ -50,8 +50,8 @@ class LaunchableApp(val packageName: String, val label: String, val icon: ImageB
 
 /**
  * Apps offered as the wallet's payment shortcut: [payment] are the ones registered for NFC
- * contactless payments (the system default first), [others] every other launcher app, for
- * QR payments, bank apps or phones without NFC.
+ * contactless payments (the system default first) plus known payment apps, [others] every
+ * other launcher app (bank apps, Bizum through the bank...).
  */
 class PaymentAppChoices(
     val payment: List<LaunchableApp>,
@@ -90,10 +90,12 @@ object PaymentApps {
         val pm = context.packageManager
         val own = context.packageName
         val services = nfcPaymentServices(pm)
-        val defaultPackage = defaultPaymentPackage(context, services)
+        val defaultPackage = defaultPaymentPackage(context, services)?.let { frontApp(pm, it) }
 
-        val paymentPackages = services.map { it.packageName }.distinct()
-            .filter { it != own && pm.getLaunchIntentForPackage(it) != null }
+        val paymentPackages = (
+            services.mapNotNull { frontApp(pm, it.packageName) } +
+                KNOWN_PAYMENT_APPS.filter { pm.getLaunchIntentForPackage(it) != null }
+            ).distinct().filter { it != own }
         @Suppress("DEPRECATION")
         val launcherPackages = pm.queryIntentActivities(
             Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0
@@ -107,6 +109,41 @@ object PaymentApps {
         val payment = build(paymentPackages).sortedByDescending { it.packageName == defaultPackage }
         return PaymentAppChoices(payment, build(launcherPackages), defaultPackage)
     }
+
+    /**
+     * Some payment services live in a package without a launcher icon: Google Wallet's tap to
+     * pay runs inside Google Play services. The user opens the app in front of it instead.
+     */
+    private val FRONT_APPS = mapOf(
+        "com.google.android.gms" to listOf("com.google.android.apps.walletnfcrel"),
+    )
+
+    /**
+     * Payment apps without an NFC payment service of their own (they pay through Google Wallet,
+     * by QR or by transfer), so the system can't tell they're payment apps. Hand-kept: add new
+     * ones here. Bizum has no app of its own (it lives inside each Spanish bank's app).
+     */
+    private val KNOWN_PAYMENT_APPS = listOf(
+        "com.revolut.revolut",          // Revolut
+        "com.paypal.android.p2pmobile", // PayPal
+        "com.satispay.customer",        // Satispay
+        "com.imaginecurve.curve.prd",   // Curve
+        "com.transferwise.android",     // Wise
+        "de.number26.android",          // N26
+        "com.bunq.android",             // bunq
+        "pt.sibs.android.mbway",        // MB WAY
+        "com.eg.android.AlipayGphone",  // Alipay
+        "com.yellowpepper.pichincha",   // Banco Pichincha (Ecuador)
+        "com.bancodeguayaquil",         // Banco Guayaquil (Ecuador)
+    )
+
+    /** The app to open for a payment service's [packageName], or null if there's none. */
+    private fun frontApp(pm: PackageManager, packageName: String): String? =
+        if (pm.getLaunchIntentForPackage(packageName) != null) {
+            packageName
+        } else {
+            FRONT_APPS[packageName]?.firstOrNull { pm.getLaunchIntentForPackage(it) != null }
+        }
 
     private fun launchable(pm: PackageManager, packageName: String): LaunchableApp {
         val info = pm.getApplicationInfo(packageName, 0)
@@ -201,7 +238,7 @@ fun PaymentAppDialog(
                         )
                     }
                     if (loaded.payment.isNotEmpty()) {
-                        item { SectionHeader(stringResource(R.string.payment_app_section_contactless)) }
+                        item { SectionHeader(stringResource(R.string.payment_app_section_payment)) }
                         items(loaded.payment, key = { "p:" + it.packageName }) { app ->
                             AppRow(
                                 label = app.label,

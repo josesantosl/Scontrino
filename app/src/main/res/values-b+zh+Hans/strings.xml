@@ -211,7 +211,7 @@
     <string name="settings_payment_app">支付应用</string>
     <string name="settings_payment_app_subtitle">卡包顶部的快捷方式，出示会员卡后即可付款</string>
     <string name="settings_payment_app_none">无</string>
-    <string name="payment_app_section_contactless">非接触式支付</string>
+    <string name="payment_app_section_payment">支付应用</string>
     <string name="payment_app_section_other">其他应用</string>
     <string name="payment_app_system_default">系统默认</string>
     <string name="wallet_open_payment_app">打开付款</string>
