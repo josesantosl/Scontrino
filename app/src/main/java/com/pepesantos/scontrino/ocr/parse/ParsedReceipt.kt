@@ -43,6 +43,11 @@ data class ParsedItem(
      * exactly. 1 when the receipt prints none.
      */
     val quantity: Int = 1,
+    /**
+     * Weight in grams of an item sold by weight, from a line such as
+     * "1,378 kg  3,15 €/kg  4,34" (Spain); null when the receipt prints none.
+     */
+    val weightGrams: Double? = null,
     /** Sum of the discount lines that follow the item, as a positive amount. */
     val discountCents: Long = 0,
     /** VAT as printed: a rate ("22%") or a letter code ("C"). */

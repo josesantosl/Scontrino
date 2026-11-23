@@ -65,7 +65,8 @@ object ReceiptDraftBuilder {
         // Keyed by the product's name when matched, so two readings of the same
         // product (one misread) still group together.
         val existingByName = mutableMapOf<String, Product>()
-        val grouped = linkedMapOf<Pair<String, Long>, Int>()
+        // Items sold by weight only group when they weigh the same.
+        val grouped = linkedMapOf<Triple<String, Long, Double?>, Int>()
         for (item in parsed.items) {
             val existing = matcher.match(item.name)
             val name = existing?.name ?: item.name
@@ -75,16 +76,17 @@ object ReceiptDraftBuilder {
             val perUnit = item.quantity > 1 && item.netCents % item.quantity == 0L
             val unitCents = if (perUnit) item.netCents / item.quantity else item.netCents
             val units = if (perUnit) item.quantity else 1
-            val key = name to unitCents
+            val key = Triple(name, unitCents, item.weightGrams)
             grouped[key] = (grouped[key] ?: 0) + units
         }
         return grouped.map { (key, quantity) ->
-            val (name, netCents) = key
+            val (name, netCents, weightGrams) = key
             val existing = existingByName[name]
             ItemEntry(
                 name = name,
                 price = netCents / 100.0,
                 quantity = quantity,
+                weight = weightGrams,
                 categoryId = existing?.categoryId
                     ?: CategoryMatcher.detectCategoryLabel(name)?.let { categoryIdByLabel[it] }
                     ?: OTHER_CATEGORY_ID,
@@ -94,7 +96,7 @@ object ReceiptDraftBuilder {
 
     /**
      * Fills the weight of the items that were bought before in the draft's store with the
-     * same name and price (receipts don't print weights). [history] is that store's.
+     * same name and price (most receipts don't print weights). [history] is that store's.
      */
     fun withKnownWeights(draft: ReceiptDraft, history: PurchaseHistory): ReceiptDraft =
         draft.copy(

@@ -43,6 +43,90 @@ class ReceiptParserTest {
     }
 
     @Test
+    fun `units column - quantity, unit price left out of the name, weights`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("Descripción", "P. Unit", "Imp.(€)"),
+                row("1 PAN DE MOLDE", "1,45"),
+                row("2 LECHE ENTERA", "0,89", "1,78"),
+                row("1 PLATANO"),
+                row("1,378 kg", "3,15 €/kg", "4,34"),
+                row("1 TOMATE PERA", "1,20"),
+                row("0,512 kg", "2,35 €/kg", "1,20"),
+                row("TOTAL (€)", "8,77"),
+            )
+        )
+        assertEquals(
+            listOf("PAN DE MOLDE", "LECHE ENTERA", "PLATANO", "TOMATE PERA"),
+            parsed.items.map { it.name }
+        )
+        assertEquals(listOf(1, 2, 1, 1), parsed.items.map { it.quantity })
+        assertEquals(listOf(145L, 178L, 434L, 120L), parsed.items.map { it.priceCents })
+        // Under a name without price, or under an item with that price.
+        assertEquals(listOf(null, null, 1378.0, 512.0), parsed.items.map { it.weightGrams })
+        assertTrue(parsed.unparsedRows.isEmpty())
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `a few rows starting with a number are not a units column`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("DESCRIZIONE", "PREZZO"),
+                row("7 CEREALI", "2,10"),
+                row("PANE", "1,20"),
+                row("LATTE", "0,99"),
+                row("YOGURT", "0,79"),
+                row("TOTALE", "5,08"),
+            )
+        )
+        assertEquals(listOf("7 CEREALI", "PANE", "LATTE", "YOGURT"), parsed.items.map { it.name })
+    }
+
+    @Test
+    fun `VAT table base plus tax fixes a large total misread on both lines`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("PAN", "1,45"),
+                row("TOMATE", "2,95"), // printed 2,35
+                row("TOTAL (€)", "3,20"), // printed 3,80
+                row("TARJETA BANCARIA", "3,20"),
+                row("IVA", "BASE IMPONIBLE (€)", "CUOTA (€)"),
+                row("4%", "3,65", "0,15"),
+                row("TOTAL", "3,65", "0,15"),
+            )
+        )
+        // 3,65 + 0,15 is one character from the 3,20 read twice: the real total, and
+        // with it the misread price can be corrected.
+        assertEquals(380L, parsed.totalCents)
+        assertEquals(295L, parsed.items[1].correctedFromCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `VAT table far from the printed total does not replace it`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("PAN", "1,45"),
+                row("TOMATE", "2,35"),
+                row("TOTAL (€)", "3,80"),
+                row("IVA", "BASE IMPONIBLE (€)", "CUOTA (€)"),
+                row("TOTAL", "5,65", "0,15"), // misread base
+            )
+        )
+        assertEquals(380L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
+    fun `Spanish CIF alone on a line, with a valid control character`() {
+        assertEquals("A46103834", ReceiptParser.parse(listOf(row("A-46103834"))).vatNumber)
+        assertNull(ReceiptParser.parse(listOf(row("A-46103835"))).vatNumber)
+        assertEquals("A46103834", ReceiptParser.parse(listOf(row("CIF: A-46103834"))).vatNumber)
+        assertTrue(SpanishCif.isValid("B12345674"))
+    }
+
+    @Test
     fun `US sales tax is added on top of the items, past a subtotal equal to them`() {
         val parsed = ReceiptParser.parse(
             listOf(

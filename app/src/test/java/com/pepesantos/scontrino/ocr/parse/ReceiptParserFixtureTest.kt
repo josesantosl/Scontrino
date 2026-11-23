@@ -185,6 +185,59 @@ class ReceiptParserFixtureTest {
     }
 
     @Test
+    fun `mercadona 2022-09-24 - units column, weight lines, unlabelled CIF`() {
+        val receipt = parse("mercadona-alcorcon-2022-09-24")
+
+        assertEquals(
+            listOf(
+                "CANÓNIGOS" to "1,19",
+                "ICEBERG 250 GR" to "0,73", // printed 0,79
+                "ENS.IV ESTACIONES" to "0,69",
+                "ZANAHORIA 500 G" to "0,39", // printed 0,59
+                "PROTEÍNAS FRESA" to "1,50",
+                "CHAMPIÑON BANDEJA P" to "1,25",
+                "+PROT NATILLA VAINI" to "1,60",
+                "PATATA GUARN. 1 KG" to "2,15",
+                "PROTEÍNA ARANDANOS" to "1,50",
+                "PEPINO HOLANDES" to "0,91",
+                "CALABAZA TROZO" to "1,68",
+                "AGUACATE BANDEJA" to "2,39",
+                "UVA BLANCA S/SEM" to "2,78",
+                "12 HUEVOS CAMPEROS" to "2,65",
+                "MANTEQUILLA PAST.SIN" to "1,95",
+                "BARRITA PERICO MIEL" to "1,60",
+                "PATAS POLLO" to "1,98",
+                "SOLOMILLO CERTIFICAD" to "4,76",
+                "POLLO CERTIFICADO E" to "6,93",
+                "PLATANO" to "4,34",
+                "CHIRIMOYA" to "3,20",
+                "CALABACIN VERDE" to "2,30",
+            ),
+            receipt.items.map { it.name to Amounts.format(it.priceCents) }
+        )
+        // The units column is the quantity, not part of the name ("1 12 HUEVOS").
+        assertTrue(receipt.items.all { it.quantity == 1 })
+        // "1,378 kg  3,15 €/kg  4,34" under the name.
+        assertEquals(
+            listOf(1378.0, 1420.0, 1444.0),
+            receipt.items.takeLast(3).map { it.weightGrams }
+        )
+        assertTrue(receipt.items.dropLast(3).all { it.weightGrams == null })
+        assertTrue(receipt.unparsedRows.isEmpty())
+
+        // The large total and card lines both read 48,13; the VAT table's TOTAL row
+        // (45,72 + 3,01) gives the printed 48,73. Two prices are still misread, so it
+        // can't add up, and no single price is "corrected" into a wrong value.
+        assertEquals(4873L, receipt.totalCents)
+        assertTrue(!receipt.isConsistent)
+        assertTrue(receipt.items.all { it.correctedFromCents == null })
+        assertNull(receipt.taxCents)
+        assertEquals(ReceiptDate(2022, 9, 24, 11, 41), receipt.date)
+        // "A- 46103834", alone under the store name.
+        assertEquals("A46103834", receipt.vatNumber)
+    }
+
+    @Test
     fun `carrefour 2026-11-09 retake - misread quantity line with a speck and a doubled sign`() {
         // Printed "2 X 0,79", read "2. xX 0,79".
         val receipt = parse("carrefour-torino-2026-11-09-retake")

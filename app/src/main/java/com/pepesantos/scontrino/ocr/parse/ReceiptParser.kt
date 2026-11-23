@@ -22,13 +22,18 @@ import kotlin.math.abs
  *   a quantity line that also prints the line total ("2 UN X 4,99  9,98", Brazil)
  *   is the price of the name above it, and printed inside the item line
  *   ("LEITE 2 UN X 4,99  9,98") it is taken out of the name;
+ * - a column of units left of the names ("1 CANÓNIGOS  1,19", Spain) is recognised
+ *   when most item rows start with a small number, and that number is the quantity;
+ * - a weight line "1,378 kg  3,15 €/kg  4,34" prices the name printed above it
+ *   (or gives its weight to the item above with that price);
  * - a negative amount, or a "Sconto" line, is a discount on the previous item;
- * - the total is cross-checked with the payment lines, and if the items do not add
- *   up, a single misread price (one digit off) is corrected;
+ * - the total is cross-checked with the payment lines and, where a VAT table with the
+ *   taxable base is printed (Spain), with its TOTAL row (base + tax); if the items do
+ *   not add up, a single misread price (one digit off) is corrected;
  * - where prices exclude taxes (US), a tax line whose amount, added to the items,
  *   makes the total is the tax added on top.
  *
- * Store-specific formats (weights, other quantity wordings) will be added with more receipts.
+ * Store-specific formats (other quantity wordings) will be added with more receipts.
  */
 object ReceiptParser {
 
@@ -57,6 +62,9 @@ object ReceiptParser {
         "TROCO", "TRIBUTOS", "DESCONTO", "POUPAN", "ITENS",
     )
 
+    /** Header of a VAT table with the taxable base: "IVA  BASE IMPONIBLE (€)  CUOTA (€)". */
+    private val VAT_TABLE_HEADER = listOf("IMPONIBLE", "BASE IMP")
+
     /** Tax lines: VAT included in the prices ("DI CUI IVA") or sales tax added to them. */
     private val TAX_LINE = listOf("TAX", "IMPUESTO", "IVA")
 
@@ -82,6 +90,15 @@ object ReceiptParser {
      */
     private val INLINE_QUANTITY =
         Regex("""\s(\d{1,3})(?:[.,]0{0,3})?\s*(?:(?:$UNITS)\.?\s*[X×*]?|[X×*])\s*(\S+)$""")
+    /** A weight in kilograms at the start of a line: "1,378 kg", "0.456KG". */
+    private val WEIGHT = Regex("""^(\d{1,3})[.,](\d{3})\s*KG\b""")
+
+    /** The units column printed before the name: "1 CANÓNIGOS", "2 LECHE ENTERA". */
+    private val LEADING_COUNT = Regex("""^\d{1,2}$""")
+
+    /** Words after a number that make it a quantity line, not a units column. */
+    private val QUANTITY_SIGN = Regex("""^(?:[X×*]{1,2}|(?:$UNITS)\.?)$""")
+
     /** "Cad 0,99 Pz. 2" (cadauno, pezzi), printed under the item it belongs to. */
     private val QUANTITY_EACH = Regex("""^CAD\.?\s+(\S+)\s+PZ\.?\s*(\d{1,3})(?!\d)""")
     /**
@@ -91,7 +108,7 @@ object ReceiptParser {
      */
     private val TAX_IDS = listOf(
         Regex("""\bRUC\s*:\s*(\d{13})\b"""), // Ecuador, RUC
-        Regex("""\b(?:CIF|NIF)\s*:?\s*([A-Z]\d{7}[A-Z0-9])\b"""), // Spain
+        Regex("""\b(?:CIF|NIF)\s*:?\s*([A-Z][-\s]?\d{7}[A-Z0-9])\b"""), // Spain
         // Brazil, CNPJ "12.345.678/0001-90" (the customer's is a CPF).
         Regex("""\bCNPJ\s*[:.]?\s*(\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2})"""),
     )
@@ -112,6 +129,7 @@ object ReceiptParser {
         val columns = Columns.of(rows.getOrNull(columnHeader))
         val start = if (columnHeader >= 0) columnHeader + 1 else 0
         val end = (start until rows.size).firstOrNull { "TOTAL" in upper[it] } ?: rows.size
+        val countColumn = hasCountColumn(rows, start, end)
 
         val vatLegend = upper.mapNotNull { line ->
             VAT_LEGEND.find(line.trim())?.destructured?.let { (letter, rate) ->
@@ -148,7 +166,25 @@ object ReceiptParser {
         }
 
         for (index in start until end) {
-            val row = columns.trim(rows[index]) ?: continue
+            // The units column is taken out first: it lies left of the description.
+            val counted = if (countColumn) leadingCount(rows[index]) else null
+            val row = columns.trim(counted?.second ?: rows[index]) ?: continue
+            if (WEIGHT.containsMatchIn(row.text.uppercase(Locale.ROOT).trim())) {
+                val weight = readWeight(row, index)
+                val previous = items.lastOrNull()
+                val name = pendingName
+                when {
+                    weight == null -> unparsed += row.text
+                    name != null -> {
+                        pendingName = null
+                        addItem(weight.toItem(name))
+                    }
+                    previous != null && previous.weightGrams == null && previous.priceCents == weight.lineCents ->
+                        items[items.lastIndex] = previous.copy(weightGrams = weight.grams)
+                    else -> unparsed += row.text
+                }
+                continue
+            }
             readQuantityEach(row, previousItem = items.lastIndex)?.let { quantity ->
                 val previous = items.getOrNull(quantity.previousItem)
                 if (previous != null && quantity.nearlyFits(previous)) {
@@ -170,7 +206,7 @@ object ReceiptParser {
                 }
                 continue
             }
-            val line = readLine(row, index, vatLegend, columns)
+            val line = readLine(row, index, vatLegend, columns, count = counted?.first)
             when {
                 line == null -> {
                     pendingName?.let { unparsed += it.text }
@@ -206,10 +242,11 @@ object ReceiptParser {
         pendingQuantity?.let(::settle)
 
         val itemsTotal = items.sumOf { it.netCents }
-        val totals = totalCandidates(rows, upper, from = end)
-        val paid = totalCandidates(rows, upper, from = end, includeSubtotals = false)
+        val vatTable = vatTableTotal(rows, upper, from = end)
+        val totals = totalCandidates(rows, upper, from = end, skip = vatTable?.first)
+        val paid = totalCandidates(rows, upper, from = end, includeSubtotals = false, skip = vatTable?.first)
         val tax = addedTax(itemsTotal, paid, taxAmounts(rows, upper, from = end))
-        val total = if (tax != null) itemsTotal + tax else chooseTotal(totals, itemsTotal)
+        val total = if (tax != null) itemsTotal + tax else chooseTotal(totals, itemsTotal, vatTable?.second)
         val checkedItems = if (total != null && tax == null) correctSingleMisread(items, total) else items
 
         return ParsedReceipt(
@@ -222,6 +259,7 @@ object ReceiptParser {
                         regex.find(line)?.groupValues?.get(1)?.filter { it.isLetterOrDigit() }
                     }
                     ?: portugueseNif(line)
+                    ?: SpanishCif.findAlone(line)
             },
             headerLines = rows.take(if (columnHeader >= 0) columnHeader else start)
                 .map { it.text }
@@ -258,8 +296,17 @@ object ReceiptParser {
         )
     }
 
-    /** Reads a row that contains an amount, or returns null if it has none. */
-    private fun readLine(row: ReceiptRow, index: Int, vatLegend: Map<String, Double>, columns: Columns): Line? {
+    /**
+     * Reads a row that contains an amount, or returns null if it has none. [count] is
+     * the units column, already taken out of the row.
+     */
+    private fun readLine(
+        row: ReceiptRow,
+        index: Int,
+        vatLegend: Map<String, Double>,
+        columns: Columns,
+        count: Int? = null,
+    ): Line? {
         val words = row.words
         val amounts = words.indices.filter { Amounts.parseCents(words[it].text) != null }
         if (amounts.isEmpty()) return null
@@ -277,9 +324,11 @@ object ReceiptParser {
 
         // The name is the first column, unless the price shares it (short rows).
         val firstSegment = row.segmentWords.first()
-        val inline = inlineQuantity(words.subList(0, priceIndex), cents)
+        val inline = if (count == null) inlineQuantity(words.subList(0, priceIndex), cents) else null
         val nameWords = (if (priceWord in firstSegment) words.subList(0, priceIndex) else firstSegment)
             .filterNot { word -> inline?.second?.any { it === word } == true }
+            // With a units column, the unit price sits between the name and the price.
+            .filterNot { word -> count != null && Amounts.parseCents(word.text) != null }
         val name = cleanName(nameWords)
 
         val upperName = name.text.uppercase(Locale.ROOT)
@@ -293,8 +342,62 @@ object ReceiptParser {
             vatRate = vatRate,
             isDiscount = cents < 0 || DISCOUNT.any { it in upperName },
             rowIndex = index,
-            quantity = inline?.first ?: 1,
+            quantity = count ?: inline?.first ?: 1,
         )
+    }
+
+    /**
+     * Whether the item rows start with a units column ("1 CANÓNIGOS  1,19"): most
+     * rows with a name between [start] and [end] begin with a small number.
+     */
+    private fun hasCountColumn(rows: List<ReceiptRow>, start: Int, end: Int): Boolean {
+        val named = (start until end).map { rows[it] }
+            .filter { row -> row.words.any { word -> word.text.count { it.isLetter() } >= 2 } }
+        val counted = named.count { leadingCount(it) != null }
+        return counted >= 3 && counted * 5 >= named.size * 3
+    }
+
+    /**
+     * The units printed before the name ("1 CANÓNIGOS", "1 12 HUEVOS") and the row
+     * without them; not a quantity line ("2 x 0,79", "2 UN") nor a bare amount.
+     */
+    private fun leadingCount(row: ReceiptRow): Pair<Int, ReceiptRow>? {
+        val words = row.words
+        // Specks before the number (":", "|") are skipped.
+        val first = words.indexOfFirst { word -> word.text.any { it.isLetterOrDigit() } }
+        if (first < 0) return null
+        val countWord = words[first]
+        val count = LEADING_COUNT.matchEntire(countWord.text)?.value?.toInt()?.takeIf { it >= 1 } ?: return null
+        val next = words.getOrNull(first + 1) ?: return null
+        if (QUANTITY_SIGN.matches(next.text.uppercase(Locale.ROOT)) || Amounts.parseCents(next.text) != null) return null
+        val segments = row.segmentWords
+            .map { segment -> segment.filterNot { it === countWord } }
+            .filter { it.isNotEmpty() }
+        return count to ReceiptRow(segments.flatten(), segments)
+    }
+
+    /** "1,378 kg  3,15 €/kg  4,34": [grams] sold for [lineCents], the last amount. */
+    private class Weight(val grams: Double, val lineCents: Long, val confidence: Float, val rowIndex: Int) {
+        fun toItem(name: Name) = ParsedItem(
+            name = name.text,
+            code = name.code,
+            priceCents = lineCents,
+            weightGrams = grams,
+            priceConfidence = confidence,
+            nameConfidence = name.confidence,
+            rowIndex = rowIndex,
+        )
+    }
+
+    /** Reads a weight line, or null if it has no positive line total. */
+    private fun readWeight(row: ReceiptRow, index: Int): Weight? {
+        val match = WEIGHT.find(row.text.uppercase(Locale.ROOT).trim()) ?: return null
+        val (kilos, thousandths) = match.destructured
+        val grams = kilos.toInt() * 1000.0 + thousandths.toInt()
+        if (grams <= 0.0) return null
+        val lineWord = row.words.lastOrNull { Amounts.parseCents(it.text) != null } ?: return null
+        val lineCents = Amounts.parseCents(lineWord.text)?.takeIf { it > 0 } ?: return null
+        return Weight(grams, lineCents, lineWord.confidence, index)
     }
 
     /**
@@ -493,8 +596,10 @@ object ReceiptParser {
         upper: List<String>,
         from: Int,
         includeSubtotals: Boolean = true,
+        /** The VAT table's TOTAL row, whose last amount is the tax, not the total. */
+        skip: Int? = null,
     ): List<Long> =
-        (from until rows.size).mapNotNull { index ->
+        (from until rows.size).filter { it != skip }.mapNotNull { index ->
             val line = upper[index]
             val isTotal = "TOTAL" in line && (includeSubtotals || "SUBTOTAL" !in line)
             val isPayment = PAYMENT.any { it in line }
@@ -522,16 +627,37 @@ object ReceiptParser {
     }
 
     /**
+     * The TOTAL row of a VAT table with the taxable base ("TOTAL  45,72  3,01", Spain)
+     * after row [from]: its index and base + tax, the total computed from small print.
+     */
+    private fun vatTableTotal(rows: List<ReceiptRow>, upper: List<String>, from: Int): Pair<Int, Long>? {
+        val header = (from until rows.size).firstOrNull { index -> VAT_TABLE_HEADER.any { it in upper[index] } }
+            ?: return null
+        val index = (header + 1 until rows.size).firstOrNull { "TOTAL" in upper[it] } ?: return null
+        val amounts = rows[index].words.mapNotNull { word -> Amounts.parseCents(word.text)?.takeIf { it > 0 } }
+        if (amounts.size < 2) return null
+        val (base, tax) = amounts.takeLast(2)
+        return if (base > tax) index to base + tax else null
+    }
+
+    /**
      * The printed total is cross-checked with the payment lines, since a large or
      * condensed total font is often misread ("1768", "19,9"). Preference: an amount
      * equal to the items' sum, then the most repeated one, then the total line.
+     * Where the payment line shares the large font (Mercadona: "48,73" read "48,13"
+     * on both), the VAT table's base + tax [vatTable] wins if it is one character
+     * away from that choice.
      */
-    private fun chooseTotal(candidates: List<Long>, itemsTotal: Long): Long? {
-        if (candidates.isEmpty()) return null
-        if (itemsTotal in candidates) return itemsTotal
-        val counts = candidates.groupingBy { it }.eachCount()
-        val best = counts.values.max()
-        return candidates.first { counts[it] == best }
+    private fun chooseTotal(candidates: List<Long>, itemsTotal: Long, vatTable: Long? = null): Long? {
+        if (itemsTotal in candidates || itemsTotal == vatTable) return itemsTotal
+        val printed = if (candidates.isEmpty()) null else {
+            val counts = candidates.groupingBy { it }.eachCount()
+            val best = counts.values.max()
+            candidates.first { counts[it] == best }
+        }
+        if (vatTable == null || printed == vatTable) return printed
+        if (printed == null) return vatTable
+        return if (editDistance(Amounts.format(printed), Amounts.format(vatTable)) == 1) vatTable else printed
     }
 
     /**
