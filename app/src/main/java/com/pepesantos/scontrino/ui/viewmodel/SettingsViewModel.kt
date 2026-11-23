@@ -40,6 +40,11 @@ class SettingsViewModel(
 
     fun setReceiptLanguages(codes: List<String>) = settingsRepository.setReceiptLanguages(codes)
 
+    /** Package of the wallet's payment app shortcut, empty = none. */
+    val paymentApp: StateFlow<String> = settingsRepository.paymentApp
+
+    fun setPaymentApp(packageName: String) = settingsRepository.setPaymentApp(packageName)
+
     private val _aliasRows = MutableStateFlow<List<ProductUsage>>(emptyList())
     /** Products bought so far, in the order of the aliases screen: see [sortForAliases]. */
     val aliasRows: StateFlow<List<ProductUsage>> = _aliasRows.asStateFlow()

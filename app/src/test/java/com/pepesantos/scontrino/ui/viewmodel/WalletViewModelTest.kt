@@ -5,7 +5,9 @@ import com.pepesantos.scontrino.data.model.LoyaltyCardWithStore
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.data.repository.LoyaltyCardRepository
 import com.pepesantos.scontrino.data.repository.StoreRepository
+import com.pepesantos.scontrino.data.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -19,6 +21,11 @@ class WalletViewModelTest {
 
     private val loyaltyCardRepository: LoyaltyCardRepository = mock()
     private val storeRepository: StoreRepository = mock()
+    private val settingsRepository: SettingsRepository = mock {
+        on { paymentApp } doReturn MutableStateFlow("")
+        on { paymentAppName } doReturn MutableStateFlow("")
+        on { paymentAppColor } doReturn MutableStateFlow(null)
+    }
     private lateinit var viewModel: WalletViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -30,7 +37,7 @@ class WalletViewModelTest {
         // Mock initial load
         whenever(loyaltyCardRepository.getAll()).thenReturn(emptyList())
         
-        viewModel = WalletViewModel(loyaltyCardRepository, storeRepository)
+        viewModel = WalletViewModel(loyaltyCardRepository, storeRepository, settingsRepository)
     }
 
     @After

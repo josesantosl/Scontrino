@@ -28,7 +28,7 @@ class ViewModelFactory(
                     currencyProvider = { settingsRepository.currency.value },
                 ) as T
             modelClass.isAssignableFrom(WalletViewModel::class.java) ->
-                WalletViewModel(loyaltyCardRepository, storeRepository) as T
+                WalletViewModel(loyaltyCardRepository, storeRepository, settingsRepository) as T
             modelClass.isAssignableFrom(StatsViewModel::class.java) ->
                 StatsViewModel(receiptRepository, itemRepository, settingsRepository) as T
             modelClass.isAssignableFrom(PriceComparisonViewModel::class.java) ->

@@ -7,6 +7,7 @@ import com.pepesantos.scontrino.data.model.LoyaltyCardWithStore
 import com.pepesantos.scontrino.data.model.Store
 import com.pepesantos.scontrino.data.repository.LoyaltyCardRepository
 import com.pepesantos.scontrino.data.repository.StoreRepository
+import com.pepesantos.scontrino.data.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,8 +17,24 @@ import kotlinx.coroutines.launch
  */
 class WalletViewModel(
     private val loyaltyCardRepository: LoyaltyCardRepository,
-    private val storeRepository: StoreRepository
+    private val storeRepository: StoreRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
+
+    /** Package of the app opened from the top of the wallet to pay, empty = none. */
+    val paymentApp: StateFlow<String> = settingsRepository.paymentApp
+
+    /** Name chosen for the payment app card, empty = the app's own label. */
+    val paymentAppName: StateFlow<String> = settingsRepository.paymentAppName
+
+    /** Colour of the payment app card, null = default. */
+    val paymentAppColor: StateFlow<Long?> = settingsRepository.paymentAppColor
+
+    fun setPaymentAppCard(name: String, color: Long?) =
+        settingsRepository.setPaymentAppCard(name.trim(), color)
+
+    /** Forgets the payment app (it was uninstalled). */
+    fun clearPaymentApp() = settingsRepository.setPaymentApp("")
 
     private val _cards = MutableStateFlow<List<LoyaltyCardWithStore>>(emptyList())
     val cards: StateFlow<List<LoyaltyCardWithStore>> = _cards

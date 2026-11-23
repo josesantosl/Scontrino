@@ -79,6 +79,36 @@ class SettingsRepository private constructor(context: Context) {
         _receiptLanguages.value = codes
     }
 
+    private val _paymentApp = MutableStateFlow(prefs.getString(KEY_PAYMENT_APP, null).orEmpty())
+    /** Package of the app opened from the top of the wallet to pay, or empty for none. */
+    val paymentApp: StateFlow<String> = _paymentApp.asStateFlow()
+
+    private val _paymentAppName = MutableStateFlow(prefs.getString(KEY_PAYMENT_APP_NAME, null).orEmpty())
+    /** Name shown on the wallet's payment app card, or empty for the app's own label. */
+    val paymentAppName: StateFlow<String> = _paymentAppName.asStateFlow()
+
+    private val _paymentAppColor = MutableStateFlow(
+        prefs.getLong(KEY_PAYMENT_APP_COLOR, NO_COLOR).takeIf { it != NO_COLOR }
+    )
+    /** Colour (ARGB) of the wallet's payment app card, or null for the default one. */
+    val paymentAppColor: StateFlow<Long?> = _paymentAppColor.asStateFlow()
+
+    /** Changes the app; its custom name and colour are for the previous app, so they're reset. */
+    fun setPaymentApp(packageName: String) {
+        if (packageName != _paymentApp.value) setPaymentAppCard(name = "", color = null)
+        prefs.edit { putString(KEY_PAYMENT_APP, packageName) }
+        _paymentApp.value = packageName
+    }
+
+    fun setPaymentAppCard(name: String, color: Long?) {
+        prefs.edit {
+            putString(KEY_PAYMENT_APP_NAME, name)
+            if (color == null) remove(KEY_PAYMENT_APP_COLOR) else putLong(KEY_PAYMENT_APP_COLOR, color)
+        }
+        _paymentAppName.value = name
+        _paymentAppColor.value = color
+    }
+
     companion object {
         const val DEFAULT_CURRENCY = "EUR"
         private const val FILE = "settings"
@@ -88,6 +118,10 @@ class SettingsRepository private constructor(context: Context) {
         private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
         private const val KEY_RECEIPT_LANGUAGES = "receipt_languages"
+        private const val KEY_PAYMENT_APP = "payment_app"
+        private const val KEY_PAYMENT_APP_NAME = "payment_app_name"
+        private const val KEY_PAYMENT_APP_COLOR = "payment_app_color"
+        private const val NO_COLOR = 0L
 
         @Volatile
         private var instance: SettingsRepository? = null

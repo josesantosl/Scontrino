@@ -258,8 +258,12 @@ fun ReceiptCard(
     }
     
     val cardColor = if (storeColor != null) Color(storeColor) else MaterialTheme.colorScheme.surfaceVariant
-    val contentColor = if (storeColor != null) Color.White else MaterialTheme.colorScheme.onSurface
-    val secondaryColor = if (storeColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor = if (storeColor != null) onCardColor(cardColor) else MaterialTheme.colorScheme.onSurface
+    val secondaryColor = if (storeColor != null) {
+        onCardColor(cardColor).copy(alpha = 0.7f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Card(
         modifier = Modifier

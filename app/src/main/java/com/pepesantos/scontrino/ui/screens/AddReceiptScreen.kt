@@ -27,6 +27,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
@@ -255,6 +256,17 @@ fun AddReceiptScreen(
 
     // Enter on the keyboard goes to the next field (store → item name → price → weight → next item).
     val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    // Leaves no field focused (nor keyboard open) behind when the scan takes over: a
+    // review screen once came back with the save button raised as if above a keyboard.
+    val startScan: (() -> Unit)? = onScan?.let { scan ->
+        {
+            focusManager.clearFocus()
+            keyboard?.hide()
+            scan()
+        }
+    }
 
     val aliasEntry = aliasRowIndex?.let { items.getOrNull(it) }?.takeIf { it.name.isNotBlank() }
     if (aliasEntry != null) {
@@ -301,7 +313,7 @@ fun AddReceiptScreen(
         ReceiptPhotoViewer(
             image = receiptBitmap,
             onDismiss = { showPhoto = false },
-            onRescan = onScan?.let { scan ->
+            onRescan = startScan?.let { scan ->
                 {
                     showPhoto = false
                     if (hasChanges) showScanReplaceDialog = true else scan()
@@ -310,7 +322,7 @@ fun AddReceiptScreen(
         )
     }
 
-    if (showScanReplaceDialog && onScan != null) {
+    if (showScanReplaceDialog && startScan != null) {
         AlertDialog(
             onDismissRequest = { showScanReplaceDialog = false },
             title = { Text(stringResource(R.string.unsaved_changes_title)) },
@@ -318,7 +330,7 @@ fun AddReceiptScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showScanReplaceDialog = false
-                    onScan()
+                    startScan()
                 }) {
                     Text(stringResource(R.string.receipt_scan))
                 }
@@ -391,7 +403,7 @@ fun AddReceiptScreen(
                             )
                         }
                     } else if (onScan != null) {
-                        IconButton(onClick = { if (hasChanges) showScanReplaceDialog = true else onScan() }) {
+                        IconButton(onClick = { if (hasChanges) showScanReplaceDialog = true else startScan?.invoke() }) {
                             Icon(
                                 imageVector = Icons.Filled.DocumentScanner,
                                 contentDescription = stringResource(R.string.receipt_scan)

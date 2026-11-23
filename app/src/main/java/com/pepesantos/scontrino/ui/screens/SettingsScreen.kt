@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material.icons.filled.Contactless
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,6 +34,8 @@ import com.pepesantos.scontrino.data.settings.AppLocale
 import com.pepesantos.scontrino.ocr.OcrLanguage
 import com.pepesantos.scontrino.ocr.ReceiptScanner
 import com.pepesantos.scontrino.ui.components.Money
+import com.pepesantos.scontrino.ui.components.PaymentAppDialog
+import com.pepesantos.scontrino.ui.components.PaymentApps
 import com.pepesantos.scontrino.ui.components.ReceiptLanguagesDialog
 import com.pepesantos.scontrino.ui.components.displayName
 import com.pepesantos.scontrino.ui.viewmodel.SettingsViewModel
@@ -71,6 +74,10 @@ fun SettingsScreen(
     }
     var showReceiptLanguagesDialog by remember { mutableStateOf(false) }
     val appContext = LocalContext.current.applicationContext
+    val paymentAppsEnabled = remember { PaymentApps.isEnabled(appContext) }
+    val paymentPackage by viewModel.paymentApp.collectAsState()
+    val paymentAppLabel = remember(paymentPackage) { PaymentApps.load(appContext, paymentPackage)?.label }
+    var showPaymentAppDialog by remember { mutableStateOf(false) }
     // After a theme change, whether to offer the launcher icon that matches it (true = light icon).
     var offerLightIcon by remember { mutableStateOf<Boolean?>(null) }
     val scope = rememberCoroutineScope()
@@ -151,6 +158,16 @@ fun SettingsScreen(
                         },
                     )
                 )
+                if (paymentAppsEnabled) {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_payment_app)) },
+                        supportingContent = {
+                            Text(paymentAppLabel ?: stringResource(R.string.settings_payment_app_subtitle))
+                        },
+                        leadingContent = { Icon(Icons.Filled.Contactless, contentDescription = null) },
+                        modifier = Modifier.clickable { showPaymentAppDialog = true }
+                    )
+                }
                 HorizontalDivider()
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_aliases)) },
@@ -212,6 +229,17 @@ fun SettingsScreen(
                 }
             },
             onDismiss = { showLanguageDialog = false },
+        )
+    }
+
+    if (showPaymentAppDialog) {
+        PaymentAppDialog(
+            current = paymentPackage,
+            onSelect = { packageName ->
+                showPaymentAppDialog = false
+                viewModel.setPaymentApp(packageName)
+            },
+            onDismiss = { showPaymentAppDialog = false },
         )
     }
 
