@@ -50,7 +50,32 @@ object ReceiptParser {
         "EFECTIVO", "TARJETA", "VISA", "MASTERCARD",
         // Portuguese: "VALOR A PAGAR", "VALOR PAGO", cash, card, Portuguese debit network.
         "PAGAR", "PAGO", "DINHEIRO", "CARTÃO", "CARTAO", "MULTIBANCO", "NUMERÁRIO", "NUMERARIO",
+        // German: "gegeben bar" (cash given), card payment, German debit network.
+        "GEGEBEN", "KARTENZAHLUNG", "GIROCARD", "EC-KARTE",
+        // French: bank card, cash, "paiement".
+        "CARTE BANCAIRE", "CARTE BLEUE", "ESPECES", "ESPÈCES", "PAIEMENT",
     )
+
+    /**
+     * Lines that close the item list (the total), by language:
+     * - Italian "TOTALE", Spanish "TOTAL (€)", Portuguese "TOTAL", "TOTAL A PAGAR",
+     *   "VALOR TOTAL", French "TOTAL", "TOTAL TTC", English "TOTAL": all contain "TOTAL";
+     * - German "Summe", "zu zahlen";
+     * - French "NET À PAYER" (often printed without "TOTAL").
+     */
+    private val TOTAL = listOf("TOTAL", "SUMME", "ZU ZAHLEN", "A PAYER", "À PAYER")
+
+    /**
+     * Subtotals: they close the item list but are not what was paid. Italian "SUBTOTALE",
+     * Spanish/Portuguese/English "SUBTOTAL", French "SOUS-TOTAL", German "Zwischensumme".
+     */
+    private val SUBTOTAL = listOf("SUBTOTAL", "SOUS-TOTAL", "SOUS TOTAL", "ZWISCHENSUMME")
+
+    /** Words of a price line that make its amount the price of one unit ("Einzelpreis"). */
+    private val UNIT_PRICE = listOf("EINZELPREIS")
+
+    /** A count before the name: "1 * IBU 400 AKUT", "2 x COLA" (Germany). */
+    private val COUNT_SIGN = Regex("""^[X×*]$""")
 
     /**
      * Lines with an amount that is not the total: VAT breakdown, taxes, change, savings,
@@ -60,13 +85,17 @@ object ReceiptParser {
     private val NOT_TOTAL = listOf(
         "IVA", "TAX", "IMPUESTO", "RESTO", "CAMBIO", "VUELTO", "CHANGE", "SCONT", "RISPARMI",
         "TROCO", "TRIBUTOS", "DESCONTO", "POUPAN", "ITENS",
+        // German: VAT, net sum ("Nettosumme"), change ("zurück", "Rückgeld").
+        "MWST", "NETTO", "ZURÜCK", "ZURUCK", "RÜCKGELD", "RUCKGELD",
+        // French: VAT, total before VAT ("TOTAL HT"), change ("rendu", "monnaie").
+        "TVA", "TOTAL HT", "RENDU", "MONNAIE",
     )
 
     /** Header of a VAT table with the taxable base: "IVA  BASE IMPONIBLE (€)  CUOTA (€)". */
     private val VAT_TABLE_HEADER = listOf("IMPONIBLE", "BASE IMP")
 
     /** Tax lines: VAT included in the prices ("DI CUI IVA") or sales tax added to them. */
-    private val TAX_LINE = listOf("TAX", "IMPUESTO", "IVA")
+    private val TAX_LINE = listOf("TAX", "IMPUESTO", "IVA", "MWST", "TVA")
 
     private val VAT_LEGEND = Regex("""^([A-F])\s*[:.]?\s*IVA\s*(\d{1,2}(?:[,.]\d{1,2})?)\s*%""")
     private val VAT_LETTER = Regex("""^[A-F]$""")
@@ -113,6 +142,13 @@ object ReceiptParser {
         Regex("""\bCNPJ\s*[:.]?\s*(\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2})"""),
     )
 
+    /**
+     * Germany, "USt-IdNr.: DE123456789" (also "USt-ID", "UStID-Nr."). The digits may
+     * come with a slashed zero read as "O". Labelled, so not checked any further.
+     */
+    private val GERMAN_VAT_ID =
+        Regex("""\bUST[-.\s]?ID[-.\s]*(?:NR|NUMMER)?\.?\s*:?\s*DE\s?([0-9O]{3}\s?[0-9O]{3}\s?[0-9O]{3})(?![0-9O])""")
+
     /** Portugal: "NIF: 500 100 144", "Contribuinte n.º 500100144", "NIPC". */
     private val PORTUGUESE_NIF = Regex("""\b(?:NIF|NIPC|CONTRIBUINTE)\b\D{0,12}?(\d{3}\s?\d{3}\s?\d{3})(?!\d)""")
 
@@ -128,7 +164,7 @@ object ReceiptParser {
         val columnHeader = upper.indexOfFirst { COLUMN_HEADER.containsMatchIn(it) }
         val columns = Columns.of(rows.getOrNull(columnHeader))
         val start = if (columnHeader >= 0) columnHeader + 1 else 0
-        val end = (start until rows.size).firstOrNull { "TOTAL" in upper[it] } ?: rows.size
+        val end = (start until rows.size).firstOrNull { index -> TOTAL.any { it in upper[index] } } ?: rows.size
         val countColumn = hasCountColumn(rows, start, end)
 
         val vatLegend = upper.mapNotNull { line ->
@@ -236,7 +272,9 @@ object ReceiptParser {
                 }
 
                 pendingName != null && line.cents > 0 -> {
-                    addItem(line.toItem(pendingName))
+                    // "03045316  Einzelpreis  EUR 9,45": the digits are the article code.
+                    val code = line.name.text.takeIf { text -> text.length >= 3 && text.all { it.isDigit() } }
+                    addItem(line.toItem(pendingName.withCode(code)))
                     pendingName = null
                 }
 
@@ -264,6 +302,7 @@ object ReceiptParser {
                         regex.find(line)?.groupValues?.get(1)?.filter { it.isLetterOrDigit() }
                     }
                     ?: portugueseNif(line)
+                    ?: germanVatId(line)
                     ?: SpanishCif.findAlone(line)
             },
             headerLines = rows.take(if (columnHeader >= 0) columnHeader else start)
@@ -287,12 +326,15 @@ object ReceiptParser {
         val rowIndex: Int,
         /** Units printed inside the line ("2 UN X 4,99"), 1 if none. */
         val quantity: Int = 1,
+        /** The amount is the price of one unit ("Einzelpreis"), not the line total. */
+        val isUnitPrice: Boolean = false,
     ) {
         fun toItem(name: Name) = ParsedItem(
             name = name.text,
             code = name.code,
-            priceCents = cents,
-            quantity = quantity,
+            // "2 * NAME" / "Einzelpreis 4,50": the line total is both units.
+            priceCents = if (isUnitPrice) cents * name.count else cents,
+            quantity = if (name.count > 1) name.count else quantity,
             vatCode = vatCode,
             vatRate = vatRate,
             priceConfidence = priceWord.confidence,
@@ -349,6 +391,7 @@ object ReceiptParser {
             isDiscount = cents < 0 || DISCOUNT.any { it in upperName },
             rowIndex = index,
             quantity = count ?: inline?.first ?: 1,
+            isUnitPrice = row.text.uppercase(Locale.ROOT).let { text -> UNIT_PRICE.any { it in text } },
         )
     }
 
@@ -550,13 +593,32 @@ object ReceiptParser {
         }
     }
 
-    /** [rowIndex]: the row of a name printed apart from its price, null if on the same row. */
-    private class Name(val text: String, val code: String?, val confidence: Float, val rowIndex: Int? = null) {
+    /**
+     * [rowIndex]: the row of a name printed apart from its price, null if on the same row.
+     * [count]: units printed before the name ("1 * IBU 400"), 1 if none.
+     */
+    private class Name(
+        val text: String,
+        val code: String?,
+        val confidence: Float,
+        val rowIndex: Int? = null,
+        val count: Int = 1,
+    ) {
         /** A product name needs some letters; "." or "00" is OCR noise. */
         val isValid: Boolean get() = text.count { it.isLetter() } >= 2
+
+        /** This name with the article code [code] printed on another row, if it has none. */
+        fun withCode(code: String?) =
+            if (this.code != null || code == null) this else Name(text, code, confidence, rowIndex, count)
     }
 
-    private fun cleanName(words: List<OcrWord>, rowIndex: Int? = null): Name {
+    private fun cleanName(allWords: List<OcrWord>, rowIndex: Int? = null): Name {
+        // "1 * IBU 400 AKUT": the count and its sign are not part of the name.
+        val count = allWords.firstOrNull()?.text?.takeIf { text -> text.length <= 3 && text.all { it.isDigit() } }
+            ?.takeIf { allWords.size > 2 && COUNT_SIGN.matches(allWords[1].text.uppercase(Locale.ROOT)) }
+            ?.toInt()
+            ?.takeIf { it >= 1 }
+        val words = if (count != null) allWords.drop(2) else allWords
         val tokens = words.map { it.text }
             .filter { token -> token.any { it.isLetterOrDigit() } }
             // Receipts print names in capitals; lone lowercase letters are specks.
@@ -577,6 +639,7 @@ object ReceiptParser {
             code = if (hasCode) codes.last() else null,
             confidence = if (nameWords.isEmpty()) 0f else nameWords.map { it.confidence }.average().toFloat(),
             rowIndex = rowIndex,
+            count = count ?: 1,
         )
     }
 
@@ -594,6 +657,13 @@ object ReceiptParser {
         val check = (11 - sum % 11).let { if (it >= 10) 0 else it }
         return nif.takeIf { nif[8] - '0' == check }
     }
+
+    /** The German VAT id of the store ("DE" and nine digits), if [line] has one. */
+    private fun germanVatId(line: String): String? =
+        GERMAN_VAT_ID.find(line)?.groupValues?.get(1)
+            ?.filterNot { it.isWhitespace() }
+            ?.replace('O', '0')
+            ?.let { "DE$it" }
 
     // region Total
 
@@ -615,7 +685,7 @@ object ReceiptParser {
     ): List<Long> =
         (from until rows.size).filter { it != skip }.mapNotNull { index ->
             val line = upper[index]
-            val isTotal = "TOTAL" in line && (includeSubtotals || "SUBTOTAL" !in line)
+            val isTotal = TOTAL.any { it in line } && (includeSubtotals || SUBTOTAL.none { it in line })
             val isPayment = PAYMENT.any { it in line }
             if (!isTotal && !isPayment || NOT_TOTAL.any { it in line }) null else lastAmount(rows[index])
         }

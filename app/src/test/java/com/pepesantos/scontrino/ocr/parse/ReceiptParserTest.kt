@@ -43,6 +43,68 @@ class ReceiptParserTest {
     }
 
     @Test
+    fun `German - count before the name, Einzelpreis is per unit, Zwischensumme is not paid`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("2 * NASENSPRAY 10ML"),
+                row("01234567", "Einzelpreis", "EUR", "4,50"),
+                row("1 * PFLASTER"),
+                row("07654321", "EUR", "2,00"),
+                row("Zwischensumme", "EUR", "11,00"),
+                row("zu zahlen", "EUR", "11,00"),
+                row("incl. MWST 19,00 %", "EUR", "1,76"),
+                row("gegeben bar", "EUR", "20,00"),
+                row("zurück", "EUR", "9,00"),
+            )
+        )
+        assertEquals(listOf("NASENSPRAY 10ML", "PFLASTER"), parsed.items.map { it.name })
+        assertEquals(listOf("01234567", "07654321"), parsed.items.map { it.code })
+        assertEquals(listOf(2, 1), parsed.items.map { it.quantity })
+        assertEquals(listOf(900L, 200L), parsed.items.map { it.priceCents })
+        assertEquals(1100L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        // VAT included in the prices: nothing added on top.
+        assertNull(parsed.taxCents)
+    }
+
+    @Test
+    fun `French - TOTAL HT and TVA are not the total, NET A PAYER closes the list`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("BAGUETTE", "1,10"),
+                row("LAIT DEMI-ECREME", "0,99"),
+                row("NET A PAYER", "2,09"),
+                row("TOTAL HT", "1,98"),
+                row("TVA 5,5%", "0,11"),
+                row("CARTE BANCAIRE", "2,09"),
+                row("RENDU", "0,00"),
+            )
+        )
+        assertEquals(listOf("BAGUETTE", "LAIT DEMI-ECREME"), parsed.items.map { it.name })
+        assertEquals(209L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+        assertNull(parsed.taxCents)
+    }
+
+    @Test
+    fun `French - SOUS-TOTAL closes the list, TOTAL TTC is the total, not TOTAL HT`() {
+        val parsed = ReceiptParser.parse(
+            listOf(
+                row("BAGUETTE", "1,10"),
+                row("FROMAGE", "3,50"),
+                row("FROMAGE", "-0,50"),
+                row("SOUS-TOTAL", "4,60"),
+                row("TOTAL HT", "3,89"),
+                row("TOTAL TTC", "4,10"),
+                row("ESPECES", "5,00"),
+            )
+        )
+        // The discount line is a negative amount on the item above.
+        assertEquals(410L, parsed.totalCents)
+        assertTrue(parsed.isConsistent)
+    }
+
+    @Test
     fun `units column - quantity, unit price left out of the name, weights`() {
         val parsed = ReceiptParser.parse(
             listOf(

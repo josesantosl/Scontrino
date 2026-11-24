@@ -238,6 +238,28 @@ class ReceiptParserFixtureTest {
     }
 
     @Test
+    fun `tal apotheke 2019-01-30 - German Summe, count before the name, code and unit price below`() {
+        val receipt = parse("tal-apotheke-trebbus-2019-01-30")
+
+        // "1 * IBU 400 ..." / "03045316  Einzelpreis  EUR 9,45".
+        val item = receipt.items.single()
+        assertEquals("IBU 400 AKUT 1A PHARMA FTA 50St", item.name)
+        assertEquals("03045316", item.code)
+        assertEquals(945L, item.priceCents)
+        assertEquals(1, item.quantity)
+        assertEquals(listOf(13, 14), item.rows)
+
+        // "Summe" closes the item list; "Nettosumme" and "incl. MWST" are not totals.
+        assertEquals(945L, receipt.totalCents)
+        assertTrue(receipt.isConsistent)
+        assertNull(receipt.taxCents)
+        assertTrue(receipt.footerLines.first().startsWith("Summe"))
+        assertEquals(ReceiptDate(2019, 1, 30, 14, 33), receipt.date)
+        // "USt-IdNr.: DEO00000000": the slashed zero read as O.
+        assertEquals("DE000000000", receipt.vatNumber)
+    }
+
+    @Test
     fun `carrefour 2026-11-09 retake - misread quantity line with a speck and a doubled sign`() {
         // Printed "2 X 0,79", read "2. xX 0,79".
         val receipt = parse("carrefour-torino-2026-11-09-retake")

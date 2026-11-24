@@ -56,7 +56,7 @@ object CategoryMatcher {
             "hygiene", "higiene", "igiene", "sapone", "jabon", "=soap", "savon", "seife", "assorbent",
             "compresa", "tampon", "rasoi", "maquinilla", "razor", "balsamo", "acondicionador",
             "colluttorio", "enjuague", "sabonete", "pasta de dente", "escova de dente", "absorvente",
-            "condicionador", "barbear", "enxaguante",
+            "condicionador", "barbear", "enxaguante","condo"
         ),
         "transport" to listOf(
             "=bus", "=train", "treno", "metro", "biglietto", "billete", "ticket", "transport",
