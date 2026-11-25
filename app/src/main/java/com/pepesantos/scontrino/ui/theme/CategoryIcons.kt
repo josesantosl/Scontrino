@@ -1,6 +1,7 @@
 package com.pepesantos.scontrino.ui.theme
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -97,7 +98,7 @@ object CategoryIcons {
             "LocalCafe" -> Icons.Default.LocalCafe
             "Inventory2" -> Icons.Default.Inventory2
 
-            else -> Icons.Default.Help
+            else -> Icons.AutoMirrored.Filled.Help
         }
     }
 }

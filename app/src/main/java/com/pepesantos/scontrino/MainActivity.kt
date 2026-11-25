@@ -10,9 +10,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -164,10 +164,10 @@ fun ScontrinoApp(factory: ViewModelFactory, onLanguageChanged: () -> Unit = {}) 
 }
 
 enum class AppDestinations(
-    @StringRes val label: Int,
+    @param:StringRes val label: Int,
     val icon: ImageVector,
 ) {
-    SCONTRINI(R.string.nav_receipts, Icons.Filled.ListAlt),
+    SCONTRINI(R.string.nav_receipts, Icons.AutoMirrored.Filled.ListAlt),
     STATS(R.string.nav_stats, Icons.Filled.BarChart),
     WALLET(R.string.nav_wallet, Icons.Filled.CreditCard),
     SETTINGS(R.string.nav_settings, Icons.Filled.Settings),

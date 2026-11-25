@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.data.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Embedded
 
@@ -13,7 +14,8 @@ import androidx.room.Embedded
             childColumns = ["storeId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("storeId")],
 )
 data class LoyaltyCard(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

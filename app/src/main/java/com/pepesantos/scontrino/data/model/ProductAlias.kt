@@ -2,6 +2,7 @@ package com.pepesantos.scontrino.data.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -10,7 +11,8 @@ import androidx.room.PrimaryKey
  * mirror it in [Product.categoryId], so every query keeps reading the product's category.
  */
 @Entity(
-    foreignKeys = [ForeignKey(entity = Category::class, parentColumns = ["id"], childColumns = ["categoryId"])]
+    foreignKeys = [ForeignKey(entity = Category::class, parentColumns = ["id"], childColumns = ["categoryId"])],
+    indices = [Index("categoryId")],
 )
 data class ProductAlias(
     @PrimaryKey val name: String,

@@ -2,9 +2,11 @@ package com.pepesantos.scontrino.data.model
 import androidx.room.PrimaryKey
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
-    foreignKeys = [ ForeignKey(entity = Category::class, parentColumns = ["id"], childColumns = ["categoryId"])]
+    foreignKeys = [ ForeignKey(entity = Category::class, parentColumns = ["id"], childColumns = ["categoryId"])],
+    indices = [Index("categoryId")],
 )
 data class Product(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

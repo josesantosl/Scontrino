@@ -21,21 +21,22 @@ class ViewModelFactory(
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return when {
+        val viewModel: ViewModel = when {
             modelClass.isAssignableFrom(ReceiptViewModel::class.java) ->
                 ReceiptViewModel(
                     receiptRepository, storeRepository, productRepository, itemRepository, categoryRepository,
                     currencyProvider = { settingsRepository.currency.value },
-                ) as T
+                )
             modelClass.isAssignableFrom(WalletViewModel::class.java) ->
-                WalletViewModel(loyaltyCardRepository, storeRepository, settingsRepository) as T
+                WalletViewModel(loyaltyCardRepository, storeRepository, settingsRepository)
             modelClass.isAssignableFrom(StatsViewModel::class.java) ->
-                StatsViewModel(receiptRepository, itemRepository, settingsRepository) as T
+                StatsViewModel(receiptRepository, itemRepository, settingsRepository)
             modelClass.isAssignableFrom(PriceComparisonViewModel::class.java) ->
-                PriceComparisonViewModel(itemRepository) as T
+                PriceComparisonViewModel(itemRepository)
             modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
-                SettingsViewModel(settingsRepository, productRepository, receiptRepository, categoryRepository) as T
+                SettingsViewModel(settingsRepository, productRepository, receiptRepository, categoryRepository)
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
+        return modelClass.cast(viewModel)!!
     }
 }

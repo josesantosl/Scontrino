@@ -3,11 +3,13 @@ import androidx.room.PrimaryKey
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Embedded
+import androidx.room.Index
 
 @Entity(
     foreignKeys = [
         ForeignKey(entity = Store::class, parentColumns = ["id"], childColumns = ["storeId"], onDelete = ForeignKey.RESTRICT)
-    ]
+    ],
+    indices = [Index("storeId")],
 )
 data class Receipt(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
