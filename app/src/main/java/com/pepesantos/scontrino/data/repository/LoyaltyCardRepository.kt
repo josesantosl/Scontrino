@@ -14,4 +14,8 @@ class LoyaltyCardRepository(private val loyaltyCardDao: LoyaltyCardDao) {
     suspend fun getAll() = loyaltyCardDao.getAllWithStore()
 
     suspend fun getById(id: Int) = loyaltyCardDao.getById(id)
+
+    suspend fun nextPosition() = loyaltyCardDao.nextPosition()
+
+    suspend fun setPositions(positions: Map<Int, Int>) = loyaltyCardDao.setPositions(positions)
 }

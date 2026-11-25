@@ -207,6 +207,15 @@
     <string name="payment_app_section_other">Andere Apps</string>
     <string name="payment_app_system_default">Systemstandard</string>
     <string name="wallet_open_payment_app">Zum Bezahlen öffnen</string>
+    <string name="wallet_edit_card_title">Karte bearbeiten</string>
+    <string name="wallet_store_has_card">%1$s hat schon eine andere Karte</string>
+    <string name="wallet_card_duplicate">Diese Karte hast du schon</string>
+    <string name="wallet_reorder">Karten anordnen</string>
+    <string name="wallet_reorder_done">Fertig</string>
+    <string name="wallet_drag_handle">Ziehen zum Verschieben</string>
+    <string name="wallet_remove_payment_app">Entfernen</string>
+    <string name="wallet_remove_payment_app_title">Bezahl-App entfernen?</string>
+    <string name="wallet_remove_payment_app_message">Du kannst sie in den Einstellungen wieder auswählen.</string>
     <string name="wallet_custom_color">Eigene Farbe</string>
     <string name="wallet_color_hex">Hex</string>
     <string name="wallet_color_hue">Farbton</string>
@@ -217,6 +226,7 @@
     <string name="licenses_purpose_opencv">Schneidet das Foto des Kassenbons zu und richtet es vor dem Lesen gerade</string>
     <string name="licenses_purpose_zxing_cpp">Scannt den Barcode von Kundenkarten</string>
     <string name="licenses_purpose_zxing">Erzeugt den Barcode der Kundenkarten zum Vorzeigen an der Kasse</string>
+    <string name="licenses_purpose_reorderable">Ordnet die Karten in der Brieftasche per Ziehen neu an</string>
     <string name="licenses_purpose_jetpack">Oberfläche, Datenbank und Kamera der App</string>
     <string name="licenses_purpose_kotlin">Die Sprache, in der die App geschrieben ist</string>
 

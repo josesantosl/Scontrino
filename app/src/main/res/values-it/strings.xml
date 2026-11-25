@@ -208,6 +208,15 @@
     <string name="payment_app_section_other">Altre app</string>
     <string name="payment_app_system_default">Predefinita di sistema</string>
     <string name="wallet_open_payment_app">Apri per pagare</string>
+    <string name="wallet_edit_card_title">Modifica carta</string>
+    <string name="wallet_store_has_card">%1$s ha già un\'altra carta</string>
+    <string name="wallet_card_duplicate">Hai già questa carta</string>
+    <string name="wallet_reorder">Riordina le carte</string>
+    <string name="wallet_reorder_done">Fatto</string>
+    <string name="wallet_drag_handle">Trascina per spostare</string>
+    <string name="wallet_remove_payment_app">Rimuovi</string>
+    <string name="wallet_remove_payment_app_title">Rimuovere l\'app di pagamento?</string>
+    <string name="wallet_remove_payment_app_message">Puoi sceglierla di nuovo nelle Impostazioni.</string>
     <string name="wallet_custom_color">Colore personalizzato</string>
     <string name="wallet_color_hex">Hex</string>
     <string name="wallet_color_hue">Tonalità</string>
@@ -218,6 +227,7 @@
     <string name="licenses_purpose_opencv">Ritaglia e raddrizza la foto dello scontrino prima di leggerla</string>
     <string name="licenses_purpose_zxing_cpp">Scansiona il codice a barre delle carte fedeltà</string>
     <string name="licenses_purpose_zxing">Disegna il codice a barre delle carte da mostrare alla cassa</string>
+    <string name="licenses_purpose_reorderable">Permette di riordinare le carte del portafoglio trascinandole</string>
     <string name="licenses_purpose_jetpack">Interfaccia, database e fotocamera dell\'app</string>
     <string name="licenses_purpose_kotlin">Il linguaggio in cui è scritta l\'app</string>
 

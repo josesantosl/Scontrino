@@ -30,10 +30,13 @@ class WalletViewModel(
     /** Colour of the payment app card, null = default. */
     val paymentAppColor: StateFlow<Long?> = settingsRepository.paymentAppColor
 
+    /** Place of the payment app card among the loyalty cards (see [WalletEntry.merge]). */
+    val paymentAppPosition: StateFlow<Int> = settingsRepository.paymentAppPosition
+
     fun setPaymentAppCard(name: String, color: Long?) =
         settingsRepository.setPaymentAppCard(name.trim(), color)
 
-    /** Forgets the payment app (it was uninstalled). */
+    /** Forgets the payment app (removed from the wallet, or uninstalled): "None" in settings. */
     fun clearPaymentApp() = settingsRepository.setPaymentApp("")
 
     private val _cards = MutableStateFlow<List<LoyaltyCardWithStore>>(emptyList())
@@ -69,7 +72,9 @@ class WalletViewModel(
      * Saves a new loyalty card. 
      * Automatically links it to an existing store or creates a new one with the chosen color.
      */
-    fun saveCard(storeName: String, cardNumber: String, color: Long) {
+    fun saveCard(name: String, number: String, color: Long) {
+        val storeName = name.trim()
+        val cardNumber = number.trim()
         viewModelScope.launch {
             // 1. Search for store by name (case-insensitive)
             val storeResults = storeRepository.search(storeName)
@@ -85,9 +90,14 @@ class WalletViewModel(
                 storeRepository.update(store.copy(color = color))
             }
 
-            // 3. Persist the loyalty card
+            // 3. Persist the loyalty card, at the end of the wallet (after the payment app too)
+            val afterPaymentApp = if (paymentApp.value.isEmpty()) 0 else paymentAppPosition.value + 1
             loyaltyCardRepository.insert(
-                LoyaltyCard(storeId = store.id, cardNumber = cardNumber)
+                LoyaltyCard(
+                    storeId = store.id,
+                    cardNumber = cardNumber,
+                    position = maxOf(loyaltyCardRepository.nextPosition(), afterPaymentApp)
+                )
             )
             loadCards()
             loadStores()
@@ -106,20 +116,44 @@ class WalletViewModel(
     }
 
     /**
-     * Updates an existing loyalty card's details and its associated store's name/color.
+     * Edits a card. The name and colour belong to the store: a name of another existing store
+     * moves the card there (that store takes [color], so its other cards change colour too);
+     * any other name renames the card's own store, on every receipt as well (typo fixes).
      */
-    fun updateCard(card: LoyaltyCard, storeName: String, color: Long) {
+    fun updateCard(card: LoyaltyCard, name: String, number: String, color: Long) {
+        val storeName = name.trim()
         viewModelScope.launch {
-            val cardWithStore = cards.value.firstOrNull { it.card.id == card.id }
-            cardWithStore?.let {
-                val store = storeRepository.getById(it.card.storeId)
-                store?.let { s ->
-                    storeRepository.update(s.copy(name = storeName, color = color))
+            val other = storeRepository.search(storeName)
+                .firstOrNull { it.name.equals(storeName, ignoreCase = true) && it.id != card.storeId }
+            val storeId = if (other != null) {
+                if (other.color != color) storeRepository.update(other.copy(color = color))
+                other.id
+            } else {
+                storeRepository.getById(card.storeId)?.let { store ->
+                    if (store.name != storeName || store.color != color) {
+                        storeRepository.update(store.copy(name = storeName, color = color))
+                    }
                 }
+                card.storeId
             }
-            loyaltyCardRepository.update(card)
+            loyaltyCardRepository.update(card.copy(storeId = storeId, cardNumber = number.trim()))
             loadCards()
             loadStores()
         }
+    }
+
+    /**
+     * Saves the order left by a drag and drop: each entry's index becomes its position. The
+     * list is updated at once, so a second drag never sees the old order.
+     */
+    fun saveOrder(entries: List<WalletEntry>) {
+        val positions = entries.withIndex()
+            .mapNotNull { (index, entry) -> (entry as? WalletEntry.Card)?.let { it.card.card.id to index } }
+            .toMap()
+        _cards.value = _cards.value
+            .map { it.copy(card = it.card.copy(position = positions[it.card.id] ?: it.card.position)) }
+            .sortedBy { it.card.position }
+        entries.indexOf(WalletEntry.PaymentApp).takeIf { it >= 0 }?.let(settingsRepository::setPaymentAppPosition)
+        viewModelScope.launch { loyaltyCardRepository.setPositions(positions) }
     }
 }

@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,6 +15,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
@@ -50,7 +53,10 @@ import com.pepesantos.scontrino.ui.components.hueColors
 import androidx.compose.ui.graphics.Brush
 import com.pepesantos.scontrino.ui.components.LaunchableApp
 import com.pepesantos.scontrino.ui.components.PaymentApps
+import com.pepesantos.scontrino.ui.viewmodel.WalletEntry
 import com.pepesantos.scontrino.ui.viewmodel.WalletViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * Card colours, shown in two rows of six; any other one can be picked with "Custom color".
@@ -117,7 +123,11 @@ fun WalletScreen(viewModel: WalletViewModel) {
     var selectedCard by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var cardToDelete by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
-    
+    var editingCard by remember { mutableStateOf<LoyaltyCardWithStore?>(null) }
+    var confirmRemovePaymentApp by remember { mutableStateOf(false) }
+    // Plain remember: leaving the wallet ends the reorder mode (the order is already saved).
+    var reordering by remember { mutableStateOf(false) }
+
     val cards by viewModel.cards.collectAsState()
     val stores by viewModel.stores.collectAsState()
 
@@ -129,7 +139,16 @@ fun WalletScreen(viewModel: WalletViewModel) {
     }
     val paymentAppName by viewModel.paymentAppName.collectAsState()
     val paymentAppColor by viewModel.paymentAppColor.collectAsState()
+    val paymentAppPosition by viewModel.paymentAppPosition.collectAsState()
     var editPaymentApp by remember { mutableStateOf(false) }
+
+    val entries = remember(cards, paymentApp, paymentAppPosition) {
+        WalletEntry.merge(cards, hasPaymentApp = paymentApp != null, paymentPosition = paymentAppPosition)
+    }
+    // Order shown while dragging; saved on each drop, and back in sync with the saved one then.
+    var order by remember(entries) { mutableStateOf(entries) }
+    val canReorder = entries.size >= 2
+    LaunchedEffect(canReorder) { if (!canReorder) reordering = false }
 
     paymentApp?.takeIf { editPaymentApp }?.let { app ->
         EditPaymentAppCardDialog(
@@ -140,7 +159,32 @@ fun WalletScreen(viewModel: WalletViewModel) {
                 viewModel.setPaymentAppCard(name, color)
                 editPaymentApp = false
             },
+            onRemove = {
+                editPaymentApp = false
+                confirmRemovePaymentApp = true
+            },
             onDismiss = { editPaymentApp = false }
+        )
+    }
+
+    if (confirmRemovePaymentApp) {
+        AlertDialog(
+            onDismissRequest = { confirmRemovePaymentApp = false },
+            title = { Text(stringResource(R.string.wallet_remove_payment_app_title)) },
+            text = { Text(stringResource(R.string.wallet_remove_payment_app_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearPaymentApp()
+                    confirmRemovePaymentApp = false
+                }) {
+                    Text(stringResource(R.string.wallet_remove_payment_app))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmRemovePaymentApp = false }) {
+                    Text(stringResource(R.string.delete_cancel))
+                }
+            }
         )
     }
 
@@ -148,8 +192,8 @@ fun WalletScreen(viewModel: WalletViewModel) {
         viewModel.loadStores()
     }
 
-    LaunchedEffect(showAddDialog) {
-        if (showAddDialog) {
+    LaunchedEffect(showAddDialog, editingCard) {
+        if (showAddDialog || editingCard != null) {
             viewModel.loadStores()
         }
     }
@@ -157,18 +201,42 @@ fun WalletScreen(viewModel: WalletViewModel) {
     selectedCard?.let { cardWithStore ->
         BarcodeDialog(
             cardWithStore = cardWithStore,
+            onEdit = {
+                selectedCard = null
+                editingCard = cardWithStore
+            },
             onDismiss = { selectedCard = null }
         )
     }
-    
+
     if (showAddDialog) {
-        AddCardDialog(
-            onDismiss = { showAddDialog = false },
+        CardDialog(
+            card = null,
+            availableStores = stores,
+            existingCards = cards,
             onSave = { name, number, color ->
                 viewModel.saveCard(name, number, color)
                 showAddDialog = false
             },
-            availableStores = stores
+            onDelete = null,
+            onDismiss = { showAddDialog = false }
+        )
+    }
+
+    editingCard?.let { cardWithStore ->
+        CardDialog(
+            card = cardWithStore,
+            availableStores = stores,
+            existingCards = cards,
+            onSave = { name, number, color ->
+                viewModel.updateCard(cardWithStore.card, name, number, color)
+                editingCard = null
+            },
+            onDelete = {
+                editingCard = null
+                cardToDelete = cardWithStore
+            },
+            onDismiss = { editingCard = null }
         )
     }
 
@@ -202,6 +270,18 @@ fun WalletScreen(viewModel: WalletViewModel) {
                         text = stringResource(R.string.nav_wallet),
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    if (canReorder) {
+                        IconButton(onClick = { reordering = !reordering }) {
+                            Icon(
+                                imageVector = if (reordering) Icons.Filled.Check else Icons.Filled.SwapVert,
+                                contentDescription = stringResource(
+                                    if (reordering) R.string.wallet_reorder_done else R.string.wallet_reorder
+                                )
+                            )
+                        }
+                    }
                 }
             )
         }
@@ -212,33 +292,67 @@ fun WalletScreen(viewModel: WalletViewModel) {
             .padding(innerPadding)
             .padding(horizontal = 16.dp)
     ) {
+        val listState = rememberLazyListState()
+        val reorderState = rememberReorderableLazyListState(listState) { from, to ->
+            val fromIndex = order.indexOfFirst { it.key == from.key }
+            val toIndex = order.indexOfFirst { it.key == to.key }
+            if (fromIndex >= 0 && toIndex >= 0) {
+                order = order.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+            }
+        }
         LazyColumn(
+            state = listState,
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            paymentApp?.let { app ->
-                item {
-                    PaymentAppCard(
-                        app = app,
-                        name = paymentAppName.ifBlank { app.label },
-                        color = paymentAppColor ?: PAYMENT_APP_DEFAULT_COLOR,
-                        onClick = {
-                            if (!PaymentApps.open(context, app.packageName)) viewModel.clearPaymentApp()
-                        },
-                        onLongClick = { editPaymentApp = true }
-                    )
+            items(order, key = { it.key }) { entry ->
+                ReorderableItem(reorderState, key = entry.key) { isDragging ->
+                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "drag")
+                    val handle: (@Composable BoxScope.() -> Unit)? = if (reordering) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.DragHandle,
+                                contentDescription = stringResource(R.string.wallet_drag_handle),
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .draggableHandle(onDragStopped = { viewModel.saveOrder(order) })
+                                    .padding(16.dp),
+                                tint = LocalContentColor.current
+                            )
+                        }
+                    } else {
+                        null
+                    }
+                    val itemModifier = Modifier.shadow(elevation, RoundedCornerShape(12.dp))
+                    when (entry) {
+                        is WalletEntry.Card -> LoyaltyCardItem(
+                            cardWithStore = entry.card,
+                            onClick = { selectedCard = entry.card },
+                            onLongClick = { editingCard = entry.card },
+                            modifier = itemModifier,
+                            dragHandle = handle
+                        )
+                        WalletEntry.PaymentApp -> paymentApp?.let { app ->
+                            PaymentAppCard(
+                                app = app,
+                                name = paymentAppName.ifBlank { app.label },
+                                color = paymentAppColor ?: PAYMENT_APP_DEFAULT_COLOR,
+                                onClick = {
+                                    if (!PaymentApps.open(context, app.packageName)) viewModel.clearPaymentApp()
+                                },
+                                onLongClick = { editPaymentApp = true },
+                                modifier = itemModifier,
+                                dragHandle = handle
+                            )
+                        }
+                    }
                 }
             }
-            items(cards) { cardWithStore ->
-                LoyaltyCardItem(
-                    cardWithStore = cardWithStore,
-                    onClick = { selectedCard = cardWithStore },
-                    onLongClick = { cardToDelete = cardWithStore }
-                )
-            }
-            item {
-                AddCardButton(onClick = { showAddDialog = true })
+            if (!reordering) {
+                item(key = "add-card") {
+                    AddCardButton(onClick = { showAddDialog = true })
+                }
             }
         }
 
@@ -260,7 +374,9 @@ fun WalletScreen(viewModel: WalletViewModel) {
 fun LoyaltyCardItem(
     cardWithStore: LoyaltyCardWithStore,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    dragHandle: (@Composable BoxScope.() -> Unit)? = null,
 ) {
     val cardColor = Color(cardWithStore.storeColor ?: 0xFF94A3B8)
     val darkColor = Color(
@@ -270,12 +386,14 @@ fun LoyaltyCardItem(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(cardColor)
+            // While reordering only the handle reacts, so a stray tap doesn't open the card.
             .combinedClickable(
+                enabled = dragHandle == null,
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
@@ -292,21 +410,40 @@ fun LoyaltyCardItem(
             color = onCardColor(cardColor),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 64.dp)
         )
+        if (dragHandle != null) {
+            CompositionLocalProvider(LocalContentColor provides onCardColor(cardColor)) { dragHandle() }
+        }
     }
 }
 
+/**
+ * Adds a card ([card] null) or edits [card] (then [onDelete] shows a delete button). The name
+ * is the store's: picking another existing store's name takes its colour. The same number in
+ * the same store can't be saved twice; another card in that store only gets a notice.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddCardDialog(
+fun CardDialog(
+    card: LoyaltyCardWithStore?,
+    availableStores: List<Store>,
+    existingCards: List<LoyaltyCardWithStore>,
+    onSave: (name: String, number: String, color: Long) -> Unit,
+    onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
-    onSave: (String, String, Long) -> Unit,
-    availableStores: List<Store> = emptyList()
 ) {
-    var name by remember { mutableStateOf("") }
-    var number by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(cardColors[0]) }
+    var name by remember { mutableStateOf(card?.storeName.orEmpty()) }
+    var number by remember { mutableStateOf(card?.card?.cardNumber.orEmpty()) }
+    var selectedColor by remember { mutableStateOf(card?.storeColor ?: cardColors[0]) }
+
+    val sameStoreCards = remember(name, existingCards) {
+        existingCards.filter {
+            it.card.id != card?.card?.id && it.storeName.equals(name.trim(), ignoreCase = true)
+        }
+    }
+    val isDuplicate = sameStoreCards.any { it.card.cardNumber == number.trim() }
     var showScanner by remember { mutableStateOf(false) }
 
     var nameExpanded by remember { mutableStateOf(false) }
@@ -351,7 +488,23 @@ fun AddCardDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.wallet_add_card_title)) },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(if (card == null) R.string.wallet_add_card_title else R.string.wallet_edit_card_title),
+                    modifier = Modifier.weight(1f)
+                )
+                if (onDelete != null) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete_card_title),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        },
         text = {
             Column(
                 modifier = Modifier
@@ -371,6 +524,11 @@ fun AddCardDialog(
                             nameExpanded = true
                         },
                         label = { Text(stringResource(R.string.wallet_card_name)) },
+                        supportingText = if (sameStoreCards.isNotEmpty() && !isDuplicate) {
+                            { Text(stringResource(R.string.wallet_store_has_card, sameStoreCards.first().storeName)) }
+                        } else {
+                            null
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
@@ -401,6 +559,12 @@ fun AddCardDialog(
                     value = number,
                     onValueChange = { number = it },
                     label = { Text(stringResource(R.string.wallet_card_number)) },
+                    isError = isDuplicate,
+                    supportingText = if (isDuplicate) {
+                        { Text(stringResource(R.string.wallet_card_duplicate)) }
+                    } else {
+                        null
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -427,7 +591,7 @@ fun AddCardDialog(
         confirmButton = {
             Button(
                 onClick = { onSave(name, number, selectedColor) },
-                enabled = name.isNotBlank() && number.isNotBlank()
+                enabled = name.isNotBlank() && number.isNotBlank() && !isDuplicate
             ) {
                 Text(stringResource(R.string.wallet_save))
             }
@@ -558,6 +722,7 @@ fun ColorOption(
 @Composable
 fun BarcodeDialog(
     cardWithStore: LoyaltyCardWithStore,
+    onEdit: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val barcodeBitmap = remember(cardWithStore.card.cardNumber) {
@@ -580,6 +745,16 @@ fun BarcodeDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
+                        onClick = onEdit,
+                        modifier = Modifier.align(Alignment.TopStart)
+                    ) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = stringResource(R.string.wallet_edit),
+                            tint = onCardColor(headerColor)
+                        )
+                    }
+                    IconButton(
                         onClick = onDismiss,
                         modifier = Modifier.align(Alignment.TopEnd)
                     ) {
@@ -593,7 +768,9 @@ fun BarcodeDialog(
                         text = cardWithStore.storeName,
                         color = onCardColor(headerColor),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 48.dp)
                     )
                 }
                 // A white header would melt into the white barcode area.
@@ -647,17 +824,24 @@ private fun PaymentAppCard(
     color: Long,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    dragHandle: (@Composable BoxScope.() -> Unit)? = null,
 ) {
     val cardColor = Color(color)
     val darkColor = Color(red = cardColor.red * 0.7f, green = cardColor.green * 0.7f, blue = cardColor.blue * 0.7f)
     val openLabel = stringResource(R.string.wallet_open_payment_app)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(cardColor)
-            .combinedClickable(onClick = onClick, onClickLabel = openLabel, onLongClick = onLongClick),
+            .combinedClickable(
+                enabled = dragHandle == null,
+                onClick = onClick,
+                onClickLabel = openLabel,
+                onLongClick = onLongClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -681,23 +865,41 @@ private fun PaymentAppCard(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 64.dp)
         )
+        if (dragHandle != null) {
+            CompositionLocalProvider(LocalContentColor provides onCardColor(cardColor)) { dragHandle() }
+        }
     }
 }
 
-/** Rename (empty = the app's own name) and recolour the payment app card. */
+/**
+ * Rename (empty = the app's own name) and recolour the payment app card, or [onRemove] it from
+ * the wallet ("None" in settings).
+ */
 @Composable
 private fun EditPaymentAppCardDialog(
     appLabel: String,
     currentName: String,
     currentColor: Long,
     onSave: (name: String, color: Long) -> Unit,
+    onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by remember { mutableStateOf(currentName) }
     var color by remember { mutableStateOf(currentColor) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_payment_app)) },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.settings_payment_app), modifier = Modifier.weight(1f))
+                IconButton(onClick = onRemove) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.wallet_remove_payment_app),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
         text = {
             Column(
                 modifier = Modifier

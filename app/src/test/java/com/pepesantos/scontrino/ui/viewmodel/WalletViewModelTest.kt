@@ -25,6 +25,7 @@ class WalletViewModelTest {
         on { paymentApp } doReturn MutableStateFlow("")
         on { paymentAppName } doReturn MutableStateFlow("")
         on { paymentAppColor } doReturn MutableStateFlow(null)
+        on { paymentAppPosition } doReturn MutableStateFlow(0)
     }
     private lateinit var viewModel: WalletViewModel
 
@@ -36,6 +37,7 @@ class WalletViewModelTest {
         
         // Mock initial load
         whenever(loyaltyCardRepository.getAll()).thenReturn(emptyList())
+        whenever(loyaltyCardRepository.nextPosition()).thenReturn(3)
         
         viewModel = WalletViewModel(loyaltyCardRepository, storeRepository, settingsRepository)
     }
@@ -72,7 +74,51 @@ class WalletViewModelTest {
         advanceUntilIdle()
 
         verify(storeRepository).insert(argThat { name == storeName && this.color == color })
-        verify(loyaltyCardRepository).insert(argThat { storeId == 1 && this.cardNumber == cardNumber })
+        verify(loyaltyCardRepository).insert(argThat { storeId == 1 && this.cardNumber == cardNumber && position == 3 })
+    }
+
+    @Test
+    fun `updateCard with another store's name moves the card there and recolours that store`() = runTest {
+        val card = LoyaltyCard(id = 7, storeId = 1, cardNumber = "111", position = 2)
+        val lidl = Store(2, "Lidl", color = 0xFF000000)
+        whenever(storeRepository.search("lidl")).thenReturn(listOf(lidl))
+
+        viewModel.updateCard(card, " lidl ", "222", 0xFF112233L)
+        advanceUntilIdle()
+
+        verify(storeRepository).update(lidl.copy(color = 0xFF112233L))
+        verify(loyaltyCardRepository).update(card.copy(storeId = 2, cardNumber = "222"))
+        verify(storeRepository, never()).getById(any())
+    }
+
+    @Test
+    fun `updateCard with a new name renames the card's own store`() = runTest {
+        val card = LoyaltyCard(id = 7, storeId = 1, cardNumber = "111")
+        val bennet = Store(1, "Benet", color = 0xFF000000)
+        whenever(storeRepository.search("Bennet")).thenReturn(listOf(bennet))
+        whenever(storeRepository.getById(1)).thenReturn(bennet)
+
+        viewModel.updateCard(card, "Bennet", "111", 0xFF000000)
+        advanceUntilIdle()
+
+        verify(storeRepository).update(bennet.copy(name = "Bennet"))
+        verify(loyaltyCardRepository).update(card)
+    }
+
+    @Test
+    fun `saveOrder stores each entry's index as its position`() = runTest {
+        val a = LoyaltyCardWithStore(LoyaltyCard(1, 1, "1", position = 0), "A", null)
+        val b = LoyaltyCardWithStore(LoyaltyCard(2, 2, "2", position = 1), "B", null)
+        whenever(loyaltyCardRepository.getAll()).thenReturn(listOf(a, b))
+        viewModel.loadCards()
+        advanceUntilIdle()
+
+        viewModel.saveOrder(listOf(WalletEntry.Card(b), WalletEntry.PaymentApp, WalletEntry.Card(a)))
+        advanceUntilIdle()
+
+        verify(loyaltyCardRepository).setPositions(mapOf(2 to 0, 1 to 2))
+        verify(settingsRepository).setPaymentAppPosition(1)
+        assertEquals(listOf(2, 1), viewModel.cards.value.map { it.card.id })
     }
 
     @Test

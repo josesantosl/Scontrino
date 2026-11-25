@@ -216,6 +216,15 @@
     <string name="payment_app_section_other">Other apps</string>
     <string name="payment_app_system_default">System default</string>
     <string name="wallet_open_payment_app">Open to pay</string>
+    <string name="wallet_edit_card_title">Edit card</string>
+    <string name="wallet_store_has_card">%1$s already has another card</string>
+    <string name="wallet_card_duplicate">You already have this card</string>
+    <string name="wallet_reorder">Reorder cards</string>
+    <string name="wallet_reorder_done">Done</string>
+    <string name="wallet_drag_handle">Drag to move</string>
+    <string name="wallet_remove_payment_app">Remove</string>
+    <string name="wallet_remove_payment_app_title">Remove the payment app?</string>
+    <string name="wallet_remove_payment_app_message">You can choose it again in Settings.</string>
     <string name="wallet_custom_color">Custom color</string>
     <string name="wallet_color_hex">Hex</string>
     <string name="wallet_color_hue">Hue</string>
@@ -226,6 +235,7 @@
     <string name="licenses_purpose_opencv">Crops and straightens receipt photos before reading them</string>
     <string name="licenses_purpose_zxing_cpp">Scans the barcodes of loyalty cards</string>
     <string name="licenses_purpose_zxing">Draws loyalty card barcodes to show at the checkout</string>
+    <string name="licenses_purpose_reorderable">Lets you reorder the wallet cards by dragging them</string>
     <string name="licenses_purpose_jetpack">The app\'s interface, database and camera</string>
     <string name="licenses_purpose_kotlin">The language the app is written in</string>
 

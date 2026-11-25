@@ -93,9 +93,27 @@ class SettingsRepository private constructor(context: Context) {
     /** Colour (ARGB) of the wallet's payment app card, or null for the default one. */
     val paymentAppColor: StateFlow<Long?> = _paymentAppColor.asStateFlow()
 
-    /** Changes the app; its custom name and colour are for the previous app, so they're reset. */
+    private val _paymentAppPosition = MutableStateFlow(prefs.getInt(KEY_PAYMENT_APP_POSITION, 0))
+    /**
+     * Place of the payment app card in the wallet, numbered together with LoyaltyCard.position;
+     * on a tie it goes first, so the default 0 keeps it at the top.
+     */
+    val paymentAppPosition: StateFlow<Int> = _paymentAppPosition.asStateFlow()
+
+    fun setPaymentAppPosition(position: Int) {
+        prefs.edit { putInt(KEY_PAYMENT_APP_POSITION, position) }
+        _paymentAppPosition.value = position
+    }
+
+    /**
+     * Changes the app; its custom name, colour and place are for the previous app, so they're
+     * reset (a new app starts at the top of the wallet).
+     */
     fun setPaymentApp(packageName: String) {
-        if (packageName != _paymentApp.value) setPaymentAppCard(name = "", color = null)
+        if (packageName != _paymentApp.value) {
+            setPaymentAppCard(name = "", color = null)
+            setPaymentAppPosition(0)
+        }
         prefs.edit { putString(KEY_PAYMENT_APP, packageName) }
         _paymentApp.value = packageName
     }
@@ -121,6 +139,7 @@ class SettingsRepository private constructor(context: Context) {
         private const val KEY_PAYMENT_APP = "payment_app"
         private const val KEY_PAYMENT_APP_NAME = "payment_app_name"
         private const val KEY_PAYMENT_APP_COLOR = "payment_app_color"
+        private const val KEY_PAYMENT_APP_POSITION = "payment_app_position"
         private const val NO_COLOR = 0L
 
         @Volatile

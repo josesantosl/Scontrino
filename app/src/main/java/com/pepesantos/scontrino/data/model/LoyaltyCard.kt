@@ -19,6 +19,11 @@ data class LoyaltyCard(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val storeId: Int,
     val cardNumber: String,
+    /**
+     * Place in the wallet chosen by the user (ascending; ties by store name). It shares its
+     * numbering with the payment app card (SettingsRepository.paymentAppPosition).
+     */
+    val position: Int = 0,
 )
 
 data class LoyaltyCardWithStore(

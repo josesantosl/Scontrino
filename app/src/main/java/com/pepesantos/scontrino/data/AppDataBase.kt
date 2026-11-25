@@ -24,7 +24,7 @@ import com.pepesantos.scontrino.ui.theme.CategoryIcons
         LoyaltyCard::class,
         ProductAlias::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -98,6 +98,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // All at 0: ties are sorted by store name, the order the wallet had so far.
+                db.execSQL("ALTER TABLE LoyaltyCard ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         /**
          * Returns the singleton instance of [AppDatabase].
          * Uses fallbackToDestructiveMigration for simplified schema updates during development.
@@ -113,7 +120,7 @@ abstract class AppDatabase : RoomDatabase() {
                     // Every version bump needs a migration here: the destructive
                     // fallback below would otherwise wipe the user's receipts.
                     .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
-                        MIGRATION_10_11)
+                        MIGRATION_10_11, MIGRATION_11_12)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

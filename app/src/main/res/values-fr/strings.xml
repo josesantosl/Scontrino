@@ -208,6 +208,15 @@
     <string name="payment_app_section_other">Autres applications</string>
     <string name="payment_app_system_default">Par défaut du système</string>
     <string name="wallet_open_payment_app">Ouvrir pour payer</string>
+    <string name="wallet_edit_card_title">Modifier la carte</string>
+    <string name="wallet_store_has_card">%1$s a déjà une autre carte</string>
+    <string name="wallet_card_duplicate">Vous avez déjà cette carte</string>
+    <string name="wallet_reorder">Réorganiser les cartes</string>
+    <string name="wallet_reorder_done">OK</string>
+    <string name="wallet_drag_handle">Faire glisser pour déplacer</string>
+    <string name="wallet_remove_payment_app">Retirer</string>
+    <string name="wallet_remove_payment_app_title">Retirer l\'app de paiement ?</string>
+    <string name="wallet_remove_payment_app_message">Vous pourrez la choisir à nouveau dans les Paramètres.</string>
     <string name="wallet_custom_color">Couleur personnalisée</string>
     <string name="wallet_color_hex">Hex</string>
     <string name="wallet_color_hue">Teinte</string>
@@ -218,6 +227,7 @@
     <string name="licenses_purpose_opencv">Recadre et redresse la photo du ticket avant de la lire</string>
     <string name="licenses_purpose_zxing_cpp">Scanne le code-barres des cartes de fidélité</string>
     <string name="licenses_purpose_zxing">Affiche le code-barres des cartes pour le montrer en caisse</string>
+    <string name="licenses_purpose_reorderable">Permet de réorganiser les cartes du portefeuille en les faisant glisser</string>
     <string name="licenses_purpose_jetpack">Interface, base de données et appareil photo de l\'application</string>
     <string name="licenses_purpose_kotlin">Le langage dans lequel l\'application est écrite</string>
 

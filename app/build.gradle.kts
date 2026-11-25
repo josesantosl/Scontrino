@@ -89,6 +89,7 @@ dependencies {
     implementation(project(":opencv"))
     implementation(libs.tesseract4android)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.reorderable)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)

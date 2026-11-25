@@ -178,6 +178,13 @@ private val LIBRARIES = listOf(
         licenses = listOf(License.APACHE_2_0),
     ),
     OpenSourceLibrary(
+        name = "Reorderable",
+        purpose = R.string.licenses_purpose_reorderable,
+        includes = null,
+        website = "https://github.com/Calvin-LL/Reorderable",
+        licenses = listOf(License.APACHE_2_0),
+    ),
+    OpenSourceLibrary(
         name = "Android Jetpack",
         purpose = R.string.licenses_purpose_jetpack,
         includes = "AndroidX · Jetpack Compose · Room · CameraX · Guava ListenableFuture · AutoValue · JSpecify · libyuv",

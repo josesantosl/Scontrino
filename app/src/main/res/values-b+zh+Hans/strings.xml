@@ -215,6 +215,15 @@
     <string name="payment_app_section_other">其他应用</string>
     <string name="payment_app_system_default">系统默认</string>
     <string name="wallet_open_payment_app">打开付款</string>
+    <string name="wallet_edit_card_title">编辑卡片</string>
+    <string name="wallet_store_has_card">%1$s 已有另一张卡</string>
+    <string name="wallet_card_duplicate">你已经有这张卡了</string>
+    <string name="wallet_reorder">调整卡片顺序</string>
+    <string name="wallet_reorder_done">完成</string>
+    <string name="wallet_drag_handle">拖动以移动</string>
+    <string name="wallet_remove_payment_app">移除</string>
+    <string name="wallet_remove_payment_app_title">移除付款应用？</string>
+    <string name="wallet_remove_payment_app_message">你可以在设置中重新选择。</string>
     <string name="wallet_custom_color">自定义颜色</string>
     <string name="wallet_color_hex">十六进制</string>
     <string name="wallet_color_hue">色相</string>
@@ -225,6 +234,7 @@
     <string name="licenses_purpose_opencv">识别前裁剪并校正小票照片</string>
     <string name="licenses_purpose_zxing_cpp">扫描会员卡的条形码</string>
     <string name="licenses_purpose_zxing">生成会员卡条形码，方便在收银台出示</string>
+    <string name="licenses_purpose_reorderable">通过拖动调整卡包中卡片的顺序</string>
     <string name="licenses_purpose_jetpack">应用的界面、数据库和相机</string>
     <string name="licenses_purpose_kotlin">编写本应用所用的编程语言</string>
 
