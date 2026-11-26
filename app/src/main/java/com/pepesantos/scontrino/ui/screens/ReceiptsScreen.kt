@@ -8,13 +8,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,8 +37,10 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
     var editingReceipt by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var receiptToDelete by remember { mutableStateOf<ReceiptWithStoreName?>(null) }
     var showOcrDebug by remember { mutableStateOf(false) }
-    // Opened from the new receipt screen (top bar button); leaving it goes back there.
+    // Opened from the list (main button) or from the new receipt screen (top bar button);
+    // leaving it goes back to where it was opened from.
     var showScan by remember { mutableStateOf(false) }
+    var scanFromAddReceipt by remember { mutableStateOf(false) }
     // A receipt read from a photo, being reviewed in the new receipt screen.
     var scanDraft by remember { mutableStateOf<ReceiptDraft?>(null) }
     // The photo it was read from, only while reviewing (never saved).
@@ -75,7 +79,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
             ScanReceiptScreen(
                 onNavigateBack = {
                     showScan = false
-                    showAddReceipt = true
+                    showAddReceipt = scanFromAddReceipt
                 },
                 onScanned = { parsed, image ->
                     // Short database read (the store's past weights), then the review screen.
@@ -123,6 +127,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 // Another photo replaces this reading.
                 onScan = {
                     closeScanReview()
+                    scanFromAddReceipt = true
                     showScan = true
                 },
             )
@@ -141,6 +146,7 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                 onStoreNameChange = { viewModel.loadPurchaseHistory(it, excludeReceiptId = -1) },
                 onScan = {
                     showAddReceipt = false
+                    scanFromAddReceipt = true
                     showScan = true
                 },
             )
@@ -200,13 +206,35 @@ fun ReceiptsScreen(viewModel: ReceiptViewModel) {
                                 )
                             }
                         }
-                        FloatingActionButton(
+                        // Manual entry (also handy as a shopping list before going out).
+                        // Neutral colours: they stand out on black and on white without
+                        // competing with the store colours of the cards. The manual one is a
+                        // shade towards the background, so the camera stays the main action.
+                        SmallFloatingActionButton(
                             onClick = { showAddReceipt = true },
-                            containerColor = MaterialTheme.colorScheme.primary
+                            containerColor = lerp(
+                                MaterialTheme.colorScheme.inverseSurface,
+                                MaterialTheme.colorScheme.surface,
+                                0.005f
+                            ),
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Add,
+                                painter = painterResource(R.drawable.outline_edit_square_24),
                                 contentDescription = stringResource(R.string.add_receipt_fab)
+                            )
+                        }
+                        FloatingActionButton(
+                            onClick = {
+                                scanFromAddReceipt = false
+                                showScan = true
+                            },
+                            containerColor = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PhotoCamera,
+                                contentDescription = stringResource(R.string.scan_fab)
                             )
                         }
                     }

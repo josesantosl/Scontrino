@@ -47,6 +47,7 @@
 
     <!-- ReceiptsScreen -->
     <string name="add_receipt_fab">添加小票</string>
+    <string name="scan_fab">扫描</string>
     <string name="nav_wallet">卡包</string>
     <string name="wallet_edit">编辑</string>
     <string name="wallet_add_card">添加卡片</string>

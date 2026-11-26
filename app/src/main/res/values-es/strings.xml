@@ -40,6 +40,7 @@
     <string name="add_receipt_select_date">Seleccionar fecha</string>
     <string name="add_receipt_ok">OK</string>
     <string name="add_receipt_fab">Añadir factura</string>
+    <string name="scan_fab">Escanear</string>
     <string name="nav_wallet">Cartera</string>
     <string name="wallet_edit" >Editar</string>
     <string name="wallet_add_card">Añadir una tarjeta</string>

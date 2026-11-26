@@ -47,6 +47,7 @@
 
     <!-- ReceiptsScreen -->
     <string name="add_receipt_fab">Adicionar recibo</string>
+    <string name="scan_fab">Escanear</string>
     <string name="nav_wallet">Carteira</string>
     <string name="wallet_edit" >Editar</string>
     <string name="wallet_add_card">" Adicionar um cartão"</string>
