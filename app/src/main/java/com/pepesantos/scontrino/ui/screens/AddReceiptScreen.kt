@@ -28,6 +28,8 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.ViewCompat
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
@@ -257,6 +259,12 @@ fun AddReceiptScreen(
     // Enter on the keyboard goes to the next field (store → item name → price → weight → next item).
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+
+    // If a dialog stole the focus while the keyboard was closing, its animation gets cancelled
+    // and Compose keeps the old keyboard height, so the screen opened next time looks squeezed
+    // as if the keyboard were up. Asking for the current insets again on entry corrects it.
+    val view = LocalView.current
+    LaunchedEffect(Unit) { ViewCompat.requestApplyInsets(view) }
 
     // Leaves no field focused (nor keyboard open) behind when the scan takes over: a
     // review screen once came back with the save button raised as if above a keyboard.
