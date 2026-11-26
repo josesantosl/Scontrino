@@ -55,18 +55,6 @@ android {
     }
 }
 
-// Backs the "app (release)" run configuration: Android Studio's own Android App configurations
-// always deploy the variant picked in Build Variants, so release is installed and launched via Gradle.
-// installRelease installs on every connected device; the launch step expects a single one.
-val adb = androidComponents.sdkComponents.adb
-tasks.register<Exec>("runRelease") {
-    group = "install"
-    description = "Installs the release build and launches it."
-    dependsOn("installRelease")
-    executable(adb.get().asFile)
-    args("shell", "am", "start", "-n", "com.pepesantos.scontrino/.MainActivity")
-}
-
 // Adding, removing or bumping a dependency? Update the list in ui/screens/LicensesScreen.kt.
 dependencies {
     implementation(libs.androidx.room.runtime)
