@@ -35,6 +35,10 @@ class SettingsViewModel(
 
     fun setDarkMode(enabled: Boolean) = settingsRepository.setDarkMode(enabled)
 
+    val startScreen: StateFlow<String> = settingsRepository.startScreen
+
+    fun setStartScreen(name: String) = settingsRepository.setStartScreen(name)
+
     /** Tesseract codes of the receipt languages; empty = not chosen yet (guessed when scanning). */
     val receiptLanguages: StateFlow<List<String>> = settingsRepository.receiptLanguages
 

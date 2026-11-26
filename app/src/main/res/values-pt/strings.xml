@@ -193,6 +193,7 @@
     <string name="settings_tax_included_subtitle">Desative se os preços aparecem sem impostos e o recibo os soma no final (ex.: sales tax dos EUA)</string>
     <string name="settings_receipt_languages">Idiomas dos recibos</string>
     <string name="settings_receipt_languages_hint">Idiomas em que seus recibos estão impressos, para lê-los ao escanear. O primeiro marcado é o principal. Com menos idiomas, a leitura é mais rápida.</string>
+    <string name="settings_start_screen">Tela inicial</string>
     <string name="settings_dark_mode">Modo escuro</string>
     <string name="settings_dark_mode_subtitle">Altamente recomendado</string>
     <string name="settings_icon_title">Mudar o ícone do app?</string>

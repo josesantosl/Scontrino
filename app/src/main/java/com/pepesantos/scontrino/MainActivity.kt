@@ -84,6 +84,8 @@ class MainActivity : ComponentActivity() {
             categoryRepository = CategoryRepository(database.categoryDao()),
             settingsRepository = settingsRepository,
         )
+        // Read once: changing the setting doesn't move away from the screen on show.
+        val startScreen = AppDestinations.startScreen(settingsRepository.startScreen.value)
         setContent {
             val currency by settingsRepository.currency.collectAsState()
             val taxIncluded by settingsRepository.taxIncluded.collectAsState()
@@ -107,7 +109,11 @@ class MainActivity : ComponentActivity() {
                     LocalCurrency provides currency,
                     LocalTaxIncluded provides taxIncluded,
                 ) {
-                    ScontrinoApp(factory = factory, onLanguageChanged = { recreate() })
+                    ScontrinoApp(
+                        factory = factory,
+                        startScreen = startScreen,
+                        onLanguageChanged = { recreate() },
+                    )
                 }
             }
         }
@@ -115,14 +121,20 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ScontrinoApp(factory: ViewModelFactory, onLanguageChanged: () -> Unit = {}) {
+fun ScontrinoApp(
+    factory: ViewModelFactory,
+    startScreen: AppDestinations = AppDestinations.SCONTRINI,
+    onLanguageChanged: () -> Unit = {},
+) {
     val receiptViewModel: ReceiptViewModel = viewModel(factory = factory)
     val walletViewModel: WalletViewModel = viewModel(factory = factory)
     val statsViewModel: StatsViewModel = viewModel(factory = factory)
     val priceComparisonViewModel: PriceComparisonViewModel = viewModel(factory = factory)
     val settingsViewModel: SettingsViewModel = viewModel(factory = factory)
 
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SCONTRINI) }
+    // Only the first screen: changing the setting doesn't move away from the current one, and
+    // after a language change (activity recreated) the saved screen wins.
+    var currentDestination by rememberSaveable { mutableStateOf(startScreen) }
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -170,5 +182,14 @@ enum class AppDestinations(
     SCONTRINI(R.string.nav_receipts, Icons.AutoMirrored.Filled.ListAlt),
     STATS(R.string.nav_stats, Icons.Filled.BarChart),
     WALLET(R.string.nav_wallet, Icons.Filled.CreditCard),
-    SETTINGS(R.string.nav_settings, Icons.Filled.Settings),
+    SETTINGS(R.string.nav_settings, Icons.Filled.Settings);
+
+    companion object {
+        /** The screens the app can open on (see SettingsRepository.startScreen). */
+        val startScreens = listOf(SCONTRINI, STATS, WALLET)
+
+        /** The start screen stored by [name], the receipts if none (or an unknown one). */
+        fun startScreen(name: String): AppDestinations =
+            startScreens.firstOrNull { it.name == name } ?: SCONTRINI
+    }
 }

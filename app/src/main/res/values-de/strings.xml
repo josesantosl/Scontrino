@@ -183,6 +183,7 @@
     <string name="settings_tax_included_subtitle">Deaktivieren, wenn Preise ohne Steuern angegeben werden und der Kassenbon sie am Ende hinzufügt (z. B. Sales Tax in den USA)</string>
     <string name="settings_receipt_languages">Sprachen der Kassenbons</string>
     <string name="settings_receipt_languages_hint">Sprachen, in denen deine Kassenbons gedruckt sind, um sie beim Scannen zu lesen. Die erste ausgewählte ist die Hauptsprache. Mit weniger Sprachen geht das Lesen schneller.</string>
+    <string name="settings_start_screen">Startbildschirm</string>
     <string name="settings_dark_mode">Dunkler Modus</string>
     <string name="settings_dark_mode_subtitle">Dringend empfohlen</string>
     <string name="settings_icon_title">App-Symbol ändern?</string>

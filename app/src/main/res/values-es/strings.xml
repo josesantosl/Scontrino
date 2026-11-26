@@ -184,6 +184,7 @@
     <string name="settings_tax_included_subtitle">Desactívalo si los precios van sin impuestos y el ticket los suma al final (p. ej. el sales tax de EE. UU.)</string>
     <string name="settings_receipt_languages">Idiomas de los tickets</string>
     <string name="settings_receipt_languages_hint">Idiomas en los que están impresos tus tickets, para leerlos al escanear. El primero marcado es el principal. Con menos idiomas se lee más rápido.</string>
+    <string name="settings_start_screen">Pantalla de inicio</string>
     <string name="settings_dark_mode">Modo oscuro</string>
     <string name="settings_dark_mode_subtitle">Muy recomendado</string>
     <string name="settings_icon_title">¿Cambiar el icono de la app?</string>

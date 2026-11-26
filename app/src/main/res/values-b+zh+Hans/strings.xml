@@ -191,6 +191,7 @@
     <string name="settings_tax_included_subtitle">如果标价不含税、小票在最后加上税费（例如美国的销售税），请关闭此项</string>
     <string name="settings_receipt_languages">小票语言</string>
     <string name="settings_receipt_languages_hint">小票上印刷的语言，用于扫描时识别。第一个勾选的为主要语言。语言越少，识别越快。</string>
+    <string name="settings_start_screen">启动页面</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_dark_mode_subtitle">强烈推荐</string>
     <string name="settings_icon_title">更换应用图标？</string>

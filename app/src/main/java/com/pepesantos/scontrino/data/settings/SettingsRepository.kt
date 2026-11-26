@@ -45,6 +45,18 @@ class SettingsRepository private constructor(context: Context) {
         _darkMode.value = enabled
     }
 
+    private val _startScreen = MutableStateFlow(prefs.getString(KEY_START_SCREEN, null).orEmpty())
+    /**
+     * Name of the AppDestinations entry the app opens on (e.g. the wallet, handy at the till),
+     * or empty for the receipts.
+     */
+    val startScreen: StateFlow<String> = _startScreen.asStateFlow()
+
+    fun setStartScreen(name: String) {
+        prefs.edit { putString(KEY_START_SCREEN, name) }
+        _startScreen.value = name
+    }
+
     private val _collapsedStatsCards = MutableStateFlow(
         prefs.getStringSet(KEY_COLLAPSED_STATS_CARDS, null)?.toSet() ?: emptySet()
     )
@@ -134,6 +146,7 @@ class SettingsRepository private constructor(context: Context) {
         private const val KEY_CURRENCY = "currency"
         private const val KEY_TAX_INCLUDED = "tax_included"
         private const val KEY_DARK_MODE = "dark_mode"
+        private const val KEY_START_SCREEN = "start_screen"
         private const val KEY_COLLAPSED_STATS_CARDS = "collapsed_stats_cards"
         private const val KEY_RECEIPT_LANGUAGES = "receipt_languages"
         private const val KEY_PAYMENT_APP = "payment_app"

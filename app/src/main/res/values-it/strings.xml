@@ -184,6 +184,7 @@
     <string name="settings_tax_included_subtitle">Disattivalo se i prezzi sono senza imposte e lo scontrino le aggiunge alla fine (es. la sales tax degli USA)</string>
     <string name="settings_receipt_languages">Lingue degli scontrini</string>
     <string name="settings_receipt_languages_hint">Lingue in cui sono stampati i tuoi scontrini, per leggerli durante la scansione. La prima selezionata è la principale. Con meno lingue la lettura è più veloce.</string>
+    <string name="settings_start_screen">Schermata iniziale</string>
     <string name="settings_dark_mode">Modalità scura</string>
     <string name="settings_dark_mode_subtitle">Vivamente consigliata</string>
     <string name="settings_icon_title">Cambiare l\'icona dell\'app?</string>

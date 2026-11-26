@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.pepesantos.scontrino.AppDestinations
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.data.settings.AppIcon
 import com.pepesantos.scontrino.data.settings.AppLocale
@@ -67,6 +69,9 @@ fun SettingsScreen(
     val currency by viewModel.currency.collectAsState()
     val taxIncluded by viewModel.taxIncluded.collectAsState()
     val darkMode by viewModel.darkMode.collectAsState()
+    val startScreenName by viewModel.startScreen.collectAsState()
+    val startScreen = AppDestinations.startScreen(startScreenName)
+    var showStartScreenDialog by remember { mutableStateOf(false) }
     val receiptLanguageCodes by viewModel.receiptLanguages.collectAsState()
     // What the scanner will use: the chosen languages, or its guess while none is chosen.
     val receiptLanguages = remember(receiptLanguageCodes) {
@@ -137,6 +142,14 @@ fun SettingsScreen(
                     supportingContent = { Text(receiptLanguages.joinToString(", ") { it.displayName() }) },
                     leadingContent = { Icon(Icons.Filled.DocumentScanner, contentDescription = null) },
                     modifier = Modifier.clickable { showReceiptLanguagesDialog = true }
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_start_screen)) },
+                    supportingContent = {
+                        Text(stringResource(startScreen.label))
+                    },
+                    leadingContent = { Icon(Icons.Outlined.Home, contentDescription = null) },
+                    modifier = Modifier.clickable { showStartScreenDialog = true }
                 )
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_dark_mode)) },
@@ -229,6 +242,20 @@ fun SettingsScreen(
                 }
             },
             onDismiss = { showLanguageDialog = false },
+        )
+    }
+
+    if (showStartScreenDialog) {
+        OptionsDialog(
+            title = stringResource(R.string.settings_start_screen),
+            options = AppDestinations.startScreens,
+            selected = startScreen,
+            label = { stringResource(it.label) },
+            onSelect = { destination ->
+                showStartScreenDialog = false
+                viewModel.setStartScreen(destination.name)
+            },
+            onDismiss = { showStartScreenDialog = false },
         )
     }
 
