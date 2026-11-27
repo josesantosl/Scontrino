@@ -135,7 +135,7 @@ fun WalletScreen(viewModel: WalletViewModel) {
     val paymentPackage by viewModel.paymentApp.collectAsState()
     // Read again each time the wallet is shown: hidden if the app was uninstalled meanwhile.
     val paymentApp = remember(paymentPackage) {
-        if (PaymentApps.isEnabled(context)) PaymentApps.load(context, paymentPackage) else null
+        PaymentApps.load(context, paymentPackage)
     }
     val paymentAppName by viewModel.paymentAppName.collectAsState()
     val paymentAppColor by viewModel.paymentAppColor.collectAsState()
@@ -154,7 +154,9 @@ fun WalletScreen(viewModel: WalletViewModel) {
         EditPaymentAppCardDialog(
             appLabel = app.label,
             currentName = paymentAppName,
-            currentColor = paymentAppColor ?: PAYMENT_APP_DEFAULT_COLOR,
+            currentColor = paymentAppColor
+                ?: PaymentApps.defaultCardColor(app.packageName)
+                ?: PAYMENT_APP_DEFAULT_COLOR,
             onSave = { name, color ->
                 viewModel.setPaymentAppCard(name, color)
                 editPaymentApp = false
@@ -337,7 +339,9 @@ fun WalletScreen(viewModel: WalletViewModel) {
                             PaymentAppCard(
                                 app = app,
                                 name = paymentAppName.ifBlank { app.label },
-                                color = paymentAppColor ?: PAYMENT_APP_DEFAULT_COLOR,
+                                color = paymentAppColor
+                    ?: PaymentApps.defaultCardColor(app.packageName)
+                    ?: PAYMENT_APP_DEFAULT_COLOR,
                                 onClick = {
                                     if (!PaymentApps.open(context, app.packageName)) viewModel.clearPaymentApp()
                                 },

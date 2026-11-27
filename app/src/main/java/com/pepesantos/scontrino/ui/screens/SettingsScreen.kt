@@ -79,7 +79,6 @@ fun SettingsScreen(
     }
     var showReceiptLanguagesDialog by remember { mutableStateOf(false) }
     val appContext = LocalContext.current.applicationContext
-    val paymentAppsEnabled = remember { PaymentApps.isEnabled(appContext) }
     val paymentPackage by viewModel.paymentApp.collectAsState()
     val paymentAppLabel = remember(paymentPackage) { PaymentApps.load(appContext, paymentPackage)?.label }
     var showPaymentAppDialog by remember { mutableStateOf(false) }
@@ -171,16 +170,14 @@ fun SettingsScreen(
                         },
                     )
                 )
-                if (paymentAppsEnabled) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.settings_payment_app)) },
-                        supportingContent = {
-                            Text(paymentAppLabel ?: stringResource(R.string.settings_payment_app_subtitle))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Contactless, contentDescription = null) },
-                        modifier = Modifier.clickable { showPaymentAppDialog = true }
-                    )
-                }
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_payment_app)) },
+                    supportingContent = {
+                        Text(paymentAppLabel ?: stringResource(R.string.settings_payment_app_subtitle))
+                    },
+                    leadingContent = { Icon(Icons.Filled.Contactless, contentDescription = null) },
+                    modifier = Modifier.clickable { showPaymentAppDialog = true }
+                )
                 HorizontalDivider()
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_aliases)) },

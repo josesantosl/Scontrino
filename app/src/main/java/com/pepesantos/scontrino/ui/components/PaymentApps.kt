@@ -3,7 +3,6 @@ package com.pepesantos.scontrino.ui.components
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.nfc.NfcAdapter
@@ -66,10 +65,6 @@ class PaymentAppChoices(
 object PaymentApps {
 
     private const val ICON_SIZE_PX = 96
-
-    /** Debug builds only for now. */
-    fun isEnabled(context: Context): Boolean =
-        context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     /** The app, or null if it was uninstalled or can no longer be opened. */
     fun load(context: Context, packageName: String): LaunchableApp? {
@@ -135,6 +130,16 @@ object PaymentApps {
         "com.eg.android.AlipayGphone",  // Alipay
         "com.yellowpepper.pichincha",   // Banco Pichincha (Ecuador)
         "com.bancodeguayaquil",         // Banco Guayaquil (Ecuador)
+    )
+
+    /**
+     * Card colour (ARGB) for apps whose icon has a background of its own, so the card matches it
+     * until the user picks another one. Null = the generic default.
+     */
+    fun defaultCardColor(packageName: String): Long? = DEFAULT_CARD_COLORS[packageName]
+
+    private val DEFAULT_CARD_COLORS = mapOf(
+        "com.google.android.apps.walletnfcrel" to 0xFFFFFFFF, // Google Wallet: white icon background
     )
 
     /** The app to open for a payment service's [packageName], or null if there's none. */
