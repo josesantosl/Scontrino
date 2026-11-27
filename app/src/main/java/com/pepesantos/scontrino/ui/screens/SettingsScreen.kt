@@ -196,30 +196,32 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                     modifier = Modifier.clickable { showLicenses = true }
                 )
-            }
 
-            // Same style as "Made in Turin" in the wallet; tapping it opens the GitHub profile.
-            val uriHandler = LocalUriHandler.current
-            val creditColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(role = Role.Button) { uriHandler.openUri(GITHUB_PROFILE_URL) }
-                    .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Developed by José Santos L.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = creditColor,
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_github),
-                    contentDescription = "GitHub",
-                    modifier = Modifier.size(14.dp),
-                    tint = creditColor,
-                )
+                // Last item of the list, scrolling with it rather than pinned to the bottom.
+                // Same style as "Made in Turin" in the wallet; tapping it opens the GitHub profile.
+                val uriHandler = LocalUriHandler.current
+                val creditColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .clickable(role = Role.Button) { uriHandler.openUri(GITHUB_PROFILE_URL) }
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Developed by José Santos L.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = creditColor,
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_github),
+                        contentDescription = "GitHub",
+                        modifier = Modifier.size(14.dp),
+                        tint = creditColor,
+                    )
+                }
             }
         }
     }
