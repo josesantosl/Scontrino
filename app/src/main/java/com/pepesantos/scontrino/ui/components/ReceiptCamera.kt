@@ -1,15 +1,22 @@
 package com.pepesantos.scontrino.ui.components
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.Surface
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.view.CameraController
-import androidx.camera.view.LifecycleCameraController
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -75,7 +82,12 @@ private const val GUIDE_HEIGHT_FRACTION = 0.72f
  * The frame drawn on top is only a guide for the user: the photo is saved whole and the
  * preprocessor finds the receipt in it, exactly as with a gallery picture. Captures at the
  * highest resolution available, favouring quality over latency, since small receipt fonts
- * need every pixel. Tap on the preview to focus, pinch to zoom (CameraController defaults).
+ * need every pixel. Tap on the preview to focus, pinch to zoom.
+ *
+ * The capture rotation is pinned to portrait on purpose. CameraController would follow the
+ * motion sensor, and with the phone held flat over a receipt on a table the sensor easily flips
+ * to landscape, which tags the photo with a 90°/270° rotation that ruins OCR. The UI is
+ * portrait-only, so the photo always matches what the preview shows.
  *
  * The photo goes to the app's cache ([captureDir]); the previous one is deleted on each
  * capture, so at most one is kept.
@@ -94,31 +106,66 @@ fun ReceiptCamera(
     var torchOn by remember { mutableStateOf(false) }
     var capturing by remember { mutableStateOf(false) }
 
-    val controller = remember {
-        LifecycleCameraController(context).apply {
-            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
-            imageCaptureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
-            imageCaptureResolutionSelector = ResolutionSelector.Builder()
-                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
-                .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
-                .build()
+    var camera by remember { mutableStateOf<Camera?>(null) }
+
+    val previewView = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            scaleType = PreviewView.ScaleType.FILL_CENTER
         }
+    }
+    val preview = remember {
+        Preview.Builder()
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                    .build()
+            )
+            .setTargetRotation(Surface.ROTATION_0)
+            .build()
+    }
+    val imageCapture = remember {
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                    .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                    .build()
+            )
+            // Fixed: never follow the device sensor (see the KDoc above).
+            .setTargetRotation(Surface.ROTATION_0)
+            .build()
     }
 
     DisposableEffect(lifecycleOwner) {
-        controller.bindToLifecycle(lifecycleOwner)
-        onDispose { controller.unbind() }
+        val providerFuture = ProcessCameraProvider.getInstance(context)
+        var provider: ProcessCameraProvider? = null
+        var disposed = false
+        providerFuture.addListener({
+            if (disposed) return@addListener
+            try {
+                val p = providerFuture.get().also { provider = it }
+                p.unbind(preview, imageCapture)
+                preview.setSurfaceProvider(previewView.surfaceProvider)
+                camera = p.bindToLifecycle(
+                    lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture,
+                )
+            } catch (e: Exception) {
+                Log.e("ReceiptCamera", "Cannot start the camera", e)
+                onError(e.message ?: e.javaClass.simpleName)
+            }
+        }, ContextCompat.getMainExecutor(context))
+        onDispose {
+            disposed = true
+            provider?.unbind(preview, imageCapture)
+            camera = null
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         AndroidView(
-            factory = { ctx ->
-                PreviewView(ctx).apply {
-                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                    scaleType = PreviewView.ScaleType.FILL_CENTER
-                    this.controller = controller
-                }
-            },
+            factory = { previewView.apply { installTouchGestures { camera } } },
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -146,7 +193,7 @@ fun ReceiptCamera(
         IconButton(
             onClick = {
                 torchOn = !torchOn
-                controller.enableTorch(torchOn)
+                camera?.cameraControl?.enableTorch(torchOn)
             },
             modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp),
         ) {
@@ -197,7 +244,7 @@ fun ReceiptCamera(
                         .clickable(role = Role.Button) {
                             capturing = true
                             takePicture(
-                                context, controller,
+                                context, imageCapture,
                                 onSaved = { uri ->
                                     capturing = false
                                     onCaptured(uri)
@@ -230,9 +277,45 @@ private fun ReceiptGuide(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Tap to focus and pinch to zoom, as CameraController used to provide. [camera] is read on
+ * each event since it is only available once the provider has bound the use cases.
+ */
+@SuppressLint("ClickableViewAccessibility") // Focus/zoom only; the shutter is a separate button.
+private fun PreviewView.installTouchGestures(camera: () -> Camera?) {
+    val scaleDetector = ScaleGestureDetector(
+        context,
+        object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val cam = camera() ?: return false
+                val zoom = cam.cameraInfo.zoomState.value ?: return false
+                cam.cameraControl.setZoomRatio(
+                    (zoom.zoomRatio * detector.scaleFactor)
+                        .coerceIn(zoom.minZoomRatio, zoom.maxZoomRatio)
+                )
+                return true
+            }
+        },
+    )
+    var scaled = false
+    setOnTouchListener { _, event ->
+        scaleDetector.onTouchEvent(event)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> scaled = false
+            MotionEvent.ACTION_POINTER_DOWN -> scaled = true
+            MotionEvent.ACTION_UP -> if (!scaled) {
+                camera()?.cameraControl?.startFocusAndMetering(
+                    FocusMeteringAction.Builder(meteringPointFactory.createPoint(event.x, event.y)).build()
+                )
+            }
+        }
+        true
+    }
+}
+
 private fun takePicture(
     context: Context,
-    controller: LifecycleCameraController,
+    imageCapture: ImageCapture,
     onSaved: (Uri) -> Unit,
     onFailed: (String) -> Unit,
 ) {
@@ -241,7 +324,7 @@ private fun takePicture(
     // A new name each time, so nothing downstream can mistake it for the previous photo.
     val file = File(dir, "receipt-${System.currentTimeMillis()}.jpg")
 
-    controller.takePicture(
+    imageCapture.takePicture(
         ImageCapture.OutputFileOptions.Builder(file).build(),
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {

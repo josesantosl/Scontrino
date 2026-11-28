@@ -1,10 +1,10 @@
 #+TITLE: Roadmap
 #+AUTHOR: José Santos L.
-#+TODO: IDEA(i) TODO(t) STRT(s) WAIT(w@) HOLD(h@) | DONE(d!) KILL(k@)
 #+STARTUP: logdone
 
 * Release
 ** STRT Store screenshots
+DEADLINE: <2026-12-01 Tue>
 Screenshots for F-Droid and Google Play, stored under fastlane/metadata so both
 stores use the same set. Dark theme for most shots plus one in light theme, taken
 one locale at a time for all seven languages.
