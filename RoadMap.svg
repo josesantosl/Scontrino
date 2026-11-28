@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="649" height="2424" viewBox="0 0 649 2424" font-family="sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<line x1="30" y1="15" x2="30" y2="2394" stroke="#424242" stroke-width="2"/>
+<polygon points="23,2392 37,2392 30,2406" fill="#424242"/>
+<circle cx="30" cy="30" r="5" fill="#2e7d32"/>
+<text x="50" y="34.5" fill="#212121"><tspan>Project structure and tab navigation</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-05</tspan></text>
+<circle cx="30" cy="54" r="5" fill="#2e7d32"/>
+<text x="50" y="58.5" fill="#212121"><tspan>Add receipt screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-11</tspan></text>
+<circle cx="30" cy="78" r="5" fill="#2e7d32"/>
+<text x="50" y="82.5" fill="#212121"><tspan>Room entities, DAOs, database and repositories</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-13</tspan></text>
+<circle cx="30" cy="102" r="5" fill="#2e7d32"/>
+<text x="50" y="106.5" fill="#212121"><tspan>ViewModels</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-13</tspan></text>
+<circle cx="30" cy="126" r="5" fill="#2e7d32"/>
+<text x="50" y="130.5" fill="#212121"><tspan>Unit tests for ViewModels and repositories</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-15</tspan></text>
+<circle cx="30" cy="150" r="5" fill="#2e7d32"/>
+<text x="50" y="154.5" fill="#212121"><tspan>Edit and delete receipts</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-15</tspan></text>
+<circle cx="30" cy="174" r="5" fill="#2e7d32"/>
+<text x="50" y="178.5" fill="#212121"><tspan>Loyalty cards linked to stores, store colours in the UI</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-15</tspan></text>
+<circle cx="30" cy="198" r="5" fill="#2e7d32"/>
+<text x="50" y="202.5" fill="#212121"><tspan>Category per item</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-17</tspan></text>
+<circle cx="30" cy="222" r="5" fill="#2e7d32"/>
+<text x="50" y="226.5" fill="#212121"><tspan>Barcode scanner for loyalty cards</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-05-17</tspan></text>
+<circle cx="30" cy="246" r="5" fill="#2e7d32"/>
+<text x="50" y="250.5" fill="#212121"><tspan>Items without price</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-01</tspan></text>
+<circle cx="30" cy="270" r="5" fill="#2e7d32"/>
+<text x="50" y="274.5" fill="#212121"><tspan>Weight and volume per item</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-01</tspan></text>
+<circle cx="30" cy="294" r="5" fill="#2e7d32"/>
+<text x="50" y="298.5" fill="#212121"><tspan>Category translations</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-01</tspan></text>
+<circle cx="30" cy="318" r="5" fill="#2e7d32"/>
+<text x="50" y="322.5" fill="#212121"><tspan>More keywords for automatic categorization</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-01</tspan></text>
+<circle cx="30" cy="342" r="5" fill="#2e7d32"/>
+<text x="50" y="346.5" fill="#212121"><tspan>Autocomplete for stores and products</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-02</tspan></text>
+<circle cx="30" cy="366" r="5" fill="#2e7d32"/>
+<text x="50" y="370.5" fill="#212121"><tspan>Unsaved changes dialog</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-03</tspan></text>
+<circle cx="30" cy="390" r="5" fill="#2e7d32"/>
+<text x="50" y="394.5" fill="#212121"><tspan>Store name autocomplete</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-03</tspan></text>
+<circle cx="30" cy="414" r="5" fill="#2e7d32"/>
+<text x="50" y="418.5" fill="#212121"><tspan>More representative category icons</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-05</tspan></text>
+<circle cx="30" cy="438" r="5" fill="#2e7d32"/>
+<text x="50" y="442.5" fill="#212121"><tspan>Statistics screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-05</tspan></text>
+<circle cx="30" cy="462" r="5" fill="#2e7d32"/>
+<text x="50" y="466.5" fill="#212121"><tspan>Price comparison across supermarkets</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-05</tspan></text>
+<circle cx="30" cy="486" r="5" fill="#2e7d32"/>
+<text x="50" y="490.5" fill="#212121"><tspan>Replace ML Kit with zxing-cpp</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-06</tspan></text>
+<circle cx="30" cy="510" r="5" fill="#2e7d32"/>
+<text x="50" y="514.5" fill="#212121"><tspan>Offline OCR pipeline with a debug lab</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-06</tspan></text>
+<circle cx="30" cy="534" r="5" fill="#2e7d32"/>
+<text x="50" y="538.5" fill="#212121"><tspan>Prefill price and weight from the last purchase in the same store</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-07</tspan></text>
+<circle cx="30" cy="558" r="5" fill="#9e9e9e"/>
+<text x="50" y="562.5" fill="#757575"><tspan text-decoration="line-through">Price change hint under each item</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-07</tspan></text>
+<circle cx="30" cy="582" r="5" fill="#2e7d32"/>
+<text x="50" y="586.5" fill="#212121"><tspan>Single-column layout using the engine's own lines</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-07</tspan></text>
+<circle cx="30" cy="606" r="5" fill="#2e7d32"/>
+<text x="50" y="610.5" fill="#212121"><tspan>Parse rows into items, discounts, total and date</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-07</tspan></text>
+<circle cx="30" cy="630" r="5" fill="#2e7d32"/>
+<text x="50" y="634.5" fill="#212121"><tspan>Prefill a new receipt from a scan</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-07</tspan></text>
+<circle cx="30" cy="654" r="5" fill="#2e7d32"/>
+<text x="50" y="658.5" fill="#212121"><tspan>Keyboard-friendly receipt form</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="678" r="5" fill="#2e7d32"/>
+<text x="50" y="682.5" fill="#212121"><tspan>Weights of scanned items from purchase history</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="702" r="5" fill="#2e7d32"/>
+<text x="50" y="706.5" fill="#212121"><tspan>Product aliases</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="726" r="5" fill="#2e7d32"/>
+<text x="50" y="730.5" fill="#212121"><tspan>Aliases own their category</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="750" r="5" fill="#2e7d32"/>
+<text x="50" y="754.5" fill="#212121"><tspan>Default categories reorganized</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="774" r="5" fill="#2e7d32"/>
+<text x="50" y="778.5" fill="#212121"><tspan>Settings tab with language and currency</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-08</tspan></text>
+<circle cx="30" cy="798" r="5" fill="#2e7d32"/>
+<text x="50" y="802.5" fill="#212121"><tspan>Provisional logo as launcher icon and splash screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="822" r="5" fill="#2e7d32"/>
+<text x="50" y="826.5" fill="#212121"><tspan>Store tax IDs beyond Italy</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="846" r="5" fill="#2e7d32"/>
+<text x="50" y="850.5" fill="#212121"><tspan>Optional erasing of long lines and creases</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="870" r="5" fill="#2e7d32"/>
+<text x="50" y="874.5" fill="#212121"><tspan>Try other layout modes when a receipt doesn't add up</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="894" r="5" fill="#2e7d32"/>
+<text x="50" y="898.5" fill="#212121"><tspan>Collapsible cards and tappable spending chart</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="918" r="5" fill="#2e7d32"/>
+<text x="50" y="922.5" fill="#212121"><tspan>Simplified Chinese and the yuan</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-09</tspan></text>
+<circle cx="30" cy="942" r="5" fill="#2e7d32"/>
+<text x="50" y="946.5" fill="#212121"><tspan>In-app camera with a guide frame and torch</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-10</tspan></text>
+<circle cx="30" cy="966" r="5" fill="#2e7d32"/>
+<text x="50" y="970.5" fill="#212121"><tspan>Carrefour receipts: VAT column, edge noise, quantity lines</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-10</tspan></text>
+<circle cx="30" cy="990" r="5" fill="#2e7d32"/>
+<text x="50" y="994.5" fill="#212121"><tspan>Sales tax added at the till</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-13</tspan></text>
+<circle cx="30" cy="1014" r="5" fill="#2e7d32"/>
+<text x="50" y="1018.5" fill="#212121"><tspan>Horizontal scroll in charts</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-16</tspan></text>
+<circle cx="30" cy="1038" r="5" fill="#2e7d32"/>
+<text x="50" y="1042.5" fill="#212121"><tspan>New app icon</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-19</tspan></text>
+<circle cx="30" cy="1062" r="5" fill="#2e7d32"/>
+<text x="50" y="1066.5" fill="#212121"><tspan>Dark mode, on by default</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-19</tspan></text>
+<circle cx="30" cy="1086" r="5" fill="#2e7d32"/>
+<text x="50" y="1090.5" fill="#212121"><tspan>Inverted app icon matching the theme</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-19</tspan></text>
+<circle cx="30" cy="1110" r="5" fill="#2e7d32"/>
+<text x="50" y="1114.5" fill="#212121"><tspan>Lidl receipts: quantity lines, tax ID, slashed zeros</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1134" r="5" fill="#2e7d32"/>
+<text x="50" y="1138.5" fill="#212121"><tspan>Receipt scanning out of debug builds</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1158" r="5" fill="#9e9e9e"/>
+<text x="50" y="1162.5" fill="#757575"><tspan text-decoration="line-through">Guess receipt languages from the system region</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1182" r="5" fill="#9e9e9e"/>
+<text x="50" y="1186.5" fill="#757575"><tspan text-decoration="line-through">Scan entry inside the add menu</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1206" r="5" fill="#2e7d32"/>
+<text x="50" y="1210.5" fill="#212121"><tspan>Portuguese and Brazilian receipts</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1230" r="5" fill="#2e7d32"/>
+<text x="50" y="1234.5" fill="#212121"><tspan>Portuguese app language</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-21</tspan></text>
+<circle cx="30" cy="1254" r="5" fill="#2e7d32"/>
+<text x="50" y="1258.5" fill="#212121"><tspan>Open source licenses screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1278" r="5" fill="#9e9e9e"/>
+<text x="50" y="1282.5" fill="#757575"><tspan text-decoration="line-through">AboutLibraries for the licenses screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1302" r="5" fill="#2e7d32"/>
+<text x="50" y="1306.5" fill="#212121"><tspan>Slim OpenCV built from source</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1326" r="5" fill="#2e7d32"/>
+<text x="50" y="1330.5" fill="#212121"><tspan>Reproducible, offline OpenCV build for F-Droid</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1350" r="5" fill="#2e7d32"/>
+<text x="50" y="1354.5" fill="#212121"><tspan>R8 code and resource shrinking</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1374" r="5" fill="#2e7d32"/>
+<text x="50" y="1378.5" fill="#212121"><tspan>Match misread product names to known products</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-22</tspan></text>
+<circle cx="30" cy="1398" r="5" fill="#2e7d32"/>
+<text x="50" y="1402.5" fill="#212121"><tspan>Spanish receipts: printed weights, units column, VAT table check</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1422" r="5" fill="#2e7d32"/>
+<text x="50" y="1426.5" fill="#212121"><tspan>Receipt photo and line crops while reviewing a scan</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1446" r="5" fill="#2e7d32"/>
+<text x="50" y="1450.5" fill="#212121"><tspan>Show what the scan corrected on each item</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1470" r="5" fill="#9e9e9e"/>
+<text x="50" y="1474.5" fill="#757575"><tspan text-decoration="line-through">Highlight low-confidence items</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1494" r="5" fill="#9e9e9e"/>
+<text x="50" y="1498.5" fill="#757575"><tspan text-decoration="line-through">Tap a line crop to open the viewer zoomed on it</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1518" r="5" fill="#2e7d32"/>
+<text x="50" y="1522.5" fill="#212121"><tspan>Payment app shortcut</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1542" r="5" fill="#2e7d32"/>
+<text x="50" y="1546.5" fill="#212121"><tspan>Richer card colours and a custom colour picker</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1566" r="5" fill="#2e7d32"/>
+<text x="50" y="1570.5" fill="#212121"><tspan>Known payment apps listed first</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-23</tspan></text>
+<circle cx="30" cy="1590" r="5" fill="#2e7d32"/>
+<text x="50" y="1594.5" fill="#212121"><tspan>German and French total wording</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-24</tspan></text>
+<circle cx="30" cy="1614" r="5" fill="#2e7d32"/>
+<text x="50" y="1618.5" fill="#212121"><tspan>Edit cards on long press and reorder by dragging</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-25</tspan></text>
+<circle cx="30" cy="1638" r="5" fill="#9e9e9e"/>
+<text x="50" y="1642.5" fill="#757575"><tspan text-decoration="line-through">Release run configuration</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1662" r="5" fill="#2e7d32"/>
+<text x="50" y="1666.5" fill="#212121"><tspan>Scan straight from the receipts list</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1686" r="5" fill="#2e7d32"/>
+<text x="50" y="1690.5" fill="#212121"><tspan>Stale keyboard height squeezing the screen on open</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1710" r="5" fill="#2e7d32"/>
+<text x="50" y="1714.5" fill="#212121"><tspan>Choose the start screen</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1734" r="5" fill="#9e9e9e"/>
+<text x="50" y="1738.5" fill="#757575"><tspan text-decoration="line-through">Demo data seeder</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1758" r="5" fill="#9e9e9e"/>
+<text x="50" y="1762.5" fill="#757575"><tspan text-decoration="line-through">Launcher shortcuts</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1782" r="5" fill="#2e7d32"/>
+<text x="50" y="1786.5" fill="#212121"><tspan>Portrait only, for now</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-26</tspan></text>
+<circle cx="30" cy="1806" r="5" fill="#2e7d32"/>
+<text x="50" y="1810.5" fill="#212121"><tspan>Payment apps available in release builds</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-27</tspan></text>
+<circle cx="30" cy="1830" r="5" fill="#2e7d32"/>
+<text x="50" y="1834.5" fill="#212121"><tspan>Camera photos rotated sideways</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-28</tspan></text>
+<circle cx="30" cy="1854" r="5" fill="#2e7d32"/>
+<text x="50" y="1858.5" fill="#212121"><tspan>Turn off system backup for now</tspan><tspan fill="#9e9e9e" font-weight="normal">: 2026-11-28</tspan></text>
+<circle cx="30" cy="1888" r="8" fill="#ffffff" stroke="#424242" stroke-width="2"/>
+<text x="50" y="1892.5" fill="#212121" font-weight="bold"><tspan>Store screenshots</tspan><tspan fill="#c0605a" font-weight="normal">: 2026-12-01</tspan></text>
+<circle cx="30" cy="1922" r="5" fill="#ef6c00"/>
+<text x="50" y="1926.5" fill="#212121"><tspan>Line and crease eraser in regular scanning</tspan></text>
+<circle cx="30" cy="1946" r="5" fill="#ef6c00"/>
+<text x="50" y="1950.5" fill="#212121"><tspan>French receipt column headers</tspan></text>
+<circle cx="30" cy="1970" r="5" fill="#ef6c00"/>
+<text x="50" y="1974.5" fill="#212121"><tspan>Real Portuguese and Brazilian receipts</tspan></text>
+<circle cx="30" cy="1994" r="5" fill="#ef6c00"/>
+<text x="50" y="1998.5" fill="#212121"><tspan>Simplified Chinese receipts</tspan></text>
+<circle cx="30" cy="2018" r="5" fill="#ef6c00"/>
+<text x="50" y="2022.5" fill="#212121"><tspan>Share a scan for testing</tspan></text>
+<circle cx="30" cy="2042" r="5" fill="#ef6c00"/>
+<text x="50" y="2046.5" fill="#212121"><tspan>User-controlled backups</tspan></text>
+<circle cx="30" cy="2076" r="5" fill="#1565c0"/>
+<text x="50" y="2080.5" fill="#212121"><tspan>Release signing key</tspan></text>
+<circle cx="30" cy="2100" r="5" fill="#1565c0"/>
+<text x="50" y="2104.5" fill="#212121"><tspan>First release on F-Droid</tspan></text>
+<circle cx="30" cy="2124" r="5" fill="#1565c0"/>
+<text x="50" y="2128.5" fill="#212121"><tspan>First release on Google Play</tspan></text>
+<circle cx="30" cy="2148" r="5" fill="#1565c0"/>
+<text x="50" y="2152.5" fill="#212121"><tspan>Regression tests on real receipt photos</tspan></text>
+<circle cx="30" cy="2172" r="5" fill="#1565c0"/>
+<text x="50" y="2176.5" fill="#212121"><tspan>First launch: adding a receipt</tspan></text>
+<circle cx="30" cy="2196" r="5" fill="#1565c0"/>
+<text x="50" y="2200.5" fill="#212121"><tspan>First item edit: aliases and product size</tspan></text>
+<circle cx="30" cy="2220" r="5" fill="#1565c0"/>
+<text x="50" y="2224.5" fill="#212121"><tspan>After the first receipt: add a loyalty card</tspan></text>
+<circle cx="30" cy="2244" r="5" fill="#1565c0"/>
+<text x="50" y="2248.5" fill="#212121"><tspan>Price comparison hint</tspan></text>
+<circle cx="30" cy="2268" r="5" fill="#1565c0"/>
+<text x="50" y="2272.5" fill="#212121"><tspan>Replay the tutorial from settings</tspan></text>
+<circle cx="30" cy="2302" r="5" fill="#8e24aa"/>
+<text x="50" y="2306.5" fill="#555555"><tspan>Column-based reading</tspan></text>
+<circle cx="30" cy="2326" r="5" fill="#8e24aa"/>
+<text x="50" y="2330.5" fill="#555555"><tspan>Fine-tune Tesseract for slashed zeros</tspan></text>
+<circle cx="30" cy="2350" r="5" fill="#8e24aa"/>
+<text x="50" y="2354.5" fill="#555555"><tspan>Personal tip: use a receipt as a shopping list</tspan></text>
+<circle cx="30" cy="2374" r="5" fill="#8e24aa"/>
+<text x="50" y="2378.5" fill="#555555"><tspan>Tablet and landscape layout</tspan></text>
+</svg>
