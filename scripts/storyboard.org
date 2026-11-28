@@ -1,0 +1,112 @@
+#+title: Storyboard
+#+TITLE: Scontrino — guion del vídeo promocional
+#+DATE: 2026-11-28
+#+STARTUP: overview
+#+TODO: TODO(t) EN-CURSO(e) | HECHO(d)
+
+* Idea
+Una sola compra en el súper, de la caja al ticket guardado. Enseña el flujo completo de Scontrino sin explicarlo: wallet, pago, escaneo y categorías.
+
+** Reglas
+- Sin caras: la clienta siempre de espaldas y la cajera tapada por ella.
+- Sin marcas: fachada, tarjetas y ticket con logos inventados.
+- Todo el diálogo va subtitulado en inglés (en Play Store el vídeo suele verse sin sonido al principio).
+- Los planos de móvil son grabaciones reales de la app.
+- Los planos del súper son ilustraciones estáticas con zoom o paneo suave.
+- La duración la decide el animatic: primero imágenes + audio, y se recorta lo que sobre.
+
+* Guion plano por plano
+** TODO Plano 1 — Fachada
+- Ve :: fachada de un supermercado sin marcas
+- Oye :: ambiente suave de calle
+- Hace :: ilustración, zoom lento
+
+** TODO Plano 2 — Caja
+- Ve :: clienta de espaldas con unos 10 productos en la cinta
+- Oye :: Clienta: "Hi" / Cajera: "Hi, do you have our card?" / Clienta: "Yeah"
+- Hace :: ilustración en dos capas, paneo leve
+
+** TODO Plano 3 — Wallet
+- Ve :: app abierta, botón Wallet, segunda tarjeta, código de barras
+- Oye :: beep de lectura
+- Hace :: grabación de pantalla
+
+** TODO Plano 4 — Productos pasando (duda)
+- Ve :: vuelta a la caja, cinta con 10, luego 5 y luego 0 productos, bolsas llenándose
+- Oye :: dos beeps de lectura más, uno por cambio de imagen
+- Hace :: tres variantes de la ilustración del plano 2
+- Nota :: propuesta; alternativa, mostrar algo en el móvil
+
+** TODO Plano 5 — Total
+- Ve :: clienta de espaldas con dos bolsas, tapando a la cajera
+- Oye :: Cajera: "That's 26.99"
+- Hace :: ilustración, variante final
+
+** TODO Plano 6 — Pago
+- Ve :: móvil; cierra la tarjeta de fidelidad, abre la tarjeta de pago de arriba, fondo negro, círculo que tras un segundo muestra un visto blanco
+- Oye :: Clienta: "Sure!" + beep de confirmación
+- Hace :: grabación de la app + pantalla de pago genérica dibujada (sin logo de Google)
+
+** TODO Plano 7 — Impresora
+- Ve :: la pantalla vuelve sola a Wallet
+- Oye :: ruido de impresora láser
+- Hace :: grabación de pantalla
+
+** TODO Plano 8 — Despedida de la cajera
+- Ve :: misma pantalla de Wallet
+- Oye :: Cajera: "Have a nice day!"
+- Hace :: mismo clip, sin cortar
+
+** TODO Plano 9 — Escáner
+- Ve :: pantalla de tickets, botón flotante de cámara, escáner apuntando a un ticket de 26.99
+- Oye :: clic de cámara
+- Hace :: grabación de pantalla
+
+** TODO Plano 10 — Ticket cargado
+- Ve :: barra de carga de un segundo y el ticket cargado, dividido por categorías
+- Oye :: Clienta, voz baja: "Perfect..."
+- Hace :: grabación de pantalla
+
+** TODO Plano 11 — Guardar
+- Ve :: toca "Save ticket" y el ticket queda guardado
+- Oye :: Clienta: "Bye, have a nice day!!"
+- Hace :: grabación de pantalla
+
+** TODO Plano 12 — Logo
+- Ve :: un ticket blanco sube desde abajo, crece y deja en el centro el logo de Scontrino sobre fondo negro
+- Oye :: sin voz, sonido suave de cierre
+- Hace :: animación simple de un rectángulo que crece + logo
+
+* Producción
+** TODO Ilustraciones (4 imágenes base)
+- [ ] Fachada del súper sin marcas
+- [ ] Caja con la clienta de espaldas y unos 10 productos en la cinta
+- [ ] Variantes de la caja: 5 productos, 0 productos, dos bolsas llenas
+- [ ] Logo de Scontrino sobre fondo negro + ticket blanco que crece
+
+** TODO Grabaciones de pantalla (scrcpy o grabadora de Android)
+- [ ] Wallet: abrir la tarjeta de fidelidad y mostrar el código de barras
+- [ ] Cerrar esa tarjeta y abrir la tarjeta de pago
+- [ ] Pantalla de pago genérica con el círculo y el visto (dibujada, no real)
+- [ ] Tickets, botón de cámara y escáner sobre un ticket de prueba de 26.99
+- [ ] Ticket cargado con categorías y toque en "Save ticket"
+
+** TODO Audio (voces en inglés)
+- [ ] Voces clienta: Hi, Yeah, Sure!, Perfect..., Bye
+- [ ] Voces cajera: Hi do you have our card?, That's 26.99, Have a nice day!
+- [ ] Beep de lectura y beep de confirmación
+- [ ] Impresora láser, clic de cámara, ambiente de calle
+
+* Herramientas
+- Dibujo  :: Inkscape (vectorial, ideal para siluetas planas y capas separadas) o Krita (si prefieres pintar a mano)
+- Montaje :: Kdenlive o Shotcut
+- Sonidos :: freesound.org filtrando por CC0
+- Voces   :: con Piper TTS
+- Grabación de pantalla :: scrcpy o la grabadora de Android
+
+
+* Pendientes
+- [ ] Hacer el animatic (imágenes + audio) y decidir la duración final
+- [ ] Decidir qué mostrar en el plano 4
+- [ ] Que el ticket de prueba del plano 9 sume exactamente 26.99
+- [ ] Si no llega para diciembre, publicar la app sin vídeo y añadirlo después (opcional en Play Store, se enlaza desde YouTube).
