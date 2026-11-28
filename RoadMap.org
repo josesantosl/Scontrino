@@ -1,0 +1,472 @@
+#+TITLE: Roadmap
+#+AUTHOR: José Santos L.
+#+TODO: IDEA(i) TODO(t) STRT(s) WAIT(w@) HOLD(h@) | DONE(d!) KILL(k@)
+#+STARTUP: logdone
+
+* Release
+** STRT Store screenshots
+Screenshots for F-Droid and Google Play, stored under fastlane/metadata so both
+stores use the same set. Dark theme for most shots plus one in light theme, taken
+one locale at a time for all seven languages.
+
+Taken from a release build on an emulator with demo data filled in by hand, with
+the system bar in demo mode (fixed clock, full battery, no notifications).
+Backgrounds and captions are added afterwards.
+** TODO Release signing key
+The release build is currently signed with the debug key for local testing. A
+real keystore has to be created and kept safe before anything is published:
+losing it means users can't update the app.
+** TODO First release on F-Droid
+The build recipe is drafted. Everything builds from source:
+- Tesseract4Android comes from JitPack, which F-Droid accepts.
+- OpenCV is built by our own script, which can clone its sources itself and
+  produces the same bytes from any directory.
+- No proprietary dependencies, no tracking, no network access.
+** TODO First release on Google Play
+Same APK contents as the F-Droid build: no Play-only flavour, no Google
+libraries. Needs the store listing, the data safety form (no data collected,
+nothing shared) and the content rating questionnaire.
+** DONE Provisional logo as launcher icon and splash screen
+CLOSED: [2026-11-09 Mon]
+The logo is shown on launch for at least half a second so the splash doesn't
+just flash.
+** DONE New app icon
+CLOSED: [2026-11-19 Thu]
+** DONE Open source licenses screen
+CLOSED: [2026-11-22 Sun]
+Settings → Open source licenses. One entry per project rather than per artifact:
+- Tesseract OCR (with Tesseract4Android, tessdata, Leptonica, libjpeg, libpng)
+- OpenCV (with KleidiCV, Carotene, cpufeatures)
+- zxing-cpp and ZXing
+- Android Jetpack (with the small libraries it pulls in)
+- Kotlin
+
+Each entry has a translated line saying what the library is used for, and the
+full license texts ship with the app. The list is kept by hand and must be
+updated whenever a runtime dependency changes.
+
+The same day, unused dependencies were removed.
+** KILL AboutLibraries for the licenses screen
+CLOSED: [2026-11-22 Sun]
+It generated over 150 entries (one per AndroidX artifact). Getting a clean list
+needed exclusion patterns, hand-written entries for the native code inside
+Tesseract4Android and pinning an old version to stay compatible with our Compose
+BOM. A hand-kept list turned out simpler and clearer.
+** DONE Slim OpenCV built from source
+CLOSED: [2026-11-22 Sun]
+Instead of the full OpenCV AAR, a local :opencv module built from source with
+only the core and imgproc modules plus the Java bindings. KleidiCV and Carotene
+are kept for speed on ARM; IPP, ITT and image codecs are off.
+
+Release APK went from 80 MB to 53 MB.
+** DONE Reproducible, offline OpenCV build for F-Droid
+CLOSED: [2026-11-22 Sun]
+The build script accepts pre-downloaded sources (F-Droid srclibs), a list of
+ABIs, and gives byte-identical output across directories. It needs one exact NDK
+version.
+** DONE R8 code and resource shrinking
+CLOSED: [2026-11-22 Sun]
+Release builds only. Tesseract, Leptonica and OpenCV classes are kept whole
+because native code looks them up by name.
+
+Release APK went from 53 MB to 41 MB; dex code from 13.2 MB to 1.9 MB.
+** KILL Release run configuration
+CLOSED: [2026-11-26 Thu]
+A dedicated run configuration and Gradle task for the release build. Switching
+the build variant to release and using the normal Run does the same with less to
+maintain.
+** DONE Payment apps available in release builds
+CLOSED: [2026-11-27 Fri]
+The payment app shortcut started as a debug-only experiment. Now in every build,
+with a sensible default card colour for the best-known wallet apps.
+
+* Foundations
+** DONE Project structure and tab navigation
+CLOSED: [2026-05-05 Tue]
+Single activity, Jetpack Compose, one tab per main screen.
+** DONE Room entities, DAOs, database and repositories
+CLOSED: [2026-05-13 Wed]
+Receipts, items, products, categories, stores and loyalty cards, with foreign
+keys between them and prepopulated categories.
+** DONE ViewModels
+CLOSED: [2026-05-13 Wed]
+MVVM: the data layer is separate from the UI and ViewModels hold the logic.
+** DONE Unit tests for ViewModels and repositories
+CLOSED: [2026-05-15 Fri]
+** DONE Replace ML Kit with zxing-cpp
+CLOSED: [2026-11-06 Fri]
+ML Kit was used to read loyalty card barcodes. It was the last Google library in
+the app and needed Play Services on some devices. zxing-cpp is open source, runs
+on-device and works on de-Googled phones.
+
+* Receipts
+** DONE Add receipt screen
+CLOSED: [2026-05-11 Mon]
+Store, date and a list of items with name, price and quantity.
+** DONE Edit and delete receipts
+CLOSED: [2026-05-15 Fri]
+** DONE Category per item
+CLOSED: [2026-05-17 Sun]
+Suggested automatically from the product name, editable per item.
+** DONE Items without price
+CLOSED: [2026-11-01 Sun]
+So a receipt can be saved while some prices are still unknown.
+** DONE Weight and volume per item
+CLOSED: [2026-11-01 Sun]
+Optional. Needed to compare prices per kilo or per litre between stores.
+** DONE Autocomplete for stores and products
+CLOSED: [2026-11-02 Mon]
+** DONE Unsaved changes dialog
+CLOSED: [2026-11-03 Tue]
+Leaving a receipt with changes (back gesture or button) asks before discarding.
+** DONE Prefill price and weight from the last purchase in the same store
+CLOSED: [2026-11-07 Sat]
+Applies to items added by hand. Scanned items keep the price printed on the
+receipt.
+** KILL Price change hint under each item
+CLOSED: [2026-11-07 Sat]
+A "last time: X" note under each item. Removed: for products sold by weight the
+total changes every time, so the hint mostly reported noise.
+** DONE Keyboard-friendly receipt form
+CLOSED: [2026-11-08 Sun]
+Enter jumps to the next field and the save button stays above the keyboard.
+** DONE Sales tax added at the till
+CLOSED: [2026-11-13 Fri]
+For US-style receipts where tax is added at the end instead of included in each
+price. A setting switches it on; then a receipt has a tax field and a total.
+
+Tax is stored once per receipt, not per item, so product prices, categories and
+price comparisons stay pre-tax while totals and spending stats include it. The
+scanner finds the tax line by checking that items plus tax equal the total.
+** DONE Scan straight from the receipts list
+CLOSED: [2026-11-26 Thu]
+A large camera button opens the scanner directly; a small one below opens an
+empty receipt for manual entry. A scan started from the list goes back to the
+list when done.
+** DONE Stale keyboard height squeezing the screen on open
+CLOSED: [2026-11-26 Thu]
+Sometimes the receipt screen opened with the save button raised as if a keyboard
+were showing. It may not have been the only cause.
+
+* Scanning
+** DONE Offline OCR pipeline with a debug lab
+CLOSED: [2026-11-06 Fri]
+All on the device:
+1. OpenCV finds the receipt (by its corners, or the bright region), crops,
+   deskews, evens out the lighting and binarizes.
+2. Tesseract reads the text, with word positions and confidence.
+3. Words are grouped into rows and handed to the parser.
+
+The debug lab shows every stage and has switches for each step, to tune the
+pipeline on real photos.
+** DONE Single-column layout using the engine's own lines
+CLOSED: [2026-11-07 Sat]
+Receipts are one narrow column. Telling Tesseract so, and using its own line
+grouping instead of rebuilding rows from word positions, fixed most split and
+merged rows.
+** DONE Parse rows into items, discounts, total and date
+CLOSED: [2026-11-07 Sat]
+Rule-based, no AI model. It finds the column header, item lines with their
+prices, discount lines, the total and the payment lines, and the date. The total
+is checked against the sum of the items, which lets it fix a single misread price.
+** DONE Prefill a new receipt from a scan
+CLOSED: [2026-11-07 Sat]
+"Use this receipt" turns a scan into a new receipt ready to review. The store is
+matched by the tax ID printed on the receipt, or by name.
+** DONE Weights of scanned items from purchase history
+CLOSED: [2026-11-08 Sun]
+Most Italian receipts don't print weights. If the same product was bought before
+in the same store at the same unit price, its weight is filled in. Never applied
+to saved receipts.
+** DONE Store tax IDs beyond Italy
+CLOSED: [2026-11-09 Mon]
+The parser was made generic: year-first dates, Spanish payment words, change
+lines not taken as totals, and several tax ID formats.
+** DONE Optional erasing of long lines and creases
+CLOSED: [2026-11-09 Mon]
+Removes ink strokes much longer than any letter before binarizing, so folds and
+creases don't break lines. Lab only, off by default.
+** DONE Try other layout modes when a receipt doesn't add up
+CLOSED: [2026-11-09 Mon]
+The chosen mode runs first; only if the result doesn't add up are the others
+tried. Readings are ranked by:
+1. Items that add up to the total, with no corrections.
+2. More product names you already have, because names matter as much as amounts:
+   they link items to products, aliases, comparisons and stats.
+3. Confidence of the name words.
+4. More items.
+** DONE In-app camera with a guide frame and torch
+CLOSED: [2026-11-10 Tue]
+CameraX at the highest resolution, a tall guide frame (visual only; the whole
+photo is kept and the preprocessor finds the receipt), torch, tap to focus and
+pinch to zoom. The gallery stays available. Photos are not saved to the gallery.
+** DONE Carrefour receipts: VAT column, edge noise, quantity lines
+CLOSED: [2026-11-10 Tue]
+- The VAT rate printed as a plain number next to the price is told apart by
+  which column header it sits under.
+- Words left of the description column (photo background) are dropped.
+- "2 x 0,79" lines before an item become a quantity and a unit price.
+** DONE Lidl receipts: quantity lines, tax ID, slashed zeros
+CLOSED: [2026-11-21 Sat]
+- "Cad 0,99 Pz. 2" after an item becomes a quantity.
+- The Italian VAT number accepts Lidl's format, letters misread for a slashed
+  zero, and fixes 9 → 0 using its check digit.
+- Years and times with a misread zero ("2926", "15:99") are fixed.
+** DONE Receipt scanning out of debug builds
+CLOSED: [2026-11-21 Sat]
+The pipeline moved into a reusable scanner used by both the lab and the real
+feature. The scan button sits in the receipt screen; while reading it shows which
+languages are used, and changing them re-reads the same photo.
+
+The receipt languages setting defaults to the app language, the system language
+and English.
+** KILL Guess receipt languages from the system region
+CLOSED: [2026-11-21 Sat]
+Picking languages from the phone's region is implicit magic the user can't see.
+Languages come only from explicit choices: app language, system language,
+English, or the setting.
+** KILL Scan entry inside the add menu
+CLOSED: [2026-11-21 Sat]
+A menu on the add button asking "scan or type". One more tap for everyone;
+replaced by a scan button in the receipt screen, later by two buttons in the list.
+** DONE Portuguese and Brazilian receipts
+CLOSED: [2026-11-21 Sat]
+Portuguese OCR data, column header, payment and discount words, CNPJ and
+Portuguese NIF with their check digits, item codes, and quantity lines that carry
+the line total. Built from made-up rows; no real receipts yet.
+** DONE Match misread product names to known products
+CLOSED: [2026-11-22 Sun]
+A scanned name one or two letters away from a product you already have is
+corrected to it. Rules to stay safe:
+- At most two letters, and fewer for short names (four letters or less: exact
+  only).
+- Digits must be identical, so "500 g" never becomes "250 g".
+- If two products are equally close, nothing is changed.
+** DONE Spanish receipts: printed weights, units column, VAT table check
+CLOSED: [2026-11-23 Mon]
+- "1,378 kg 3,15 €/kg 4,34" lines give the item its weight.
+- A units column left of the names ("1 CANÓNIGOS") is detected and used as the
+  quantity.
+- Unlabelled Spanish CIF with its check character.
+- The VAT summary table (base + tax) cross-checks the total, which helps when the
+  total and the card payment are printed in the same large, hard-to-read font.
+** DONE German and French total wording
+CLOSED: [2026-11-24 Tue]
+Total and subtotal words per language (Summe, zu zahlen, NET À PAYER…), net and
+tax lines not taken as totals, "1 * NAME" counts, pharmacy product codes, unit
+price lines and the German VAT ID.
+** TODO Regression tests on real receipt photos
+Unit tests cover everything after OCR, but preprocessing and Tesseract have no
+automated tests: a preprocessing change can silently break receipts that read
+fine today. Instrumented tests should run the whole pipeline on stored photos
+(personal data blanked) and check the expected items and prices. Needed before
+the next real preprocessing change.
+** HOLD Line and crease eraser in regular scanning
+Works very well in the lab on folded receipts. Not the default yet; needs the
+regression tests first, so it can't quietly hurt receipts that already work.
+** WAIT French receipt column headers
+DÉSIGNATION / PRIX headers aren't handled yet. Waiting for a real French receipt
+rather than guessing the layout.
+** WAIT Real Portuguese and Brazilian receipts
+Portuguese support was built from made-up rows. Real receipts will show what
+breaks.
+** IDEA Column-based reading
+Some receipts print quantity, unit price and line total in separate columns. The
+x positions of the header words could assign each number to its column.
+** HOLD Simplified Chinese receipts
+The app is translated into Simplified Chinese, but Chinese receipt OCR needs its
+own OCR data, number and date formats and header words. On hold until there are
+real receipts to build from.
+** IDEA Fine-tune Tesseract for slashed zeros
+Many receipt fonts print a slashed zero that Tesseract reads as 9 or @. The
+parser already fixes dates, tax IDs and one price per receipt. Training a model
+only if that stops being enough.
+
+* Review
+** DONE Receipt photo and line crops while reviewing a scan
+CLOSED: [2026-11-23 Mon]
+Each scanned item shows the receipt line(s) it was read from, cropped from the
+processed photo at the same scale on every card. The top bar shows a thumbnail
+of the receipt that opens the whole photo (fit to width, pan, pinch and
+double-tap zoom), with a "Scan again" action.
+
+Review only: the photo is kept in memory and dropped when you leave or save, not
+stored with the receipt.
+** DONE Show what the scan corrected on each item
+CLOSED: [2026-11-23 Mon]
+When the app changes something, it says so under the field:
+- "Read: SOVADRINK" under a name matched to a known product.
+- "Read 11,99 · adjusted to match the total" under a fixed price.
+
+The note disappears as soon as you edit the field.
+** KILL Highlight low-confidence items
+CLOSED: [2026-11-23 Mon]
+Warning borders on items the OCR wasn't sure about. The photo crop is right above
+each item, so anyone can see if it matches; warnings would treat the user as if
+they couldn't read their own receipt.
+** KILL Tap a line crop to open the viewer zoomed on it
+CLOSED: [2026-11-23 Mon]
+Tried: the zoom ended up too close to be useful.
+** TODO Share a scan for testing
+Debug builds only. From the scan review: copy the OCR result as JSON, and share
+the processed image together with the JSON, so testers can send new receipt
+formats easily. Nothing is kept: a temporary file, deleted when leaving the
+review. Would replace the debug lab button in the receipts list.
+
+* Products
+** DONE Category translations
+CLOSED: [2026-11-01 Sun]
+** DONE More keywords for automatic categorization
+CLOSED: [2026-11-01 Sun]
+** DONE More representative category icons
+CLOSED: [2026-11-05 Thu]
+** DONE Product aliases
+CLOSED: [2026-11-08 Sun]
+Each supermarket names the same product differently. An alias groups them, so
+stats and price comparison treat them as one. Global (not per store), many names
+to one alias, and aliases never chain. Suggestions rank existing aliases and
+products by shared words. Edited from Settings → Aliases or by long-pressing an
+item.
+** DONE Aliases own their category
+CLOSED: [2026-11-08 Sun]
+Changing the category of an aliased item changes the whole group.
+** DONE Default categories reorganized
+CLOSED: [2026-11-08 Sun]
+21 default categories with region-neutral names. A product goes where it's
+used, not what it's made of: soy milk with dairy, pesto with condiments,
+heat-and-eat dishes with ready meals. The matcher uses ordered rules, so pet food
+is checked before meat and "chicken for cats" lands in pets.
+
+* Stats
+** DONE Statistics screen
+CLOSED: [2026-11-05 Thu]
+Spending by period, by category and by store, with charts and the top products.
+** DONE Price comparison across supermarkets
+CLOSED: [2026-11-05 Thu]
+The same product (or alias) across stores, per unit or per kilo/litre when the
+weight is known. Same-store weight history is preferred over other stores.
+** DONE Collapsible cards and tappable spending chart
+CLOSED: [2026-11-09 Mon]
+** DONE Horizontal scroll in charts
+CLOSED: [2026-11-16 Mon]
+
+* Wallet
+** DONE Loyalty cards linked to stores, store colours in the UI
+CLOSED: [2026-05-15 Fri]
+A loyalty card belongs to a store; the card's colour is used for that store's
+receipts too.
+** DONE Barcode scanner for loyalty cards
+CLOSED: [2026-05-17 Sun]
+Scan the card once; at checkout the app shows the barcode full screen.
+** DONE Store name autocomplete
+CLOSED: [2026-11-03 Tue]
+** DONE Payment app shortcut
+CLOSED: [2026-11-23 Mon]
+At the till you show the loyalty card and then pay, but many people never set up
+quick access to their wallet. A card at the top of the wallet opens the payment
+app you pick:
+- "Payment apps" first: apps registered for contactless payments, with the system
+  default preselected, plus a list of well-known payment apps.
+- Then any other installed app, for QR or bank apps.
+
+Shown with the app's own icon and name, read at runtime: no third-party logos are
+bundled. Off until you pick one.
+** DONE Richer card colours and a custom colour picker
+CLOSED: [2026-11-23 Mon]
+Twelve preset colours plus a custom one (hue, saturation, brightness or hex).
+Text turns dark on light colours.
+** DONE Known payment apps listed first
+CLOSED: [2026-11-23 Mon]
+On many phones the contactless service belongs to a system component rather than
+the wallet app itself; it is mapped to the app the user actually opens.
+** DONE Edit cards on long press and reorder by dragging
+CLOSED: [2026-11-25 Wed]
+Long press (or the pencil in the barcode view) edits a card. Name and colour
+belong to the store: renaming to another existing store moves the card there.
+Reorder mode adds drag handles and saves on every drop; the payment app card
+can be moved too. Card numbers are never shown on the cards.
+
+* Settings
+** DONE Settings tab with language and currency
+CLOSED: [2026-11-08 Sun]
+Language changes without restarting the app. Currency is stored per receipt;
+changing it asks whether to apply it to all receipts or only new ones (no
+conversion).
+** DONE Simplified Chinese and the yuan
+CLOSED: [2026-11-09 Mon]
+** DONE Dark mode, on by default
+CLOSED: [2026-11-19 Thu]
+** DONE Inverted app icon matching the theme
+CLOSED: [2026-11-19 Thu]
+Changing the theme offers to switch the launcher icon too.
+** DONE Portuguese app language
+CLOSED: [2026-11-21 Sat]
+Seven languages: English, Spanish, Italian, French, German, Portuguese and
+Simplified Chinese.
+** DONE Choose the start screen
+CLOSED: [2026-11-26 Thu]
+Receipts, stats or wallet.
+** KILL Demo data seeder
+CLOSED: [2026-11-26 Thu]
+A debug option to fill the app with sample receipts for screenshots. Not worth
+the code: demo data is filled by hand once on a dedicated emulator.
+** KILL Launcher shortcuts
+CLOSED: [2026-11-26 Thu]
+Long-press shortcuts on the app icon (scan, wallet). Not needed for now.
+
+* Tutorial
+** TODO First launch: adding a receipt
+Coach marks over the real screens, not a slideshow, drawn by the app itself (no
+showcase library). Not shown if the app already has receipts.
+1. Point at the add button.
+2. Store and date: moves on once a store is typed; the date is just pointed out
+   (it defaults to today).
+3. The scan button. Continues whether you scan or skip.
+4. Item cards: fix mistakes, add or remove products, change category, price or
+   name. Skippable.
+** TODO First item edit: aliases and product size
+Shown the first time a card is filled or edited, which may be days later:
+1. Long-press a card to add an alias, so products match across supermarkets.
+2. Fill in the size (grams or litres) for better comparisons.
+** TODO After the first receipt: add a loyalty card
+On leaving the first receipt, saved or not, take the user to the wallet.
+** TODO Price comparison hint
+A one-time hint in Stats, shown once at least one product has been bought in two
+different stores. Opening Stats before that doesn't use it up.
+** IDEA Personal tip: use a receipt as a shopping list
+A tip in the developer's own words: create the receipt before going shopping with
+what you plan to buy, then fill in prices and weights while shopping or back home.
+Dismissable card, not a coach mark. Proposed trigger: the first manual receipt
+once there are at least three saved. Not convinced it's the right moment yet.
+** TODO Replay the tutorial from settings
+Debug builds for now; whether it stays in release is undecided.
+
+* Backups
+** DONE Turn off system backup for now
+CLOSED: [2026-11-28 Sat]
+With system backup on, Android uploads the app database to the phone vendor's
+cloud. That contradicts "your data stays on your phone", so it's off until there
+is a real backup design. Phone-to-phone transfer still works.
+** HOLD User-controlled backups
+Being studied before 1.0. The app never sends your data anywhere; you choose where
+copies go. Losing everything when a phone breaks is a real problem, so some form
+of backup is needed. Must be decided before release: changing the rules after
+users already have cloud copies is messier.
+*** IDEA Export and import a backup file, optionally password-protected
+Through the system file picker, like many privacy-focused apps do.
+*** IDEA Automatic copies to a folder you choose
+Periodic copies to a folder picked once, keeping the last few. If that folder is
+synced (Nextcloud, Syncthing or anything else), that's the user's choice.
+*** IDEA Opt-in system cloud backup, off by default
+For those who want it. Possible with framework APIs only: a custom backup agent
+can check the setting at backup time and skip the database, and can tell cloud
+backups from phone-to-phone transfers and whether they are end-to-end encrypted.
+Phones without Google services don't benefit anyway.
+
+* Layout
+** DONE Portrait only, for now
+CLOSED: [2026-11-26 Thu]
+** IDEA Tablet and landscape layout
+Receipts list and receipt side by side, stats in two columns. The navigation bar
+already turns into a rail on wide screens. Large screens ignore the portrait lock
+on recent Android versions, so tablets and foldables need this eventually.
