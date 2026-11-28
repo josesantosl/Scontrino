@@ -461,6 +461,10 @@ once there are at least three saved. Not convinced it's the right moment yet.
 ** TODO Replay the tutorial from settings
 Debug builds for now; whether it stays in release is undecided.
 
+** IDEA Store video: shows how the app works while selling it.
+It works as both a tutorial and an ad. It shows the most common workflow of the app.
+[[./scripts/storyboard.org][storyboard]]
+
 * Backups
 ** DONE Turn off system backup for now
 CLOSED: [2026-11-28 Sat]
