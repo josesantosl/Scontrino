@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
 private val DEFAULTS = ReceiptScanner.Options()
@@ -157,7 +158,36 @@ class OcrDebugViewModel @JvmOverloads constructor(
         return OcrJson.toJson(result, state.rows)
     }
 
-    private companion object {
-        const val TAG = "OcrDebugViewModel"
+    /**
+     * The preprocessed image (full OCR resolution) and [exportJson], written to a temp
+     * folder so testers can send both as a fixture. Overwritten on each call and deleted
+     * when the lab is left; nothing else is kept.
+     */
+    suspend fun shareFiles(): List<File>? {
+        val bitmap = _uiState.value.processedImage ?: return null
+        val json = exportJson() ?: return null
+        return withContext(Dispatchers.IO) {
+            val dir = shareDir().apply { deleteRecursively(); mkdirs() }
+            val image = File(dir, "receipt-ocr.png")
+            image.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            val text = File(dir, "receipt-ocr.json").apply { writeText(json) }
+            listOf(image, text)
+        }
+    }
+
+    private fun shareDir() = File(getApplication<Application>().cacheDir, SHARE_DIR)
+
+    override fun onCleared() {
+        shareDir().deleteRecursively()
+    }
+
+    companion object {
+        private const val TAG = "OcrDebugViewModel"
+
+        /** Must match res/xml/debug_share_paths.xml in the debug source set. */
+        private const val SHARE_DIR = "debug-share"
+
+        /** FileProvider authority, declared in the debug manifest only. */
+        fun shareAuthority(packageName: String) = "$packageName.debugshare"
     }
 }

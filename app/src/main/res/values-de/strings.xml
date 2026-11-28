@@ -154,6 +154,7 @@
     <string name="ocr_copy_json">JSON kopieren</string>
     <string name="ocr_copy_text">Text kopieren</string>
     <string name="ocr_copied">In die Zwischenablage kopiert</string>
+    <string name="ocr_share">Bild + JSON teilen</string>
     <string name="ocr_error">Fehler: %1$s</string>
     <string name="ocr_parsed_title">Erkannter Kassenbon</string>
     <string name="ocr_use_receipt">Diesen Kassenbon verwenden</string>

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -45,6 +47,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepesantos.scontrino.R
 import com.pepesantos.scontrino.ocr.ScannedReceiptImage
@@ -77,7 +81,10 @@ import com.pepesantos.scontrino.ocr.parse.Amounts
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
 import com.pepesantos.scontrino.ui.viewmodel.OcrDebugUiState
 import com.pepesantos.scontrino.ui.viewmodel.OcrDebugViewModel
+import kotlinx.coroutines.launch
+import java.io.File
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 /** Words below this confidence are outlined in red on the preview. */
 private const val LOW_CONFIDENCE = 60f
@@ -101,6 +108,8 @@ fun OcrDebugScreen(
 
     val resources = LocalResources.current
     var showCamera by rememberSaveable { mutableStateOf(false) }
+    var isPreparingShare by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
             showCamera = true
@@ -258,13 +267,41 @@ fun OcrDebugScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     LayoutAttemptsSummary(state)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
                         OutlinedButton(onClick = {
                             viewModel.exportJson()?.let { copyToClipboard(context, "receipt-ocr.json", it) }
                         }) { Text(stringResource(R.string.ocr_copy_json)) }
                         OutlinedButton(onClick = {
                             copyToClipboard(context, "receipt-ocr.txt", state.rows.joinToString("\n") { it.text })
                         }) { Text(stringResource(R.string.ocr_copy_text)) }
+                        OutlinedButton(
+                            enabled = !isPreparingShare,
+                            onClick = {
+                                isPreparingShare = true
+                                scope.launch {
+                                    try {
+                                        viewModel.shareFiles()?.let { shareFiles(context, it) }
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (e: Exception) {
+                                        Toast.makeText(
+                                            context,
+                                            resources.getString(R.string.ocr_error, e.message ?: e.javaClass.simpleName),
+                                            Toast.LENGTH_LONG,
+                                        ).show()
+                                    } finally {
+                                        isPreparingShare = false
+                                    }
+                                }
+                            },
+                        ) {
+                            Icon(Icons.Filled.Share, contentDescription = null)
+                            Text(stringResource(R.string.ocr_share), modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                 }
                 state.parsed?.let { parsed ->
@@ -449,6 +486,20 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawWordBoxes(resul
             style = stroke,
         )
     }
+}
+
+/** Opens the share sheet with [files] (debug builds only: the FileProvider is in the debug manifest). */
+private fun shareFiles(context: Context, files: List<File>) {
+    val authority = OcrDebugViewModel.shareAuthority(context.packageName)
+    val uris = files.map { FileProvider.getUriForFile(context, authority, it) }
+    val send = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = "*/*"
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+        // The ClipData carries the read grant through the chooser to the target app.
+        clipData = ClipData.newRawUri(null, uris.first()).apply { uris.drop(1).forEach { addItem(ClipData.Item(it)) } }
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(send, null))
 }
 
 private fun copyToClipboard(context: Context, label: String, text: String) {

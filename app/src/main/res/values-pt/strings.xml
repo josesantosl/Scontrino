@@ -164,6 +164,7 @@
     <string name="ocr_copy_json">Copiar JSON</string>
     <string name="ocr_copy_text">Copiar texto</string>
     <string name="ocr_copied">Copiado para a área de transferência</string>
+    <string name="ocr_share">Compartilhar imagem + JSON</string>
     <string name="ocr_error">Erro: %1$s</string>
     <string name="ocr_parsed_title">Recibo interpretado</string>
     <string name="ocr_use_receipt">Usar este recibo</string>

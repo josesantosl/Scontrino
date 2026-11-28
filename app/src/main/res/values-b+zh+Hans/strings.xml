@@ -162,6 +162,7 @@
     <string name="ocr_copy_json">复制 JSON</string>
     <string name="ocr_copy_text">复制文字</string>
     <string name="ocr_copied">已复制到剪贴板</string>
+    <string name="ocr_share">分享图片 + JSON</string>
     <string name="ocr_error">错误：%1$s</string>
     <string name="ocr_parsed_title">解析结果</string>
     <string name="ocr_use_receipt">使用这张小票</string>

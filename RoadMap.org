@@ -255,6 +255,14 @@ CLOSED: [2026-11-24 Tue]
 Total and subtotal words per language (Summe, zu zahlen, NET À PAYER…), net and
 tax lines not taken as totals, "1 * NAME" counts, pharmacy product codes, unit
 price lines and the German VAT ID.
+** DONE Camera photos rotated sideways
+CLOSED: [2026-11-28 Sat]
+With the phone held flat over a receipt on a table, the camera followed the
+motion sensor, flipped to landscape and tagged the photo with a 90° or 270°
+rotation that OpenCV couldn't undo and that badly hurt OCR. The capture rotation
+is now pinned to portrait, matching the portrait-only UI. Tap to focus, pinch to
+zoom and the torch work as before. Gallery photos still follow their EXIF
+rotation.
 ** TODO Regression tests on real receipt photos
 Unit tests cover everything after OCR, but preprocessing and Tesseract have no
 automated tests: a preprocessing change can silently break receipts that read
@@ -307,11 +315,14 @@ they couldn't read their own receipt.
 ** KILL Tap a line crop to open the viewer zoomed on it
 CLOSED: [2026-11-23 Mon]
 Tried: the zoom ended up too close to be useful.
-** TODO Share a scan for testing
+** WAIT Share a scan for testing
 Debug builds only. From the scan review: copy the OCR result as JSON, and share
 the processed image together with the JSON, so testers can send new receipt
 formats easily. Nothing is kept: a temporary file, deleted when leaving the
 review. Would replace the debug lab button in the receipts list.
+
+*** DONE First part: a "Share image + JSON" button in the debug lab
+ next to "Copy JSON". The entry from the scan review comes later.
 
 * Products
 ** DONE Category translations

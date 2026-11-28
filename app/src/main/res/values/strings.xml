@@ -163,6 +163,7 @@
     <string name="ocr_copy_json">Copy JSON</string>
     <string name="ocr_copy_text">Copy text</string>
     <string name="ocr_copied">Copied to clipboard</string>
+    <string name="ocr_share">Share image + JSON</string>
     <string name="ocr_error">Error: %1$s</string>
     <string name="ocr_parsed_title">Interpreted receipt</string>
     <string name="ocr_use_receipt">Use this receipt</string>

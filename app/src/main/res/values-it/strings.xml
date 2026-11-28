@@ -155,6 +155,7 @@
     <string name="ocr_copy_json">Copia JSON</string>
     <string name="ocr_copy_text">Copia testo</string>
     <string name="ocr_copied">Copiato negli appunti</string>
+    <string name="ocr_share">Condividi immagine + JSON</string>
     <string name="ocr_error">Errore: %1$s</string>
     <string name="ocr_parsed_title">Scontrino interpretato</string>
     <string name="ocr_use_receipt">Usa questo scontrino</string>

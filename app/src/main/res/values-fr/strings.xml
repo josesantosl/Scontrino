@@ -155,6 +155,7 @@
     <string name="ocr_copy_json">Copier le JSON</string>
     <string name="ocr_copy_text">Copier le texte</string>
     <string name="ocr_copied">Copié dans le presse-papiers</string>
+    <string name="ocr_share">Partager image + JSON</string>
     <string name="ocr_error">Erreur : %1$s</string>
     <string name="ocr_parsed_title">Ticket interprété</string>
     <string name="ocr_use_receipt">Utiliser ce ticket</string>
