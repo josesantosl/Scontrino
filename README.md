@@ -4,54 +4,51 @@ A personal receipt and loyalty card manager for Android. Built because every app
 
 ## Why
 
+Most receipt apps are built around a cloud AI core. That's why they need a subscription — they're renting compute to process your groceries. When the model gets more expensive, your plan gets more expensive. You're not buying software, you're renting a service you never fully control.
 
-Most receipt apps are built around an AI core. That's why they need a subscription — they're renting compute to process your groceries. When the model gets more expensive, your plan gets more expensive. You're not buying software, you're renting a service you never fully control.
+That design also turns the vendor's server into a single point of failure. If the service goes down, changes its pricing or shuts down, the app stops working — and your receipts may go with it.
 
+Scontrino has no such dependency. OCR runs on-device with Tesseract and OpenCV, parsing is rule-based rather than model-based, and there are no API calls, no accounts and no subscription. Your data stays on your phone.
 
-Scontrino runs on your device. No API calls, no cloud dependency, no subscription. OCR runs on-device with Tesseract and OpenCV. Parsing is rule-based, not model-based. Your data stays on your phone. It works in the subway, in the mountains, or anywhere your signal doesn't.
-
-
-The app you install today works the same in five years. Your software, your data, your rules.
-
+Your software, your data, your rules.
 
 ## Owes nothing to Google
 
-
 No Google Play Services, no ML Kit, no Firebase, no analytics, no proprietary Google libraries of any kind. The app doesn't even request internet access — the only permission it asks for is the camera.
-
 
 Everything it depends on is open source: OCR is done by Tesseract, image preprocessing by OpenCV, barcodes by ZXing. It runs the same on a de-Googled phone as on any other Android device.
 
-
 ## What it does
 
-
-- Scan and store shopping receipts with automatic product categorization
+- Scan receipts with the camera and store them, with automatic product categorization
+- Review every scan next to the photo: each item shows the receipt line it was read from
+- See at a glance what the app corrected, like a misread name or a price adjusted to match the total
+- Product aliases, so the same product matches across supermarkets even when names differ
+- Price comparison between stores and spending stats
 - Keep your loyalty cards in one place with barcode display at checkout
+- Quick access to your payment app from the wallet
 - Color-code receipts by store automatically when you add a loyalty card
 - Works fully offline
 
-
 ## Stack
 
-
-Kotlin · Jetpack Compose · Room · CameraX · Tesseract (tesseract4android) · OpenCV · ZXing
-
+- Kotlin
+- Jetpack Compose
+- Room
+- CameraX
+- Tesseract (tesseract4android)
+- OpenCV
+- ZXing
 
 ## Architecture
 
-
 MVVM with Repository pattern. Data layer is separated from UI, ViewModels handle business logic, Room manages local persistence.
-
 
 ## Status
 
-
-Active development. Stats screen in progress.
-
+Active development. Preparing the first release on F-Droid and Google Play, currently working on the store screenshots.
 
 ## License
-
 
 © 2026 José Santos L. All rights reserved.
 
