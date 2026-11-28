@@ -15,7 +15,11 @@ import com.pepesantos.scontrino.ocr.ReceiptImagePreprocessor
 import com.pepesantos.scontrino.ocr.ReceiptRow
 import com.pepesantos.scontrino.ocr.ReceiptScanner
 import com.pepesantos.scontrino.ocr.ScannedReceiptImage
+import com.pepesantos.scontrino.data.AppDatabase
+import com.pepesantos.scontrino.ocr.OcrShareName
+import com.pepesantos.scontrino.ocr.draft.StoreMatcher
 import com.pepesantos.scontrino.ocr.parse.ParsedReceipt
+import com.pepesantos.scontrino.ocr.parse.ReceiptDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Calendar
 import kotlin.coroutines.cancellation.CancellationException
 
 private val DEFAULTS = ReceiptScanner.Options()
@@ -161,18 +166,32 @@ class OcrDebugViewModel @JvmOverloads constructor(
     /**
      * The preprocessed image (full OCR resolution) and [exportJson], written to a temp
      * folder so testers can send both as a fixture. Overwritten on each call and deleted
-     * when the lab is left; nothing else is kept.
+     * when the lab is left; nothing else is kept. Named after the store and date, see
+     * [OcrShareName].
      */
     suspend fun shareFiles(): List<File>? {
-        val bitmap = _uiState.value.processedImage ?: return null
+        val state = _uiState.value
+        val bitmap = state.processedImage ?: return null
         val json = exportJson() ?: return null
         return withContext(Dispatchers.IO) {
+            val baseName = OcrShareName.of(storeName(state.parsed), state.parsed?.date, today())
             val dir = shareDir().apply { deleteRecursively(); mkdirs() }
-            val image = File(dir, "receipt-ocr.png")
+            val image = File(dir, "$baseName.png")
             image.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            val text = File(dir, "receipt-ocr.json").apply { writeText(json) }
+            val text = File(dir, "$baseName.json").apply { writeText(json) }
             listOf(image, text)
         }
+    }
+
+    /** One of the user's stores, recognised the same way as in the scan review. */
+    private suspend fun storeName(parsed: ParsedReceipt?): String? {
+        parsed ?: return null
+        val stores = AppDatabase.getDatabase(getApplication()).storeDao().getAll()
+        return StoreMatcher.match(stores, parsed.nonItemLines, parsed.vatNumber)?.store?.name
+    }
+
+    private fun today(): ReceiptDate = Calendar.getInstance().run {
+        ReceiptDate(get(Calendar.YEAR), get(Calendar.MONTH) + 1, get(Calendar.DAY_OF_MONTH))
     }
 
     private fun shareDir() = File(getApplication<Application>().cacheDir, SHARE_DIR)
