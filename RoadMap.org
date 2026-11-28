@@ -271,19 +271,19 @@ automated tests: a preprocessing change can silently break receipts that read
 fine today. Instrumented tests should run the whole pipeline on stored photos
 (personal data blanked) and check the expected items and prices. Needed before
 the next real preprocessing change.
-** HOLD Line and crease eraser in regular scanning
+** WAIT Line and crease eraser in regular scanning
 Works very well in the lab on folded receipts. Not the default yet; needs the
 regression tests first, so it can't quietly hurt receipts that already work.
-** WAIT French receipt column headers
+** TODO French receipt column headers
 DÉSIGNATION / PRIX headers aren't handled yet. Waiting for a real French receipt
 rather than guessing the layout.
-** WAIT Real Portuguese and Brazilian receipts
+** WAIT Portuguese receipts
 Portuguese support was built from made-up rows. Real receipts will show what
 breaks.
 ** IDEA Column-based reading
 Some receipts print quantity, unit price and line total in separate columns. The
 x positions of the header words could assign each number to its column.
-** HOLD Simplified Chinese receipts
+** IDEA Simplified Chinese receipts
 The app is translated into Simplified Chinese, but Chinese receipt OCR needs its
 own OCR data, number and date formats and header words. On hold until there are
 real receipts to build from.
@@ -467,7 +467,7 @@ CLOSED: [2026-11-28 Sat]
 With system backup on, Android uploads the app database to the phone vendor's
 cloud. That contradicts "your data stays on your phone", so it's off until there
 is a real backup design. Phone-to-phone transfer still works.
-** HOLD User-controlled backups
+** TODO User-controlled backups
 Being studied before 1.0. The app never sends your data anywhere; you choose where
 copies go. Losing everything when a phone breaks is a real problem, so some form
 of backup is needed. Must be decided before release: changing the rules after

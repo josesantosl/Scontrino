@@ -161,35 +161,35 @@
 <circle cx="30" cy="1922" r="5" fill="#ef6c00"/>
 <text x="50" y="1926.5" fill="#212121"><tspan>Line and crease eraser in regular scanning</tspan></text>
 <circle cx="30" cy="1946" r="5" fill="#ef6c00"/>
-<text x="50" y="1950.5" fill="#212121"><tspan>French receipt column headers</tspan></text>
+<text x="50" y="1950.5" fill="#212121"><tspan>Portuguese receipts</tspan></text>
 <circle cx="30" cy="1970" r="5" fill="#ef6c00"/>
-<text x="50" y="1974.5" fill="#212121"><tspan>Real Portuguese and Brazilian receipts</tspan></text>
-<circle cx="30" cy="1994" r="5" fill="#ef6c00"/>
-<text x="50" y="1998.5" fill="#212121"><tspan>Simplified Chinese receipts</tspan></text>
-<circle cx="30" cy="2018" r="5" fill="#ef6c00"/>
-<text x="50" y="2022.5" fill="#212121"><tspan>Share a scan for testing</tspan></text>
-<circle cx="30" cy="2042" r="5" fill="#ef6c00"/>
-<text x="50" y="2046.5" fill="#212121"><tspan>User-controlled backups</tspan></text>
+<text x="50" y="1974.5" fill="#212121"><tspan>Share a scan for testing</tspan></text>
+<circle cx="30" cy="2004" r="5" fill="#1565c0"/>
+<text x="50" y="2008.5" fill="#212121"><tspan>Release signing key</tspan></text>
+<circle cx="30" cy="2028" r="5" fill="#1565c0"/>
+<text x="50" y="2032.5" fill="#212121"><tspan>First release on F-Droid</tspan></text>
+<circle cx="30" cy="2052" r="5" fill="#1565c0"/>
+<text x="50" y="2056.5" fill="#212121"><tspan>First release on Google Play</tspan></text>
 <circle cx="30" cy="2076" r="5" fill="#1565c0"/>
-<text x="50" y="2080.5" fill="#212121"><tspan>Release signing key</tspan></text>
+<text x="50" y="2080.5" fill="#212121"><tspan>Regression tests on real receipt photos</tspan></text>
 <circle cx="30" cy="2100" r="5" fill="#1565c0"/>
-<text x="50" y="2104.5" fill="#212121"><tspan>First release on F-Droid</tspan></text>
+<text x="50" y="2104.5" fill="#212121"><tspan>French receipt column headers</tspan></text>
 <circle cx="30" cy="2124" r="5" fill="#1565c0"/>
-<text x="50" y="2128.5" fill="#212121"><tspan>First release on Google Play</tspan></text>
+<text x="50" y="2128.5" fill="#212121"><tspan>First launch: adding a receipt</tspan></text>
 <circle cx="30" cy="2148" r="5" fill="#1565c0"/>
-<text x="50" y="2152.5" fill="#212121"><tspan>Regression tests on real receipt photos</tspan></text>
+<text x="50" y="2152.5" fill="#212121"><tspan>First item edit: aliases and product size</tspan></text>
 <circle cx="30" cy="2172" r="5" fill="#1565c0"/>
-<text x="50" y="2176.5" fill="#212121"><tspan>First launch: adding a receipt</tspan></text>
+<text x="50" y="2176.5" fill="#212121"><tspan>After the first receipt: add a loyalty card</tspan></text>
 <circle cx="30" cy="2196" r="5" fill="#1565c0"/>
-<text x="50" y="2200.5" fill="#212121"><tspan>First item edit: aliases and product size</tspan></text>
+<text x="50" y="2200.5" fill="#212121"><tspan>Price comparison hint</tspan></text>
 <circle cx="30" cy="2220" r="5" fill="#1565c0"/>
-<text x="50" y="2224.5" fill="#212121"><tspan>After the first receipt: add a loyalty card</tspan></text>
+<text x="50" y="2224.5" fill="#212121"><tspan>Replay the tutorial from settings</tspan></text>
 <circle cx="30" cy="2244" r="5" fill="#1565c0"/>
-<text x="50" y="2248.5" fill="#212121"><tspan>Price comparison hint</tspan></text>
-<circle cx="30" cy="2268" r="5" fill="#1565c0"/>
-<text x="50" y="2272.5" fill="#212121"><tspan>Replay the tutorial from settings</tspan></text>
+<text x="50" y="2248.5" fill="#212121"><tspan>User-controlled backups</tspan></text>
+<circle cx="30" cy="2278" r="5" fill="#8e24aa"/>
+<text x="50" y="2282.5" fill="#555555"><tspan>Column-based reading</tspan></text>
 <circle cx="30" cy="2302" r="5" fill="#8e24aa"/>
-<text x="50" y="2306.5" fill="#555555"><tspan>Column-based reading</tspan></text>
+<text x="50" y="2306.5" fill="#555555"><tspan>Simplified Chinese receipts</tspan></text>
 <circle cx="30" cy="2326" r="5" fill="#8e24aa"/>
 <text x="50" y="2330.5" fill="#555555"><tspan>Fine-tune Tesseract for slashed zeros</tspan></text>
 <circle cx="30" cy="2350" r="5" fill="#8e24aa"/>
