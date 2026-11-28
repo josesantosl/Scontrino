@@ -323,6 +323,13 @@ review. Would replace the debug lab button in the receipts list.
 
 *** DONE First part: a "Share image + JSON" button in the debug lab
  next to "Copy JSON". The entry from the scan review comes later.
+*** DONE Shared files named after the store and date
+CLOSED: [2026-11-28 Sat]
+=store-yyyy-mm-dd-ocr.png= and =.json=, so several receipts sent by a tester can
+be told apart and kept as fixtures. The store is one of the tester's own stores,
+recognised like in the scan review (by name or VAT number), lower case, no
+accents, dashes for the rest; =receipt= if none is recognised. The date is the
+receipt's, or the day it is shared if none was read.
 
 * Products
 ** DONE Category translations
